@@ -1,0 +1,59 @@
+pcm.!default {
+	type hw
+	card 0
+}
+
+ctl.!default {
+	type hw
+	card 0
+}
+
+
+# Set your DEFAULT device to the softvol plug-in
+# NOT to a hardware card device
+#
+# The "!" means completely override the previous default
+# Not just changing/adding to it.
+pcm.!default {
+  type plug
+  slave.pcm "softvol"
+}
+
+# Configure softvol
+pcm.softvol {
+  type softvol
+
+  # Send softvol's output to dmix
+  slave {
+    # pcm "dmix"
+    # If you wanted to you could send the output to a card directly
+    # But in most cases it's better to send it to dmix and let
+    # dmix handle where to send it. You can add a whole extra section
+    # to configure dmix and where it sends output, but I'm
+    # not covering that here.
+
+    ## Use Card 0 Device 0 instead of dmix
+    pcm "hw:0,0"
+    ## Use Card 2 Device 0 instead of dmix
+    # pcm "hw:2,0"
+  }
+
+  # Add a control slider in your mixer interfaces
+  # i.e. KMix and alsamixer
+  control {
+    name "Pre-Amp"
+    card 0
+    # i.e. card 0 or card 2
+  }
+
+  # Minimum dB when slider is at 0%
+  min_dB -5.0
+
+  # Maximum DB when slider is at 100%
+  # 40 is too much
+  max_dB 10.0
+
+  # How many levels the slider should go through
+  # i.e. how granular do you want your control to be
+  resolution 12
+}

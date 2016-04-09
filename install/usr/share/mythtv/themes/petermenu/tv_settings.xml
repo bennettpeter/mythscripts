@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="TVSETUP">
+
+    <button>
+        <type>TV_SETTINGS_GENERAL</type>
+        <text>General</text>
+        <description>General video and recording preferences</description>
+        <action>SETTINGS GENERAL</action>
+    </button>
+
+    <button>
+        <type>TV_SETTINGS_PROGRAM_GUIDE</type>
+        <text>Program Guide</text>
+        <description>Guide appearance and behavior</description>
+        <action>SETTINGS EPG</action>
+    </button>
+
+    <button>
+        <type>TV_SETTINGS_PLAYBACK</type>
+        <text>Playback</text>
+        <description>Settings for viewing and playing video content</description>
+        <action>SETTINGS PLAYBACK</action>
+    </button>
+
+    <button>
+        <type>TV_SETTINGS_PLAYBACK_OSD</type>
+        <text>Playback OSD</text>
+        <description>Settings for the On Screen Display</description>
+        <action>SETTINGS OSD</action>
+    </button>
+
+    <button>
+        <type>TV_SETTINGS_PLAYBACK_GROUPS</type>
+        <text>Playback Groups</text>
+        <description>Adjust settings for different playback styles</description>
+        <action>SETTINGS PLAYGROUP</action>
+    </button>
+
+    <button>
+      <type>TV_SETTINGS_CHANNEL_GROUP</type>
+      <text>Channel Groups</text>
+      <description>Group your favorite channels together</description>
+      <action>SETTINGS CHANNELGROUPS</action>
+    </button>
+
+    <button>
+        <type>TV_SETTINGS_RECPRIORITIES</type>
+        <text>Recording Priorities</text>
+        <description>Global recording priority and scheduling</description>
+        <action>MENU recpriorities_settings.xml</action>
+    </button>
+
+</mythmenu>

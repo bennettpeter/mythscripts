@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="MANAGE_RECORDINGS">
+
+    <button>
+        <type>TV_SCHEDULE_RECORDINGS</type>
+        <text>Schedule Recordings</text>
+        <description>Pick shows to record</description>
+        <action>MENU tv_schedule.xml</action>
+    </button>
+
+    <button>
+        <type>TV_RECORDING_RULES</type>
+        <text>Recording Rules</text>
+        <description>Edit or delete any recording rule</description>
+        <action>TV_MANAGE_RECORDING_RULES</action>
+    </button>
+
+    <button>
+        <type>TV_UPCOMING_RECORDINGS</type>
+        <text>Upcoming Recordings</text>
+        <description>See what will be recorded next</description>
+        <action>TV_FIX_CONFLICTS</action>
+    </button>
+
+    <button>
+        <type>TV_PREVIOUS</type>
+        <text>Previously Recorded</text>
+        <description>See what you have recorded</description>
+        <action>TV_PREVIOUS</action>
+    </button>
+
+</mythmenu>

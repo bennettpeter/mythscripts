@@ -1,0 +1,11 @@
+
+[Unit]
+Description=Peter Suspend Actions
+Before=sleep.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mythtv/bin/pre_sleep.sh
+
+[Install]
+WantedBy=sleep.target

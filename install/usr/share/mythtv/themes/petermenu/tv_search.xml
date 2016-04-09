@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="WORDS">
+
+    <button>
+        <type>TV_SEARCH_TITLES</type>
+        <text>Titles</text>
+        <description>Find a program based on title</description>
+        <action>TV_SEARCH_TITLE</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_KEYWORDS</type>
+        <text>Keywords</text>
+        <description>Find a program matching a keyword</description>
+        <action>TV_SEARCH_KEYWORD</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_PEOPLE</type>
+        <text>People</text>
+        <description>Find a program including a given person</description>
+        <action>TV_SEARCH_PEOPLE</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_POWER</type>
+        <text>Advanced</text>
+        <description>Combine more than one word search</description>
+        <action>TV_SEARCH_POWER</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_STORED</type>
+        <text>Stored Searches</text>
+        <description>Results of searches you have saved</description>
+        <action>TV_SEARCH_STORED</action>
+    </button>
+
+</mythmenu>

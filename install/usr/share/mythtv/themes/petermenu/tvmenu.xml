@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="TV">
+
+    <button>
+        <type>TV_WATCH_TV</type>
+        <text>Watch TV</text>
+        <description>Watch live television</description>
+        <action>TV_WATCH_LIVE</action>
+    </button>
+
+    <button>
+        <type>TV_SCHEDULE_RECORDINGS</type>
+        <text>Schedule Recordings</text>
+        <description>Pick shows to record</description>
+        <action>MENU tv_schedule.xml</action>
+    </button>
+
+    <button>
+        <type>TV_WATCH_RECORDINGS</type>
+        <text>Watch Recordings</text>
+        <description>Play Recordings</description>
+        <action>TV_WATCH_RECORDING</action>
+    </button>
+
+<!-- EXECTV sample.  %s args in order are video, audio, and vbi devices
+    <button>
+        <type>TV_PLAYBACK</type>
+        <text>Passthrough Mode</text>
+        <action>EXECTV xawtv -f -device %s -dspdev %s -vbidev %s</action>
+    </button>
+-->
+
+    <button>
+        <type>TV_STATUS</type>
+        <text>System Status</text>
+        <description>What your system is doing right now</description>
+        <action>TV_STATUS</action>
+    </button>
+
+</mythmenu>

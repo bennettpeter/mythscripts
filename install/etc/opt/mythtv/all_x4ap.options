@@ -1,0 +1,6 @@
+# Archive and move to Peter
+ENCODER_OPTIONS[0]="-l 480 -E lame --ffrate"
+SAVE_TRANSCODE[0]=Y
+IMPORT_TRANSCODE[0]=N
+# These options are not subscripted and apply to any transcode
+NEW_RECGROUP=Peter

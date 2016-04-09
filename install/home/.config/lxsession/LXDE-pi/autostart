@@ -1,0 +1,8 @@
+# These commented out are the default entries that come with Jessie
+#@lxpanel --profile LXDE-pi
+#@pcmanfm --desktop --profile LXDE-pi
+#@xscreensaver -no-splash
+#@sh ${HOME}/.config/lxsession/LXDE-pi/autokey.sh
+#Start Mythtv Frontend
+/opt/mythtv/bin/startfrontend.sh
+

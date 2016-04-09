@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="OPTICAL_DISK">
+
+    <button>
+        <type>DISC_PLAY</type>
+        <text>Play Optical Disc</text>
+        <description>Play a film on Blu-ray or DVD</description>
+        <action>JUMP Play Disc</action>
+    </button>
+
+    <button>
+        <type>ARCHIVE</type>
+        <text>Archive Files</text>
+        <description>Write video to a data DVD</description>
+        <action>PLUGIN mytharchive</action>
+        <depends>mytharchive</depends>
+    </button>
+
+    <button>
+        <type>MUSIC_RIP</type>
+        <text>Import CD</text>
+        <description>Import music from an audio CD</description>
+        <action>JUMP Rip CD</action>
+        <depends>mythmusic</depends>
+    </button>
+
+    <button>
+        <type>EJECT</type>
+        <text>Eject media</text>
+        <description>Eject Disc from drive</description>
+        <action>EJECT</action>
+    </button>
+
+</mythmenu>

@@ -1,0 +1,17 @@
+
+[Unit]
+Description=MythTV Monitor
+
+[Service]
+Type=simple
+User=mythtv
+UMask=0002
+ExecStart=/opt/mythtv/bin/monitor.sh
+Restart=always
+StartLimitInterval=10min
+StartLimitBurst=5
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+

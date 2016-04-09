@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="INFO_SETUP">
+
+    <button>
+        <type>ZONEMINDER</type>
+        <text>ZoneMinder Settings</text>
+        <description>Set up surveillance software</description>
+        <action>CONFIGPLUGIN mythzoneminder</action>
+        <depends>mythzoneminder</depends>
+    </button>
+
+    <button>
+        <type>SETTINGS_WEATHER</type>
+        <text>Weather Settings</text>
+        <description>Weather locale and sources</description>
+        <action>CONFIGPLUGIN mythweather</action>
+        <depends>mythweather</depends>
+    </button>
+
+    <button>
+      <type>SETTINGS_WEATHER</type>
+      <text>Weather Station Settings</text>
+      <action>CONFIGPLUGIN mythwstation</action>
+      <depends>mythwstation</depends>
+    </button>
+
+    <button>
+        <type>SETTINGS_NEWS</type>
+        <text>News Settings</text>
+        <description>Choose which news sources interest you</description>
+        <action>CONFIGPLUGIN mythnews</action>
+        <depends>mythnews</depends>
+    </button>
+
+    <button>
+        <type>SETTINGS_WEBPAGE</type>
+        <text>Web Settings</text>
+        <action>CONFIGPLUGIN mythbrowser</action>
+        <description>Manage web bookmarks</description>
+        <depends>mythbrowser</depends>
+    </button>
+
+    <button>
+        <type>SETTINGS_RECIPE</type>
+        <text>Recipe Settings</text>
+        <description></description>
+        <action>CONFIGPLUGIN mythrecipe</action>
+        <depends>mythrecipe</depends>
+    </button>
+
+</mythmenu>
+

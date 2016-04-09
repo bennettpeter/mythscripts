@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="SCHEDULE">
+
+    <button>
+        <type>TV_PROGRAM_GUIDE</type>
+        <text>Program Guide</text>
+        <description>Choose programs from a grid-style list</description>
+        <action>TV_SCHEDULE</action>
+    </button>
+
+    <button>
+        <type>TV_PROGFIND</type>
+        <text>Program Finder</text>
+        <description>Choose programs from an alphabetical index</description>
+        <action>TV_PROGFIND</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_WORDS</type>
+        <text>Search Words</text>
+        <description>Find programs matching search words</description>
+        <action>MENU tv_search.xml</action>
+    </button>
+
+    <button>
+        <type>TV_SEARCH_LISTS</type>
+        <text>Search Lists</text>
+        <description>Pick a program to record from a set of lists</description>
+        <action>MENU tv_lists.xml</action>
+    </button>
+
+    <button>
+        <type>TV_CUSTOM_RECORD</type>
+        <text>Custom Record</text>
+        <description>Advanced program finder</description>
+        <action>TV_CUSTOM_RECORD</action>
+    </button>
+
+    <button>
+        <type>TV_MANUAL_SCHEDULE</type>
+        <text>Manual Schedule</text>
+        <description>VCR-like recording scheduler</description>
+        <action>TV_MANUALSCHEDULE</action>
+    </button>
+
+</mythmenu>

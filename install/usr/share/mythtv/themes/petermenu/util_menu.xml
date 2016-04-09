@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mythmenu name="UTIL">
+
+    <button>
+        <type>MUSIC_PLAYLIST</type>
+        <text>Music Tools</text>
+        <description>Select, import, or play music</description>
+        <action>PLUGIN mythmusic</action>
+        <depends>mythmusic</depends>
+    </button>
+
+    <button>
+        <type>SETUP_MENU</type>
+        <text>Setup</text>
+        <description>Configure MythTV and plugins</description>
+        <action>MENU main_settings.xml</action>
+        <password>SetupPinCode</password>
+    </button>
+
+</mythmenu>

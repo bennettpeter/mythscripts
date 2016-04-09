@@ -1,0 +1,170 @@
+Need to change to use /etc/mythtv/config.xml
+
+ticket 10305
+http://code.mythtv.org/trac/ticket/10305#
+Summary of changes:
+* Format of config.xml
+ + Database settings have their own top-level instead of being under
+   <MythFrontend><DefaultBackend>.
+ + Wake On Lan settings have been added to config.xml, these
+   were formerly only settable using mysql.txt.
+* UPnP autoconf now waits a full 2 seconds before deciding there
+  really is only one backend to connect to.
+* UPnP resends the discovery packet a few times in auto conf mode.
+* config.xml is only rewritten when it changes, and this is done
+  in a safe manner so a crash will not wipe out your configuration.
+* mysql.txt reading has been removed. This does not port over
+  Wake On Lan settings and all other settings not written to the
+  file by default are ignored. Setting file functionality is
+  available using the --override-settings-file option, which
+  has the added benefit of overriding DB settings instead of just
+  providing new defaults if the DB doesn't have that setting.
+
+<Configuration>
+  <UPnP>
+    <MythFrontend>
+      <DefaultBackend>
+        <!--
+Set the <LocalHostName> hostname override below only if you want to use
+something other than the machine's real hostname for identifying settings
+in the database.  This is useful if your hostname changes often, as
+otherwise you'll need to reconfigure mythtv every time.
+
+NO TWO HOSTS MAY USE THE SAME VALUE
+-->
+        <DBHostName>localhost</DBHostName>
+        <DBUserName>mythtv</DBUserName>
+        <DBPassword>0mvgQYi4</DBPassword>
+        <DBName>mythconverg</DBName>
+        <DBPort>3306</DBPort>
+      </DefaultBackend>
+    </MythFrontend>
+  </UPnP>
+</Configuration>
+
+
+echo `xmllint ~/.mythtv/config.xml --xpath //Configuration/UPnP/MythFrontend/DefaultBackend/DBHostName`
+
+found in ~/.mythtv/config.xml or /etc/mythtv/config.xml
+
+xmllint new_config.xml --xpath //Configuration/Database/DatabaseName
+
+echo $DBHostName
+echo $DBUserName
+echo $DBPassword
+echo $DBName
+echo $DBPort
+echo $LocalHostName
+
+function parsexml {
+    keyword=$1
+    paramfile=~/.mythtv/config.xml
+    if [[ ! -f $paramfile ]] ; then
+        paramfile=/etc/mythtv/config.xml
+    fi
+    value=`grep "<$keyword>" $paramfile | sed -e "s~ *<$keyword>~~;s~</$keyword> *~~"`
+    eval $keyword=$value
+}
+parsexml DBHostName
+
+
+Set Guide data Program as
+/opt/mythtv/bin/mythfilldatabase.sh
+and no parameters
+
+Fails with 
+May 19 07:01:00 panther-ux mythbackend[2400]: E MythFillDB housekeeper.cpp:459 (RunMFD) MythFillDatabase command '/opt/mythtv/bin/mythfilldatabase.sh  --verbose general --loglevel info --syslog local7' failed
+I think this is because the log file was owned by peter and did not have group write permissions
+
+run under mythtv user  
+/opt/mythtv/bin/mythfilldatabase.sh  --verbose general --loglevel info --syslog local7
+Is working fine
+
+Set back to mythfilldatabase for now.
+Maybe run my script manually every day at 7
+
+
+New format config.xml
+<Configuration>
+  <UPnP>
+    <UDN>
+      <MediaRenderer></MediaRenderer>
+    </UDN>
+  </UPnP>
+  <LocalHostName>my-unique-identifier-goes-here</LocalHostName>
+  <Database>
+    <UserName></UserName>
+    <PingHost></PingHost>
+    <Host></Host>
+    <DatabaseName></DatabaseName>
+    <Password></Password>
+    <Port></Port>
+  </Database>
+  <WakeOnLan>
+    <Enabled></Enabled>
+    <SQLReconnectWaitTime></SQLReconnectWaitTime>
+    <SQLConnectRetry></SQLConnectRetry>
+    <Command></Command>
+  </WakeOnLan>
+</Configuration>
+
+
+2nd paragraph:  http://www.gossamer-threads.com/lists/mythtv/dev/519188#519188
+
+>
+> <Configuration>
+> <UPnP>
+> <UDN>
+> <MediaRenderer></MediaRenderer>
+> </UDN>
+> </UPnP>
+> <LocalHostName>my-unique-identifier-goes-here</LocalHostName>
+> <Database>
+> <UserName></UserName>
+> <PingHost></PingHost>
+> <Host></Host>
+> <DatabaseName></DatabaseName>
+> <Password></Password>
+> <Port></Port>
+> </Database>
+> <WakeOnLan>
+> <Enabled></Enabled>
+> <SQLReconnectWaitTime></SQLReconnectWaitTime>
+> <SQLConnectRetry></SQLConnectRetry>
+> <Command></Command>
+> </WakeOnLan>
+> </Configuration>
+
+And it's in your source checkout, too:
+
+https://github.com/MythTV/mythtv/blob/master/mythtv/contrib/config_files/config.xml
+
+Mike
+
+
+you should never be running '--refresh all' with Schedules Direct, use --dd-grab-all instead.
+
+
+Need to fix the make clean or build clean
+Need to remove executables for firewre tester etc from svn
+
+Automatic transcode
+Changes in mythshutdown - 
+repair channelscan check
+need to add start tcdaily commands
+check tcdaily and do not shut down
+On tc machines - check hostlock do not shut, check multi-encoce, start multi-encode
+in mythtv.conf
+add transcode directories, parameters, CAN_TRANSCODE
+Also install on cougar-ux with suitable settings
+
+11/14/2013
+auto transcode - 
+tcdaily - when copying files to transcode create an extra file with each, a link to
+/etc/opt/mythtv/xxxxxx.options where xxxxxx is the original directory name
+the link is called xxxx_xxxxxxx.options where xxxx_xxxxxx is the video name without .mpg extension
+encode multi script - look for a file named after the video with options extension.
+This file contains additional parameters to be passed into the encode script.
+If file not found or broken link then ignore.
+
+
