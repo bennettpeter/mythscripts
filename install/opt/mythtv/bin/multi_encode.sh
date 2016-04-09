@@ -81,6 +81,8 @@ if [[ "$error" == y ]]; then
     echo "    additional options."
     echo "    If there are also values for ENCODER_OPTIONS[1]. ENCODER_OPTIONS[2], etc"
     echo "    second and third, etc. encodings of the same file will be done."
+    echo "    If there is a value for OUTPUT_FORMAT[0], etc., that will be used as the "
+    echo "    file extension and the format of the desired file, e.g. mp4"
     echo "--help Display this help text"
     echo "This should be run with nohup and &"
     exit 2

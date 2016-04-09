@@ -65,7 +65,7 @@ if [[ "$mustdelete" == Y || "$mustdelete" == y ]] ; then
     rm -fv "$mountdir/$TCSUBDIR/junk"*/*
 fi
 
-if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4)` != "$mountdir/$TCSUBDIR/*.@(mkv|mpg|mp4)" || -f "$mountdir/$TCSUBDIR/mustrun_tcencode" ]] ; then
+if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts)` != "$mountdir/$TCSUBDIR/*.@(mkv|mpg|mp4|ts)" || -f "$mountdir/$TCSUBDIR/mustrun_tcencode" ]] ; then
     echo "WARNING: Cannot process tcimport, tcencode is not complete"
     "$scriptpath/notify.py" "tcimport failed" "Cannot process tcimport, tcencode is not complete"
     exit 99
@@ -141,7 +141,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 cd "$realdir"
                 oldfile=`find "$VIDEODIR" -name $realfile 2>/dev/null` || true
                 if [[ "$oldfile" == "" ]] ; then
-                    oldfile=`find "$VIDEODIR" -name $basename.mpg 2>/dev/null` || true
+                    oldfile=`find "$VIDEODIR" -name $basename.mpg -o -name $basename.ts 2>/dev/null` || true
                 fi
                 if [[ -f "$oldfile" ]] ; then
                     duration=0
@@ -149,7 +149,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     if [[ `echo "$duration < 300" | bc` == 1 ]] ; then
                         echo "ERROR: duration less than 5 minutes for $realfile"
                         "$scriptpath/notify.py" "tcimport warning error" "ERROR: duration less than 5 minutes for $realfile $FULLNAME"
-                        origtcfile=`echo ../"$basename".@(mkv_done|mpg_done|mp4_done)`
+                        origtcfile=`echo ../"$basename".@(mkv_done|mpg_done|mp4_done|ts_done)`
                         neworigtcname=${origtcfile%_done}_failed_reported
                         # Rename source file from ../3707_20151118020000.mpg_done to ../3707_20151118020000.mpg_failed_reported 
                         mv -fv "$origtcfile" "$neworigtcname" || echo Return Code is $?
@@ -188,7 +188,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                             "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
                         $mysqlcmd
                     fi
-                    mv -fv "$storagedir/$basename.mpg"* "$storagedir/junk/" || true
+                    mv -fv "$oldfile"* "$storagedir/junk/" || true
                 else
                     echo "No match for $file"
                     cd "$maindir"

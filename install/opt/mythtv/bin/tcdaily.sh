@@ -157,9 +157,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                 if [[ "$episode" < "$lastdate" ]] ; then
                     if [[ "$mounted" == N ]] ; then
                         wakeup_server
-                        if  ls "$TCMOUNTDIR/$TCSUBDIR"/*.@(mpg|mkv|mp4) 2>/dev/null ; then 
-                        #if [[ `echo "$TCMOUNTDIR/$TCSUBDIR"/*.mpg` != "$TCMOUNTDIR/$TCSUBDIR/*.mpg" \
-                        #   || `echo "$TCMOUNTDIR/$TCSUBDIR"/*.mpg_done` != "$TCMOUNTDIR/$TCSUBDIR/*.mpg_done" ]] ; then
+                        if  ls "$TCMOUNTDIR/$TCSUBDIR"/*.@(mpg|ts|mkv|mp4) 2>/dev/null ; then
                             echo "ERROR There are prior transcode files already in $TCMOUNTDIR/$TCSUBDIR , aborting"
                             "$scriptpath/notify.py" "tcdaily failed" "There are prior transcode files already in $TCMOUNTDIR/$TCSUBDIR"
                             exit 2

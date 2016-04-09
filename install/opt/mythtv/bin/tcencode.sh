@@ -15,4 +15,4 @@ date
 echo Set IO proority to -c3 idle
 ionice -c3 -p$$
 
-nice "$scriptpath/multi_encode.sh" -i '*.@(mkv|mpg|mp4)' -l 
+nice "$scriptpath/multi_encode.sh" -i '*.@(mkv|mpg|mp4|ts)' -l
