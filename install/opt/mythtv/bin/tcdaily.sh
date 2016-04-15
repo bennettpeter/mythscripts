@@ -168,10 +168,20 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                     set -- `ls -lL "$episode"`
                     filesize="$5"
                     millisecsv=`mediainfo '--Inform=Video;%Duration%' "$episode"`
+                    # 21600000 = 6 hours
+                    if (( millisecsv > 21600000 )) ; then
+                        echo "Wacky video length of $millisecsv ignored, set to 60000"
+                        # 60000 = 1 minute
+                        millisecsv=60000
+                    fi
                     #on 2015/11/17 This gave answer of 36268563626856 for audio duration
-                    millisecsa=`mediainfo '--Inform=Audio;%Duration%' "$episode"`
+                    # stupid - that was because there are 2 audio streams 3626856 and 3626856
+                    # the tab and cut is to select just the first audio stream length
+                    millisecsa=`mediainfo '--Inform=Audio;%Duration%'$'\t' "$episode" | cut -f 1`
+                    # 21600000 = 6 hours
                     if (( millisecsa > 21600000 )) ; then
                         echo "Wacky audio length of $millisecsa ignored, set to 60000"
+                        # 60000 = 1 minute
                         millisecsa=60000
                     fi
                     if (( millisecsv > millisecsa )) ; then
