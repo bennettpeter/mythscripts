@@ -215,7 +215,13 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                             break 2;
                         fi 
                     fi
-                    echo "Episode: $episode"
+                    videoformat=`mediainfo '--Inform=Video;%Format%' "$episode"`
+                    extension=${episode/*./}
+                    echo "Episode: $episode. Video Format $videoformat"
+                    if [[ "$videoformat" != "MPEG Video" && "$extension" == "mpg" ]] ; then
+                        "$scriptpath/notify.py" "tcdaily warning" \
+                            "Episode $episode seems to be already transcoded. Format is $videoformat. Continuing anyway."
+                    fi
                     filename=`readlink "$episode"`
                     bname=`basename "$filename"`
                     if [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
