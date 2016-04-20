@@ -1,0 +1,21 @@
+# /etc/systemd/system/mythtv-backend.service
+[Unit]
+Description=MythTV Backend
+Wants=mysql.service
+After=mysql.service
+
+[Service]
+Type=simple
+User=mythtv
+Umask=0002
+EnvironmentFile=/etc/opt/mythtv/mythtv.conf
+ExecStartPre=-/opt/mythtv/bin/mythstartup.sh
+ExecStart=/usr/bin/mythbackend --logpath $LOGDIR
+Restart=on-failure
+StartLimitInterval=10min
+StartLimitBurst=5
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+

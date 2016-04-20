@@ -43,6 +43,8 @@ create_dir() {
     sudo chmod $perm "$1"
 }
 
+mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
+
 $scriptpath/fixpermissions.sh
 
 if [[ "$IS_BACKEND" == true ]] ; then
@@ -102,9 +104,8 @@ cd $scriptpath/
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
-        if ! diff install/etc/systemd/system/mythtv-backend.service.d/override.conf /etc/systemd/system/mythtv-backend.service.d/override.conf ; then
-            sudo mkdir -p /etc/systemd/system/mythtv-backend.service.d/
-            sudo cp install/etc/systemd/system/mythtv-backend.service.d/override.conf /etc/systemd/system/mythtv-backend.service.d/override.conf
+        if ! diff install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service ; then
+            sudo cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
             daemonrestart=Y
         fi
         if ! systemctl is-enabled mythtv-backend.service ; then
@@ -129,13 +130,11 @@ if [[ "$USE_MONITOR" == Y ]] ; then
         sudo cp install/etc/init/mythtv-monitor.conf /etc/init/
     fi
 fi
-sudo rsync -rv --exclude=.svn install/usr/ /usr/
-if [[ "$MYTHTVDIR" != "" ]] ; then
-    sudo cp -r install/usr/share/mythtv/themes/petermenu/ $MYTHTVDIR/share/mythtv/themes/petermenu/
+if [[ "$mythver" == 0.27* ]] ; then
+    sudo rsync -rv install/usr/ /usr/
+else
+    sudo rsync -rv install/usr/share/mythtv/themes/petermenu/ /usr/share/mythtv/themes/petermenu/
 fi
-if [[ -d /etc/acpi/events/ ]] ; then
-    sudo cp install/etc/acpi/events/* /etc/acpi/events/
-fi    
 
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
@@ -146,8 +145,22 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! systemctl is-enabled peter-suspend.service ; then
         sudo systemctl enable peter-suspend.service 
     fi
+    if ! diff install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service ; then
+        sudo cp install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service
+        daemonrestart=Y
+    fi
+    if ! systemctl is-enabled peter-resume.service ; then
+        sudo systemctl enable peter-resume.service 
+    fi
+    if ! grep ^HandlePowerKey /etc/systemd/logind.conf ; then
+        echo "HandlePowerKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+        daemonrestart=Y
+    fi
 else
     sudo cp install/etc/pm/sleep.d/* /etc/pm/sleep.d/
+    if [[ -d /etc/acpi/events/ ]] ; then
+        sudo cp install/etc/acpi/events/* /etc/acpi/events/
+    fi    
 fi
 
 #syslog
@@ -204,10 +217,6 @@ fi
 if [[ -f /etc/cron.weekly/mythtv-database ]] ; then
     sudo mkdir -p /etc/cron.removed/
     sudo mv -f /etc/cron.weekly/mythtv-database /etc/cron.removed/
-fi
-
-if [[ -d /etc/apache2/sites-available ]] ; then
-    sudo cp install/etc/apache2/sites-available/* /etc/apache2/sites-available/
 fi
 
 #Remove obsoletes
