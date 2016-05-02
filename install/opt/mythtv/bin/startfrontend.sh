@@ -98,9 +98,10 @@ fi
                 if [[ `arch` == arm* ]] ; then 
                     killall lxsession
                 else
+                    # One of these should work !
                     gnome-session-quit --no-prompt
+                    xfce4-session-logout --logout
                 fi
-                # xfce4-session-logout --logout 
             fi
         fi
     done

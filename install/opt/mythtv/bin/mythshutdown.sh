@@ -224,20 +224,18 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
 fi
 
 # Check if anybody is accessing my drives via smb
-# if [[ "$rc" == 0 ]] ; then
-    while true ; do
-        read service pid machine date
-        echo Samba connection $service $pid $machine $date
-        if [[ "$service" == "" ]] ; then break ; fi
-        if [[ "$machine" == "$LocalHostName" ]] ; then continue ; fi
-        ping -c 1 "$machine"
-        if [[ "$?" == 0 ]] ; then
-            echo "Connected to $machine, do not shut down"
-            rc=1
-            break
-        fi
-     done < <(sudo smbstatus -S | tail -n +4)
-# fi
+while which smbstatus ; do
+    read service pid machine date
+    echo Samba connection $service $pid $machine $date
+    if [[ "$service" == "" ]] ; then break ; fi
+    if [[ "$machine" == "$LocalHostName" ]] ; then continue ; fi
+    ping -c 1 "$machine"
+    if [[ "$?" == 0 ]] ; then
+        echo "Connected to $machine, do not shut down"
+        rc=1
+        break
+    fi
+ done < <(sudo smbstatus -S | tail -n +4)
 
 # Check if CPU idle
 idle=$(mpstat 1 1|grep Average:|sed 's/.* //')
