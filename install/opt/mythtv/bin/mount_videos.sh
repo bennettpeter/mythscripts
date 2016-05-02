@@ -46,9 +46,9 @@ mount|browse)
                 if nc -z -v $VIDEOHOST 2049 ; then
                     if [[ $hostname != $MAINHOST  && $VIDEOHOST != $MAINHOST  ]] ; then
                         ssh $MAINHOST "mount $dir" 1>>$logfile 2>&1 || true
-                        ssh $MAINHOST "mythutil --scanvideos" 1>>$logfile 2>&1 || true
+                        ssh $MAINHOST "sleep 15; mythutil --scanvideos" &>>$logfile &
                     elif [[ $hostname == $MAINHOST ]] ; then
-                        mythutil --scanvideos 1>>$logfile 2>&1 || true
+                       (sleep 15; mythutil --scanvideos) &>>$logfile &
                     fi
                     break;
                 fi
