@@ -133,6 +133,7 @@ fi
 if [[ "$mythver" == 0.27* ]] ; then
     sudo rsync -rv install/usr/ /usr/
 else
+	sudo mkdir -p /usr/share/mythtv/themes/petermenu/
     sudo rsync -rv install/usr/share/mythtv/themes/petermenu/ /usr/share/mythtv/themes/petermenu/
 fi
 
