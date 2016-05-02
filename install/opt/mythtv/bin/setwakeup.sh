@@ -52,6 +52,9 @@ if [ "$startuptime" != 0 ] ; then
         startuptime=$nextdw
     fi
     echo $logdate startuptime \"$startuptime\"
+    if [ `ps -p1 -o comm --no-headers` == systemd ] ; then
+		UTC=yes
+	fi
     if [ "$UTC" = yes ] ; then
         biostime=$startuptime
     else
@@ -59,5 +62,9 @@ if [ "$startuptime" != 0 ] ; then
         biostime=`date -u --date "$displaytime" +%s`
     fi
     echo $logdate biostime \"$biostime\"
-    echo $biostime > /sys/class/rtc/rtc0/wakealarm     #this writes your alarm
+    if [ `ps -p1 -o comm --no-headers` = systemd ] ; then
+		rtcwake -m no -a -t $biostime
+	else
+		echo $biostime > /sys/class/rtc/rtc0/wakealarm     #this writes your alarm
+	fi
 fi
