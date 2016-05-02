@@ -59,6 +59,8 @@ fi
 
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
+mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
+
 if [[ "$mustdelete" == Y || "$mustdelete" == y ]] ; then
     echo "Deleting prior run junk files from $VIDEODIR and $mountdir"
     rm -fv "$VIDEODIR"/*/recordings/junk/*
@@ -173,8 +175,12 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     $mysqlcmd | tail -1`
                     chanid=$1
                     starttime="$2 $3"
-                    echo "update recorded set basename = '$realfile' where basename like '$basename.%';" | \
+                    echo "update recorded set basename = '$realfile', transcoded = 1 where basename like '$basename.%';" | \
                     $mysqlcmd
+                    if [[ "$mythver" != 0.27* ]] ; then
+                        echo "update recordedfile set basename = '$realfile' where basename like '$basename.%';" | \
+                        $mysqlcmd
+                    fi
                     mythcommflag --rebuild  --chanid "$chanid" --starttime "$starttime" || echo Return Code is $?
                     # Fix duration
                     duration=`mediainfo '--Inform=Video;%Duration%' "$storagedir/$realfile"` || echo Return Code is $?
