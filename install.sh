@@ -133,10 +133,14 @@ fi
 if [[ "$mythver" == 0.27* ]] ; then
     sudo rsync -rv install/usr/ /usr/
 else
-	sudo mkdir -p /usr/share/mythtv/themes/petermenu/
-    sudo rsync -rv install/usr/share/mythtv/themes/petermenu/ /usr/share/mythtv/themes/petermenu/
+    if [[ -d /usr/share/mythtv/themes/defaultmenu ]] ; then
+        sudo rm -rf /usr/share/mythtv/themes/petermenu
+        sudo cp -r /usr/share/mythtv/themes/defaultmenu /usr/share/mythtv/themes/petermenu
+        cd /
+        sudo patch -p1 < $scriptpath/install/menu.patch
+    fi
 fi
-
+cd $scriptpath/
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! diff install/etc/systemd/system/peter-suspend.service /etc/systemd/system/peter-suspend.service ; then
