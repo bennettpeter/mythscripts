@@ -4,7 +4,7 @@
 
 paramfile=~/.mythtv/config.xml
 if [[ ! -f $paramfile ]] ; then
-    paramfile=/etc/mythtv/config.xml
+    paramfile=/home/$SOFT_USER/.mythtv/config.xml
 fi
 
 # set -- `ls -lL "$paramfile"`
