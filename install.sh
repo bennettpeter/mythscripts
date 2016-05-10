@@ -75,11 +75,6 @@ if [[ -f /etc/opt/mythtv/mythtv.conf ]] ; then
         cp -p /etc/opt/mythtv/mythtv.conf $scriptpath/backup/${hostname}_${datetime}_mythtv.conf
     fi
 fi
-if [[ "$IS_BACKEND" == true ]] ; then
-    if ! diff install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf ; then
-        cp -p /etc/init/mythtv-backend.conf $scriptpath/backup/${hostname}_${datetime}_mythtv-backend.conf
-    fi
-fi
 pushd install/etc/opt/mythtv/
 # Remove old options files
 rm -f /etc/opt/mythtv/*.options
@@ -198,14 +193,6 @@ if [[ $ARCH == arm* ]] ; then
     fi
 fi
 
-kodiver=`/usr/bin/kodi --version|head -1|cut -f 1 -d '.'`
-if [[ "$kodiver" != "" ]] ; then
-    sudo cp -av install/home/.kodi /home/$SOFT_USER/
-    sudo cp -av install/home/.kodi/peter$kodiver/userdata /home/$SOFT_USER/.kodi/
-    sudo chown -R $SOFT_USER /home/$SOFT_USER/.kodi
-    sudo chgrp -R $SOFT_USER /home/$SOFT_USER/.kodi
-    sudo chmod -R g+w /home/$SOFT_USER/.kodi
-fi
 
 if [[ $ARCH == arm* ]] ; then
 #    if [[ -f $MYTHTVDIR/bin/mythfrontend ]] ; then

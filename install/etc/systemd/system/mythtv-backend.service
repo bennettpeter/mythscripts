@@ -7,10 +7,10 @@ After=mysql.service
 [Service]
 Type=simple
 User=mythtv
-Umask=0002
-EnvironmentFile=/etc/opt/mythtv/mythtv.conf
+UMask=0002
+# EnvironmentFile=/etc/opt/mythtv/mythtv.conf
 ExecStartPre=-/opt/mythtv/bin/mythstartup.sh
-ExecStart=/usr/bin/mythbackend --logpath $LOGDIR
+ExecStart=/usr/bin/mythbackend --logpath /var/log/mythtv_scripts
 Restart=on-failure
 StartLimitInterval=10min
 StartLimitBurst=5
