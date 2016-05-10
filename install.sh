@@ -103,9 +103,8 @@ if [[ "$IS_BACKEND" == true ]] ; then
             sudo cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
             daemonrestart=Y
         fi
-        if ! systemctl is-enabled mythtv-backend.service ; then
-            sudo systemctl enable mythtv-backend.service 
-        fi
+        # The script does not enable mythtv-backend.service.
+        # It should be done manually when ready
     else
         sudo cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
     fi
