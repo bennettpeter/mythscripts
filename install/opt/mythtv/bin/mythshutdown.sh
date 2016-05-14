@@ -12,6 +12,12 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
+
+if (( `date -r $DATADIR/mythshutdown_rc +%s` + 300 >  `date +%s` )) ; then
+    rc=`cat $DATADIR/mythshutdown_rc`
+    echo `date` mythshutdown.sh $reason "(too soon) return code $rc"
+    exit $rc
+fi
 date
 
 # Get a date/time stamp to add to log output
@@ -257,6 +263,7 @@ if [[ "$rc" == 0 ]] ; then
     # Unmount videos
     $scriptpath/mount_videos.sh umount
 fi
+echo $rc > $DATADIR/mythshutdown_rc
 echo mythshutdown.sh $reason return code $rc
 exit $rc
 
