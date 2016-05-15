@@ -15,8 +15,10 @@ exec 2>&1
 
 if (( `date -r $DATADIR/mythshutdown_rc +%s` + 300 >  `date +%s` )) ; then
     rc=`cat $DATADIR/mythshutdown_rc`
-    echo `date` mythshutdown.sh $reason "(too soon) return code $rc"
-    exit $rc
+    if [[ "$rc" != 0 ]] ; then
+        echo `date` mythshutdown.sh $reason "(too soon) return code $rc"
+        exit $rc
+    fi
 fi
 date
 
