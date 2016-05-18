@@ -16,6 +16,8 @@ date
 
 . $scriptpath/getconfig.sh
 
+mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+
 #if [[ "$DISPLAY" == "" ]] ; then
 #    exit
 #fi
@@ -48,7 +50,9 @@ fi
                 for (( counter=0 ; counter<100; counter+=4 )) ; do
                     echo $counter
                     $scriptpath/wakeup.sh "$MAINHOST"
-                    nc -z -v $MAINHOST $MASTER_BACKEND_PORT && break
+                    echo "select 1 from dual;" | $mysqlcmd && break
+                    # nc -z -v $DBHostName 3306 && break
+                    # nc -z -v $MAINHOST $MASTER_BACKEND_PORT && break
                     sleep 4
                 done
                 echo 99

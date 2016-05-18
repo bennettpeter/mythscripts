@@ -8,7 +8,7 @@ sudo apt-get install libxml2-utils
 sudo apt-get install curl
 sudo apt-get install xprintidle
 
-sudo apt-get install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat ffmpeg
+sudo apt-get install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat ffmpeg mysql-client
 
 
 # Add to repos
