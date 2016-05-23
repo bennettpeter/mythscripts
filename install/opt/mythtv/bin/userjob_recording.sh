@@ -27,6 +27,23 @@ recgroup="$4"
 title="$5"
 subtitle="$6"
 
+# Get DB password from config.xml
+. $scriptpath/getconfig.sh
+
+mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+
+# Get the duplicate flag
+set -- `echo "select duplicate from recorded where basename = '$filename';" | \
+$mysqlcmd | tail -1`
+duplicate=$1
+
+echo "Filename: $filename   duplicate: $duplicate"
+
+# Check if Mythtv has flagged it as failed
+if [[ "$duplicate" != 1 ]] ; then
+    "$scriptpath/notify.py" "Recording failed" "$title $subtitle has duplicate = $duplicate, should be 1"
+fi
+
 use_mediainfo=N
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
