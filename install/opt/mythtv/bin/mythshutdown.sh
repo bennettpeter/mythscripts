@@ -187,6 +187,11 @@ if [[ `pidof parec` != "" ]] ; then
     rc=1
 fi
 
+if [[ `pidof simplescreenrecorder` != "" ]] ; then
+    echo $DATE simplescreenrecorder is running, don\'t shut down!
+    rc=1
+fi
+
 # Check if jampal is running
 if [[ "$x_user" != "" ]] ; then
     port=`grep listen-port /home/$x_user/.jampal/jampal_initial.properties | cut -d = -f 2`
