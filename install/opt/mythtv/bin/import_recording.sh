@@ -111,19 +111,21 @@ if [[ "$action" == I ]] ; then
 
     basename=${VODCHAN}_${fntime}.$ext
     newbasename=$basename
-
+    # recordedid left out as it is auto increment
     sql1="INSERT INTO recorded
     (chanid,starttime,endtime,title,subtitle,description,season,episode,category,hostname,bookmark,
     editing,cutlist,autoexpire,commflagged,recgroup,recordid,seriesid,programid,inetref,lastmodified,
     filesize,stars,previouslyshown,originalairdate,preserve,findid,deletepending,transcoder,timestretch,
     recpriority,basename,progstart,progend,playgroup,profile,duplicate,transcoded,watched,storagegroup,
-    bookmarkupdate)
+    bookmarkupdate,
+    recgroupid,inputname )
     VALUES(
     $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",0,0,'','$LocalHostName',0,
     0,0,0,0,'Default','','','','',CURRENT_TIMESTAMP,
     $filesize,0,0,'$originalairdate',0,0,0,0,1,
     0,'$basename','$starttime','$endtime','Default','Default',1,0,0,'Default',
-    '0000-00-00 00:00:00');"
+    '0000-00-00 00:00:00',
+    1,'Import');"
 
     sql2="INSERT INTO oldrecorded
     (chanid,starttime,endtime,title,subtitle,description,season,episode,category,
@@ -167,13 +169,18 @@ if [[ "$action" == U ]] ; then
     fi        
     newbasename="${basename%.*}".$ext
     sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime' where chanid = '$chanid' and starttime = '$starttime' ;" 
+    sql2="update recordedfile set basename = '$newbasename' where basename = '$basename';"
     mkdir -p "$storagedir/junk/"
     mv -fv "$storagedir/$basename"* "$storagedir/junk/" || true
     cp -ivLp "$filename" "$storagedir/$newbasename"
     echo sudo chown mythtv:mythtv "$storagedir/$newbasename"
     sudo chown mythtv:mythtv "$storagedir/$newbasename"
     echo "$sql1"
-    echo "$sql1" |  $mysqlcmd
+    echo "$sql2"
+    (
+      echo "$sql1"
+      echo "$sql2"
+    ) |  $mysqlcmd
 fi
 
 $scriptpath/repair_duration.sh $storagedir/$newbasename
