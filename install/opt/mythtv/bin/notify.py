@@ -19,6 +19,9 @@ config=ConfigParser()
 # any line that is not simply var=value must be prepended with a=1;
 config.read('/etc/opt/mythtv/mythtv.conf')
 
+privConfig=ConfigParser()
+privConfig.read('/etc/opt/mythtv/private.conf')
+
 #debug lines
 # print config.sections()
 # print config.items(" default ")
@@ -66,6 +69,6 @@ with open(logfilename,"a") as logfile:
         msg['From'] = "mythtv <" + config.get(" default ","SMTP_SENDER") + ">"
         msg['To'] = destination[0]
         smtpsrv = smtplib.SMTP_SSL(config.get(" default ","SMTP_HOST"))
-        smtpsrv.login(config.get(" default ","SMTP_USER"),config.get(" default ","SMTP_PASSWORD"))
+        smtpsrv.login(config.get(" default ","SMTP_USER"),privConfig.get(" default ","SMTP_PASSWORD"))
         smtpsrv.sendmail(config.get(" default ","SMTP_SENDER"),destination,msg.as_string())
 
