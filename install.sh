@@ -57,6 +57,10 @@ create_dir /etc/opt/mythtv
 create_dir /etc/rc_keymaps
 # create_dir $MOUNTDIR
 create_dir $LOGDIR 2775
+sudo mkdir -p /var/log/mythtv
+sudo chown syslog:adm /var/log/mythtv
+sudo chmod 2775 /var/log/mythtv
+
 if [[ "$IS_BACKEND" == true ]] ; then
     create_dir $VIDEODIR/video1 2775
     create_dir $VIDEODIR/video2 2775
@@ -166,6 +170,7 @@ fi
 sudo cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 if [[ "$daemonrestart" == Y ]] ; then
+    sudo systemctl restart rsyslog.service
     sudo systemctl daemon-reload
 fi
 
