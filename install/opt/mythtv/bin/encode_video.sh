@@ -267,8 +267,8 @@ if [[ "$error" == y ]] ; then
     echo "  720 = encode to 720 rows"
     echo "  1080 = override size found with mediainfo for on demand recordings"
     echo "--preset"
-    echo "  DIVX = encode ffmpeg4 and lame to max 720 cols, 480 rows for DIVX compatibility"
-    echo "       This creates an mkv file that will then be re-encoded using xvidm"
+    echo "  XVID = encode xvid and lame to 360 rows for compatibility for small DVD player"
+    echo "       This creates an avi file using xvidm and avidemux"
     echo "  PDVD = encode ffmpeg and lame to 360 rows to mp4 quality 6 for portable DVD Player"
     echo "  ARCHIVE = encode X264 and lame to 480 rows for archiving"
     echo "-r framerate - default is same as input"
@@ -347,17 +347,14 @@ fi
 maxWidth=0
 if [[ "$preset" != "" ]] ; then
     case $preset in
-        DIVX)
-            Height=480
+        XVID)
             # for small dvd player
-            # Decided not to use Height 360
-            # It does not save much space 
-            # It uses 84% of the space, saves 16%
-            # Height=360
-            maxWidth=720
+            Height=360
+            encoder=xvidm
             audio=lame
-            ffrate=y
-            toavi=y
+            Quality=5
+            format=avi
+            extension=avi
             ;;
         PDVD)
             Height=360
@@ -487,14 +484,23 @@ if [[ "$encoder" == xvidm ]] ; then
 
     set -x
 
+    mkdir -p encode
     mencoder "$input" -ofps $framerate -fps $framerate \
-        -oac $audio -lameopts cbr:br=128:aq=2 -o "$output"  \
+        -oac $audio -lameopts cbr:br=128:aq=2 -o "encode/$bname.temp.$extension"  \
         -ovc xvid -xvidencopts chroma_opt:vhq=0:bvhq=1:quant_type=mpeg:trellis:\
 threads=4:turbo:fixed_quant=$Quality \
         -vf scale=$Width:$Height,harddup -force-avi-aspect $Width:$Height \
-        $STARTKW $STARTPOS $LENGKW $LENGTH -delay 0 
+        $STARTKW $STARTPOS $LENGKW $LENGTH -delay -0.2 
     # > "$dname/$bname.log" 2>&1
-       
+    avidemux --load "encode/$bname.temp.$extension" --save "$output" 2>&1 | \
+        grep -v ' \[PerfectAudio\]Warning '
+    # rm -f "encode/$bname.temp.$extension"
+    outdir=`dirname "$output"`
+    outfile=`basename "$output"`
+    outfilebase="${outfile%.*}"
+    srtoutfile="$outdir/$outfilebase.srt"
+    mkvextract tracks "$input" 2:"$srtoutfile" || echo "Subtitle extract failed"
+
 elif [[ "$encoder" == xvida ]] ; then
     set -x
     #xvfb-run avidemux3_qt4 --nogui --force-alt-h264 --load "$input" \
