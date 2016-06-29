@@ -187,7 +187,7 @@ while (( "$#" >= 1 )) ; do
     shift||rc=$?
 done
 
-if [[ "$encoder" == xvida || "$encoder" == xvidm ]] ; then 
+if [[ "$encoder" == xvid* ]] ; then 
     if [[ "$format" == "" ]] ; then format=avi ; fi
     if [[ "$toavi" == "y" ]] ; then echo  "ERROR xvid inacompatible parameter --toavi." ; error=y ; fi
 else
@@ -229,7 +229,7 @@ if [[ -d "$input/VIDEO_TS" ]] ; then
     if [[ "$titlenum" == "" ]] ; then
         titlenum=0
     fi
-    if [[ "$encoder" == "xvida" || "$encoder" == "xvidm" ]] ; then
+    if [[ "$encoder" == xvid* ]] ; then
         echo  "ERROR $encoder inacompatible with DVD input." 
         error=y
     fi
@@ -273,9 +273,9 @@ if [[ "$error" == y ]] ; then
     echo "  ARCHIVE = encode X264 and lame to 480 rows for archiving"
     echo "-r framerate - default is same as input"
     echo "  Ignored for xvida, must have fixed rate input that will be used for output"
-    echo "  For xvidm will be defaulted from input which must be 29.970 or 23.976"
-    echo "  For xvidm if sepecified must be 30000/1001 or 24000/1001"
-    echo "-e encoder - x264, ffmpeg4, xvidm, xvida - default x264"
+    echo "  For xvidm, xvidfm will be defaulted from input which must be 29.970 or 23.976"
+    echo "  For xvidm, xvidfm if sepecified must be 30000/1001 or 24000/1001"
+    echo "-e encoder - x264, ffmpeg4, xvidm, xvida, xvidfm - default x264"
     echo "-f format - mkv, avi, mp4 - default mkv"
     echo "  for xvid* this is ignored and avi is used"
     echo "-E audio - lame, copy, ffac3, others - default copy"
@@ -311,7 +311,7 @@ extension=${input/*./}
 bname=`basename "$input" .$extension`
 
 extension=$format
-if [[ "$encoder" == xvidm || "$encoder" == xvida ]] ; then
+if [[ "$encoder" == xvid* ]] ; then
     extension=avi
 fi
 
@@ -350,9 +350,15 @@ if [[ "$preset" != "" ]] ; then
         XVID)
             # for small dvd player
             Height=360
-            encoder=xvidm
+            # British shows from PBS must use xvidfm for audio sync problem.
+            if [[ "$encoder" != xvid* ]] ; then
+                encoder=xvidm
+            fi
             audio=lame
-            Quality=5
+            # Quality 5 for reality, 4 for scripted show.
+            if [[ "$Quality" == "" ]] ; then
+                Quality=5
+            fi
             format=avi
             extension=avi
             ;;
@@ -453,12 +459,28 @@ if [[ "$output" == "" ]] ; then
     fi
 fi
 
-if [[ "$encoder" == xvidm ]] ; then
+output_dname=`dirname "$output"`
+mkdir -p "$output_dname"
+output_extension=${output/*./}
+output_bname=`basename "$output" .$output_extension`
+
+if [[ "$encoder" == xvidfm ]] ; then
+    set -x
+    ffmpeg -i "$input" -c:v libxvid -q:v 3 -codec:a copy \
+        -vf scale=-8:$Height \
+        -f avi "$output_dname/$output_bname.ph1_avi"
+    set -
+    ph1file="$output_dname/$output_bname.ph1_avi"
+else
+    ph1file="$input"
+fi
+
+if [[ "$encoder" == xvidm || "$encoder" == xvidfm ]] ; then
     if [[ "$Quality" == "" ]] ; then
         Quality=4
     fi
     if [[ "$framerate" == "" ]] ; then
-        framerate=`mediainfo '--Inform=Video;%FrameRate%' "$input"`
+        framerate=`mediainfo '--Inform=Video;%FrameRate%' "$ph1file"`
         if [[ "$framerate" == "29.970" ]] ; then
             framerate="30000/1001"
         elif [[ "$framerate" == "23.976" ]] ; then
@@ -482,24 +504,41 @@ if [[ "$encoder" == xvidm ]] ; then
         LENGKW="-endpos"
     fi
 
-    set -x
+    input_ext=${ph1file/*./}
+    if [[ "$input_ext" == "ph1_avi" ]] ; then
+        delay="0"
+    else
+        delay="-0.2"
+    fi
 
-    mkdir -p encode
-    mencoder "$input" -ofps $framerate -fps $framerate \
-        -oac $audio -lameopts cbr:br=128:aq=2 -o "encode/$bname.temp.$extension"  \
+    set -x
+    
+    if [[ "$encoder" == xvidfm ]] ; then
+        filter_parm=
+        aspect_parm=
+    else
+        filter_parm="scale=$Width:$Height,"
+        aspect_parm="-force-avi-aspect $Width:$Height"
+    fi
+
+    mencoder "$ph1file" -ofps $framerate -fps $framerate \
+        -oac $audio -lameopts cbr:br=128:aq=2 \
+        -o "$output_dname/$output_bname.ph2_avi"  \
         -ovc xvid -xvidencopts chroma_opt:vhq=0:bvhq=1:quant_type=mpeg:trellis:\
 threads=4:turbo:fixed_quant=$Quality \
-        -vf scale=$Width:$Height,harddup -force-avi-aspect $Width:$Height \
-        $STARTKW $STARTPOS $LENGKW $LENGTH -delay -0.2 
-    # > "$dname/$bname.log" 2>&1
-    avidemux --load "encode/$bname.temp.$extension" --save "$output" 2>&1 | \
-        grep -v ' \[PerfectAudio\]Warning '
-    # rm -f "encode/$bname.temp.$extension"
-    outdir=`dirname "$output"`
-    outfile=`basename "$output"`
-    outfilebase="${outfile%.*}"
-    srtoutfile="$outdir/$outfilebase.srt"
+        -vf ${filter_parm}harddup $aspect_parm -mc 0 -noskip \
+        $STARTKW $STARTPOS $LENGKW $LENGTH -delay $delay -of avi
+
+    avidemux --load "$output_dname/$output_bname.ph2_avi" --save "$output" --output-format AVI --quit 
+    # Removed this - avidemux does not work with it 
+    #  grep -v ' \[PerfectAudio\]Warning '
+
+    srtoutfile="$output_dname/$output_bname.srt"
     mkvextract tracks "$input" 2:"$srtoutfile" || echo "Subtitle extract failed"
+    if [[ ! -f "$output" ]] ; then
+        echo "ERROR - File $output was not created"
+        exit 2
+    fi
 
 elif [[ "$encoder" == xvida ]] ; then
     set -x
