@@ -16,7 +16,7 @@ if [[ "$sourcedir" == "" ]] ; then
 fi
 sourcedir=`readlink -f "$sourcedir"`
 if [[ "$subrelease" == "" ]] ; then subrelease=0 ; fi
-packagever=`git -C "$gitpath" describe --dirty|cut -c2-`-$subrelease
+packagever=`git -C "$gitpath" describe --dirty|cut -c2-|sed  's/-pre/~pre/'`-$subrelease
 installdir=`git -C "$gitpath" rev-parse --show-toplevel`
 installdir=`dirname "$installdir"`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
@@ -24,9 +24,8 @@ codename=`lsb_release -c|cut -f 2`
 mythtvpackagename=mythtv-light_${packagever}_${arch}_$codename
 packagename=mythplugins-light_${packagever}_${arch}_$codename
 echo Package $packagename
-if [[ -d $installdir/$packagename ]] ; then
-    ls -l $installdir
-    echo $installdir/$packagename already exists - run with a subrelease number
+if [[ -f $installdir/$packagename.deb ]] ; then
+    echo $installdir/$packagename.deb already exists - run with a subrelease number
     exit 2
 fi
 if [[ ! -d $installdir/$mythtvpackagename ]] ; then
@@ -74,5 +73,6 @@ FINISH
 
 cd $installdir
 fakeroot dpkg-deb --build $packagename
+rm -rf $packagename
 echo $PWD
 ls -ld ${packagename}*
