@@ -24,15 +24,12 @@ gitver=`git -C "$gitpath" describe --dirty|cut -c2-`
 gitbranch=`git branch|grep "^\* "|cut -b3-`
 packagever=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Version"|cut -d ' ' -f 4|cut -c2-`
 packagebranch=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Branch"|cut -d ' ' -f 4`
+echo Package branch: $packagebranch, git branch: $gitbranch
 if [[ "$packagever" != "$gitver" ]] ; then
     echo ERROR Package version $packagever does not match git version $gitver
     exit 2
 fi
 packagever=`echo $packagever|sed  's/-pre/~pre/'`
-if [[ "$packagebranch" != "$gitbranch" ]] ; then
-    echo ERROR Package branch $packagebranch does not match git branch $gitbranch
-    exit 2
-fi
 packagerel=$packagever-$subrelease
 gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
 installdir=`dirname "$gitbasedir"`
