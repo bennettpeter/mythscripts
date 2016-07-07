@@ -14,15 +14,28 @@ if [[ "$sourcedir" == "" ]] ; then
     echo Parameter 2 = subrelease number
     exit 2
 fi
+if [[ ! -d "$sourcedir" ]] ; then
+    sourcedir=$HOME/proj/mythtv-build/myth-$sourcedir
+fi
 sourcedir=`readlink -f "$sourcedir"`
 if [[ "$subrelease" == "" ]] ; then subrelease=0 ; fi
-packagever=`git -C "$gitpath" describe --dirty|cut -c2-|sed  's/-pre/~pre/'`-$subrelease
-installdir=`git -C "$gitpath" rev-parse --show-toplevel`
-installdir=`dirname "$installdir"`
+gitver=`git -C "$gitpath" describe --dirty|cut -c2-`
+gitbranch=`git branch|grep "^\* "|cut -b3-`
+packagever=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Version"|cut -d ' ' -f 4|cut -c2-`
+packagebranch=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Branch"|cut -d ' ' -f 4`
+echo Package branch: $packagebranch, git branch: $gitbranch
+if [[ "$packagever" != "$gitver" ]] ; then
+    echo ERROR Package version $packagever does not match git version $gitver
+    exit 2
+fi
+packagever=`echo $packagever|sed  's/-pre/~pre/'`
+packagerel=$packagever-$subrelease
+gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
+installdir=`dirname "$gitbasedir"`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`
-mythtvpackagename=mythtv-light_${packagever}_${arch}_$codename
-packagename=mythplugins-light_${packagever}_${arch}_$codename
+mythtvpackagename=mythtv-light_${packagerel}_${arch}_$codename
+packagename=mythplugins-light_${packagerel}_${arch}_$codename
 echo Package $packagename
 if [[ -f $installdir/$packagename.deb ]] ; then
     echo $installdir/$packagename.deb already exists - run with a subrelease number
@@ -47,7 +60,7 @@ strip -g -v `find $installdir/$packagename/usr/bin/ -type f -executable`
 strip -g -v `find $installdir/$packagename/usr/lib/ -type f -executable`
 cat >$installdir/$packagename/DEBIAN/control <<FINISH
 Package: mythplugins-light
-Version: $packagever
+Version: $packagerel
 Section: graphics
 Priority: optional
 Architecture: $arch
@@ -72,6 +85,7 @@ Description: MythTV Plugins Light
 FINISH
 
 cd $installdir
+chmod -R  g-w,o-w $packagename
 fakeroot dpkg-deb --build $packagename
 rm -rf $packagename
 echo $PWD
