@@ -15,14 +15,30 @@ if [[ "$sourcedir" == "" ]] ; then
     echo Run this from the git source directory
     exit 2
 fi
+if [[ ! -d "$sourcedir" ]] ; then
+    sourcedir=$HOME/proj/mythtv-build/myth-$sourcedir
+fi
 sourcedir=`readlink -f "$sourcedir"`
 if [[ "$subrelease" == "" ]] ; then subrelease=0 ; fi
-packagever=`git -C "$gitpath" describe --dirty|cut -c2-|sed  's/-pre/~pre/'`-$subrelease
-installdir=`git -C "$gitpath" rev-parse --show-toplevel`
-installdir=`dirname "$installdir"`
+gitver=`git -C "$gitpath" describe --dirty|cut -c2-`
+gitbranch=`git branch|grep "^\* "|cut -b3-`
+packagever=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Version"|cut -d ' ' -f 4|cut -c2-`
+packagebranch=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Branch"|cut -d ' ' -f 4`
+if [[ "$packagever" != "$gitver" ]] ; then
+    echo ERROR Package version $packagever does not match git version $gitver
+    exit 2
+fi
+packagever=`echo $packagever|sed  's/-pre/~pre/'`
+if [[ "$packagebranch" != "$gitbranch" ]] ; then
+    echo ERROR Package branch $packagebranch does not match git branch $gitbranch
+    exit 2
+fi
+packagerel=$packagever-$subrelease
+gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
+installdir=`dirname "$gitbasedir"`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`
-packagename=mythtv-light_${packagever}_${arch}_$codename
+packagename=mythtv-light_${packagerel}_${arch}_$codename
 echo Package $packagename
 if [[ -f $installdir/$packagename.deb ]] ; then
     echo $installdir/$packagename.deb already exists - run with a subrelease number
@@ -30,12 +46,22 @@ if [[ -f $installdir/$packagename.deb ]] ; then
 fi
 rm -rf $installdir/$packagename $installdir/$packagename.deb
 cp -a "$sourcedir/" "$installdir/$packagename/"
+if [[ ! -d $installdir/$packagename/usr/share/doc/mythtv-backend/contrib ]] ; then
+    if [[ -d $gitbasedir/mythtv/contrib ]] ; then
+        mkdir -p $installdir/$packagename/usr/share/doc/mythtv-backend/contrib
+        cp -a $gitbasedir/mythtv/contrib/*  \
+            $installdir/$packagename/usr/share/doc/mythtv-backend/contrib/
+    else
+        echo ERROR Running from wrong directory, $gitbasedir/mythtv/contrib not found
+        exit 2
+    fi
+fi
 mkdir -p $installdir/$packagename/DEBIAN
 strip -g `find $installdir/$packagename/usr/bin/ -type f -executable`
 strip -g `find $installdir/$packagename/usr/lib/ -type f -executable -name '*.so*'`
 cat >$installdir/$packagename/DEBIAN/control <<FINISH
 Package: mythtv-light
-Version: $packagever
+Version: $packagerel
 Section: graphics
 Priority: optional
 Architecture: $arch
@@ -67,6 +93,7 @@ mkdir -p $installdir/$packagename/usr/share/menu/
 sed -e "s~@env@~$environ~" < $scriptpath/lightpackage/mythtv-frontend > $installdir/$packagename/usr/share/menu/mythtv-frontend
 
 cd $installdir
+chmod -R  g-w,o-w $packagename
 fakeroot dpkg-deb --build $packagename
 rm -rf $packagename
 echo $PWD
