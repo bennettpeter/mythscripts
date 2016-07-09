@@ -35,7 +35,13 @@ gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
 installdir=`dirname "$gitbasedir"`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`
-packagename=mythtv-light_${packagerel}_${arch}_$codename
+source=
+# This expects that remote tracking branches for official
+# repositories start with "mythtv"
+if [[ "$packagebranch" != mythtv* ]] ; then
+    source="peter_"
+fi
+packagename=mythtv-light_${source}${packagerel}_${arch}_$codename
 echo Package $packagename
 if [[ -f $installdir/$packagename.deb ]] ; then
     echo $installdir/$packagename.deb already exists - run with a subrelease number
@@ -64,8 +70,8 @@ Priority: optional
 Architecture: $arch
 Essential: no
 Installed-Size: `du -B1024 -d0 $installdir/$packagename | cut  -f1`
-Maintainer: Peter Bennett <pgbennett@comcast.net>
-Depends: libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, libexiv2-13 | libexiv2-14, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb
+Maintainer: Peter Bennett <pbennett@mythtv.org>
+Depends: libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, libexiv2-13 | libexiv2-14, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb, libcec3
 Conflicts: mythtv-common, mythtv-frontend, mythtv-backend
 Homepage: http://www.mythtv.org
 Description: MythTV Light
@@ -92,6 +98,6 @@ sed -e "s~@env@~$environ~" < $scriptpath/lightpackage/mythtv-frontend > $install
 cd $installdir
 chmod -R  g-w,o-w $packagename
 fakeroot dpkg-deb --build $packagename
-rm -rf $packagename
+# Do not rm $packagename because it is needed for plugins build
 echo $PWD
 ls -ld ${packagename}*

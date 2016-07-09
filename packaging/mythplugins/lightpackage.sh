@@ -4,7 +4,7 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 #scriptname=`basename "$scriptname" .sh`
 gitpath="$PWD"
-cd $scriptpath
+# cd $scriptpath
 sourcedir=$1
 subrelease=$2
 if [[ "$sourcedir" == "" ]] ; then
@@ -15,7 +15,7 @@ if [[ "$sourcedir" == "" ]] ; then
     exit 2
 fi
 if [[ ! -d "$sourcedir" ]] ; then
-    sourcedir=$HOME/proj/mythtv-build/myth-$sourcedir
+    sourcedir=$HOME/proj/mythtv-build/plugins-$sourcedir
 fi
 sourcedir=`readlink -f "$sourcedir"`
 if [[ "$subrelease" == "" ]] ; then subrelease=0 ; fi
@@ -66,8 +66,8 @@ Priority: optional
 Architecture: $arch
 Essential: no
 Installed-Size: `du -B1024 -d0 $installdir/$packagename | cut  -f1`
-Maintainer: Peter Bennett <pgbennett@comcast.net>
-Depends: mythtv-light
+Maintainer: Peter Bennett <pbennett@mythtv.org>
+Depends: mythtv-light, python, perl, libimage-size-perl, perlmagick, libxml-parser-perl, libxml-sax-perl, libcarp-clan-perl, libsoap-lite-perl, libdate-manip-perl, libdate-calc-perl, libwww-perl, libxml-simple-perl, libdatetime-format-iso8601-perl, libjson-perl, libxml-xpath-perl, mjpegtools, dvdauthor, genisoimage, dvd+rw-tools, python, python-imaging, python-mysqldb, pmount, python-feedparser, python-pycurl
 Conflicts: mythtv-common, mythtv-frontend, mythtv-backend
 Homepage: http://www.mythtv.org
 Description: MythTV Plugins Light
@@ -87,6 +87,6 @@ FINISH
 cd $installdir
 chmod -R  g-w,o-w $packagename
 fakeroot dpkg-deb --build $packagename
-rm -rf $packagename
+
 echo $PWD
 ls -ld ${packagename}*
