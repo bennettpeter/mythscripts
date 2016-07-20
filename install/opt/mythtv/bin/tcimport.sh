@@ -231,7 +231,12 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 else
                     sql_extra=
                 fi
-                echo "update recorded set recgroup = '$NEW_RECGROUP' $sql_extra where basename like '$basename.%';" | \
+                set -- `echo "select recgroupid from recgroups where recgroup = '$NEW_RECGROUP';" | \
+                    $mysqlcmd | tail -1`
+                recgroupid=$1
+                echo "update recorded set recgroup = '$NEW_RECGROUP', 
+                      recgroupid = $recgroupid $sql_extra 
+                      where basename like '$basename.%';" | \
                     $mysqlcmd
             fi
         done
