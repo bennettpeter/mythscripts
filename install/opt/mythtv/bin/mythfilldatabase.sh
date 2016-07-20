@@ -1,7 +1,7 @@
 #!/bin/bash
 # Wrapper for mythfilldatabase
 
-# set -e
+set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
@@ -15,7 +15,7 @@ today=`date "+%a %Y/%m/%d"`
 # Note the --only-update-guide option does not work for SD only for XMLTV
 # Note the --remove-new-channels option does not in fact remove new channels, just prevents 
 # them being added when using SD
-mythfilldatabase --dd-grab-all --remove-new-channels "$@"
+#mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 
 # Get DB password
 #. $scriptpath/getconfig.sh
@@ -28,6 +28,20 @@ mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 
 # Reschedule without those channels
 #mythutil --resched
+
+# new design using json api
+if [[ "$OCUR_SOURCEID" != "" ]] ; then
+    # There are two grabbers that work - tv_grab_na_sd and tv_grab_sd_json
+    grabber="$scriptpath/tv_grab_na_sd"
+    rm -f /tmp/tv_grab_off*.xml
+    "$grabber" --download-only
+    for (( offset = 0; offset < 20; offset += 3 )) ; do
+        "$grabber" --days 3 --offset $offset > /tmp/tv_grab_off$offset.xml
+        mythfilldatabase --file --sourceid $OCUR_SOURCEID --xmlfile /tmp/tv_grab_off$offset.xml
+    done
+else
+    mythfilldatabase --dd-grab-all --remove-new-channels "$@"
+fi
 
 # Print 1 day's upcoming recordings
 date >> $LOGDIR/mythtv_upcoming_recordings.log
