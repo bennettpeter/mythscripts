@@ -80,7 +80,7 @@ fi
         #else
         #    mythfrontend --service
         #fi
-        mythfrontend
+        mythfrontend -O libCECEnabled=0
         rc=$?
         if [[ "$rc" != 0 ]] ; then
             start_frontend=false

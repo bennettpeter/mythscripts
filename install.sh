@@ -58,7 +58,7 @@ create_dir /etc/rc_keymaps
 # create_dir $MOUNTDIR
 create_dir $LOGDIR 2775
 sudo mkdir -p /var/log/mythtv
-sudo chown syslog:adm /var/log/mythtv
+sudo chgrp adm /var/log/mythtv
 sudo chmod 2775 /var/log/mythtv
 
 if [[ "$IS_BACKEND" == true ]] ; then
