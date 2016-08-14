@@ -42,6 +42,7 @@ fi
 #if [[ "$DISPLAY" != "" ]] ; then
     start_frontend=true
     while $start_frontend ; do
+        rc=0
         if [[ "$AUTO_LOGIN" != Y && "$USE_MYTHWELCOME" != Y ]] ; then
             start_frontend=false
         fi
@@ -50,16 +51,15 @@ fi
                 for (( counter=0 ; counter<100; counter+=4 )) ; do
                     echo $counter
                     $scriptpath/wakeup.sh "$MAINHOST"
-                    networkc=0
-                    echo "select 1 from dual;" | $mysqlcmd || networkc=$?
-                    if [[ "$networkc" == 0 ]] ; then break ; fi
+                    rc=0
+                    echo "select 1 from dual;" | $mysqlcmd || rc=$?
+                    if [[ "$rc" == 0 ]] ; then break ; fi
                     # nc -z -v $DBHostName 3306 && break
                     # nc -z -v $MAINHOST $MASTER_BACKEND_PORT && break
                     sleep 4
                 done
                 echo 99
             ) |  zenity --progress --no-cancel --text="<span size=\"$textsize\">Waiting for MythTV Backend.</span>" --auto-close --title "Please be patient"
-            if [[ "$networkc" != 0 ]] ; then break ; fi
         fi
         # nvidia-settings -a '[gpu:0]/GPUPowerMizerMode=1'||nvidia-settings failed
         #if [[ `arch` == arm* ]] ; then 
@@ -82,10 +82,13 @@ fi
         #else
         #    mythfrontend --service
         #fi
-        mythfrontend -O libCECEnabled=0
-        rc=$?
-        if [[ "$rc" != 0 ]] ; then
-            start_frontend=false
+        echo "select 1 from dual;" | $mysqlcmd || rc=$?
+        if [[ "$rc" == 0 ]] ; then 
+            mythfrontend -O libCECEnabled=0
+            rc=$?
+            if [[ "$rc" != 0 ]] ; then
+                start_frontend=false
+            fi
         fi
         # nvidia-settings -a '[gpu:0]/GPUPowerMizerMode=0'||nvidia-settings failed
         # gnome-session-save --logout
