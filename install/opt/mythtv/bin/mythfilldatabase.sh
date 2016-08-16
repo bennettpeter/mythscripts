@@ -31,8 +31,8 @@ today=`date "+%a %Y/%m/%d"`
 
 # new design using json api
 if [[ "$OCUR_SOURCEID" != "" ]] ; then
-    # There are two grabbers that work - tv_grab_na_sd and tv_grab_sd_json
-    grabber="$scriptpath/tv_grab_na_sd"
+    # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
+    grabber="$scriptpath/tv_grab_zz_sdjson_sqlite"
     rm -f /tmp/tv_grab_off*.xml
     "$grabber" --download-only
     for (( offset = 0; offset < 20; offset += 3 )) ; do
