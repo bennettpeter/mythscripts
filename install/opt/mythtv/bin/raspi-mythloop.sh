@@ -55,14 +55,9 @@ while true ; do
         read -s pwd
         if [[ "$pwd" == 22 ]] ; then
             $scriptpath/wakeup.sh "$MAINHOST"
-            if [[ "$USE_XWIN" == Y ]] ; then            
-                # This will start startfrontend.sh under xwindows
-                # via a setting in ~/.config/lxsession/LXDE-pi/autostart
-                # startx
-                xinit /opt/mythtv/bin/startfrontend.sh
-            else
-                /opt/mythtv/bin/startfrontend.sh
-            fi
+            sudo $scriptpath/setgovernor.sh high
+            xinit $scriptpath/startfrontend.sh
+            sudo $scriptpath/setgovernor.sh normal
             break 
         fi
         if [[ "$pwd" == 99 ]] ; then 
@@ -70,7 +65,7 @@ while true ; do
             echo;echo
             figlet -f $font "       Shutting down"
             sleep 3
-            sudo shutdown -h now
+            sudo shutdown -P now
         fi
     done
     s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`

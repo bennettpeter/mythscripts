@@ -84,7 +84,10 @@ fi
         #fi
         echo "select 1 from dual;" | $mysqlcmd || rc=$?
         if [[ "$rc" == 0 ]] ; then 
-            mythfrontend -O libCECEnabled=0
+            if [[ "$CEC_ENABLED" != 1 ]] ; then
+                CEC_ENABLED=0
+            fi
+            mythfrontend -O libCECEnabled=$CEC_ENABLED
             rc=$?
             if [[ "$rc" != 0 ]] ; then
                 start_frontend=false
