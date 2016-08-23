@@ -198,7 +198,7 @@ if [[ $ARCH == arm* ]] ; then
 fi
 
 
-if [[ $ARCH == arm* ]] ; then
+if [[ "$AMPLIFY" == Y ]] ; then
 #    if [[ -f $MYTHTVDIR/bin/mythfrontend ]] ; then
 #        sudo cp -av install/home/.config /home/$SOFT_USER/
 #        sudo chown -R $SOFT_USER /home/$SOFT_USER/.config
@@ -207,6 +207,8 @@ if [[ $ARCH == arm* ]] ; then
     sudo cp -v install/home/.asoundrc_arm /home/$SOFT_USER/.asoundrc
     sudo chown -R $SOFT_USER /home/$SOFT_USER/.asoundrc
     sudo chgrp -R $SOFT_USER /home/$SOFT_USER/.asoundrc
+else
+    rm -f /home/$SOFT_USER/.asoundrc
 fi
 
 # Remove automatic weekly db backup
