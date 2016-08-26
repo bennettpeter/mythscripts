@@ -21,10 +21,9 @@ if [[ "$VIDEOHOST" == "" ]] ; then
 fi
 
 hostname=`cat /etc/hostname`
-textsize=70000
-if [[ `arch` == arm* ]] ; then 
-    textsize=25000
-fi
+screenwidth=`xrandr|grep "*"|head -1|sed -e "s/^ *//g;s/x.*//"`
+let textsize=screenwidth*35
+echo "Screen width $screenwidth, text size $textsize"
 
 case $REQUEST in 
 mount|browse)

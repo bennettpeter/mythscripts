@@ -34,11 +34,9 @@ $scriptpath/setup_user.sh
 # xmodmap -e "keycode 174 = Escape NoSymbol Escape"
 # xmodmap -e "keycode 172 = p P p P"
 
-textsize=70000
-if [[ `arch` == arm* ]] ; then 
-    textsize=25000
-fi
-
+screenwidth=`xrandr|grep "*"|head -1|sed -e "s/^ *//g;s/x.*//"`
+let textsize=screenwidth*35
+echo "Screen width $screenwidth, text size $textsize"
 #if [[ "$DISPLAY" != "" ]] ; then
     start_frontend=true
     while $start_frontend ; do
@@ -87,6 +85,9 @@ fi
             if [[ "$CEC_ENABLED" != 1 ]] ; then
                 CEC_ENABLED=0
             fi
+            xset s off         # don't activate screensaver
+            xset -dpms         # disable DPMS (Energy Star) features.
+            xset s noblank     # don't blank the video device
             mythfrontend -O libCECEnabled=$CEC_ENABLED
             rc=$?
             if [[ "$rc" != 0 ]] ; then
