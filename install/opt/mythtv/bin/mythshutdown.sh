@@ -167,7 +167,7 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" != Y ]] ; t
 fi
 
 if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; then
-    idletime=`DISPLAY=:0 sudo -u $x_user xprintidle`
+    idletime=`DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user xprintidle`
     # 15 minutes time out
     if (( idletime < 900000 )) ; then
         echo "$DATE Primary screen x activity going on recently - $idletime - don't shut down"
