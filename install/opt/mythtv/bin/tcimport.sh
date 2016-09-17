@@ -134,9 +134,21 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     newname=`echo "$newname" | sed 's!/\([0-9][0-9][0-9][0-9][0-9][0-9]\) SE !/\1 !'`
                     # In case there are duplicates of the same name (e.g. recording was split in 2), keep full name.
                     if [[ -f "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext" ]] ; then
-                        newname="$savewild"
+                        mv -v --backup=numbered "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext" \
+                              "$mountdir/$TCSUBDIR/save$counter/$newname Part 1.$saveext"
                     fi
-                    ln -fv "$xyz" "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext"
+                    if [[ -f "$mountdir/$TCSUBDIR/save$counter/$newname Part 1.$saveext" ]] ; then
+                        lastnum=`echo "$mountdir/$TCSUBDIR/save$counter/$newname Part "?."$saveext" \
+                          | sed "s/.* //;s/\..*//"`
+                        if [[ "$lastnum" == "?" ]] ; then
+                            lastnum=0
+                        fi
+                        if (( lastnum > 0 )) ; then
+                            let lastnum=lastnum+1
+                            newname="$newname Part $lastnum"
+                        fi
+                    fi
+                    ln -v --backup=numbered "$xyz" "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext"
                 done
             fi
             if [[ "${IMPORT_TRANSCODE[counter]}" == Y ]] ; then
