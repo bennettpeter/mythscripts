@@ -44,6 +44,11 @@
 #
 # Version history:
 #
+# 2016/09/10 - 1.24 - change (improve) cast mapping
+# 2016/09/10 - 1.23 - remove use warning nonfatal experimental decl
+# 2016/08/25 - 1.22 - no warning messages for malformed SD data if quiet
+# 2016/08/25 - 1.21 - additional error checking of SD data
+# 2016/08/24 - 1.20 - correct sql error reporting
 # 2016/08/03 - 1.19 - reflect multinational capability (and fix docs)
 # 2016/08/03 - 1.18 - rename grabber based on xmltv agreed convention
 # 2016/07/30 - 1.17 - don't report radio stations as tvshow category
@@ -73,7 +78,7 @@ use feature ':5.16';
 
 use strict;
 use warnings FATAL => 'all';
-use warnings NONFATAL => qw(exec recursion internal malloc newline experimental deprecated portable);
+use warnings NONFATAL => qw(exec recursion internal malloc newline deprecated portable);
 no warnings 'once';
 
 use utf8;
@@ -109,7 +114,7 @@ use Data::Dumper;
 my $RFC2838_COMPLIANT          = 1;             # RFC2838 compliant station ids, which makes XMLTV
                                                 # validate even though the docs say "SHOULD" not "MUST"
 
-my $SCRIPT_VERSION             = '$Id: tv_grab_zz_sdjson_sqlite,v 1.19 2016/08/03 16:02:00 gtb Exp ed $';
+my $SCRIPT_VERSION             = '$Id: tv_grab_zz_sdjson_sqlite,v 1.24 2016/09/10 13:41:00 gtb Exp ed $';
 my $SCRIPT_URL                 = 'https://github.com/garybuhrmaster/tv_grab_zz_sdjson_sqlite';
 my $SCRIPT_NAME                = basename("$0");
 my $SCRIPT_NAME_DIR            = dirname("$0");
@@ -572,21 +577,21 @@ for (my $retry = 0; $retry < 7; $retry++)
     $sql3 = "replace into schedules_hash (station, day, hash) values (?, ?, ?)";
 
     $sth1 = $DBH->prepare_cached($sql1);
-    if (!defined($sth))
+    if (!defined($sth1))
       {
         print (STDERR "Unexpected error when preparing statement ($sql1): " . $DBH->errstr . "\n");
         exit(1);
       }
     $sth2 = $DBH->prepare_cached($sql2);
-    if (!defined($sth))
+    if (!defined($sth2))
       {
         print (STDERR "Unexpected error when preparing statement ($sql2): " . $DBH->errstr . "\n");
         exit(1);
       }
     $sth3 = $DBH->prepare_cached($sql3);
-    if (!defined($sth))
+    if (!defined($sth3))
       {
-        print (STDERR "Unexpected error when preparing statement ($sql2): " . $DBH->errstr . "\n");
+        print (STDERR "Unexpected error when preparing statement ($sql3): " . $DBH->errstr . "\n");
         exit(1);
       }
 
@@ -663,16 +668,22 @@ for (my $retry = 0; $retry < 7; $retry++)
             $sth1->execute();
             if ($sth1->err)
               {
-                print (STDERR "Unexpected error when executing statement ($sql): " . $sth1->errstr . "\n");
+                print (STDERR "Unexpected error when executing statement ($sql1): " . $sth1->errstr . "\n");
                  exit(1);
               }
             foreach my $program(@{$programs})
               {
                 my $pID = $program->{'programID'};
-                my $starttime = DateTime::Format::ISO8601->parse_datetime($program->{'airDateTime'});
+                my $airDateTime = $program->{'airDateTime'};
                 my $duration = $program->{'duration'};
                 my $phash = $program->{'md5'};
                 my $details = $JSON->utf8->encode($program);
+                if ((!defined($duration)) || (!defined($phash)) || (!defined($pID)) || (!defined($airDateTime)))
+                  {
+                    print (STDERR "Unexpected parsing error in program (data malformed) in schedule for $sID on " . $meta->{'startDate'} . ", skipping\n") if (!$quiet);
+                    next;
+                  }
+                my $starttime = DateTime::Format::ISO8601->parse_datetime($airDateTime);
                 $sth2->bind_param( 1, $sID, SQL_VARCHAR );
                 $sth2->bind_param( 2, DateTime::Format::SQLite->format_date($dayDateTime), SQL_DATE );
                 $sth2->bind_param( 3, DateTime::Format::SQLite->format_datetime($starttime), SQL_DATETIME );
@@ -683,7 +694,7 @@ for (my $retry = 0; $retry < 7; $retry++)
                 $sth2->execute();
                 if ($sth2->err)
                   {
-                    print (STDERR "Unexpected error when executing statement ($sql): " . $sth2->errstr . "\n");
+                    print (STDERR "Unexpected error when executing statement ($sql2): " . $sth2->errstr . "\n");
                     exit(1);
                   }
               }
@@ -693,7 +704,7 @@ for (my $retry = 0; $retry < 7; $retry++)
             $sth3->execute();
             if ($sth3->err)
               {
-                print (STDERR "Unexpected error when executing statement ($sql): " . $sth3->errstr . "\n");
+                print (STDERR "Unexpected error when executing statement ($sql3): " . $sth3->errstr . "\n");
                  exit(1);
               }
           }
@@ -843,7 +854,7 @@ for (my $retry = 0; $retry < 7; $retry++)
             $sth1->execute();
             if ($sth1->err)
               {
-                print (STDERR "Unexpected error when executing statement ($sql): " . $sth1->errstr . "\n");
+                print (STDERR "Unexpected error when executing statement ($sql1): " . $sth1->errstr . "\n");
                 exit(1);
               }
           }
@@ -883,8 +894,8 @@ print (STDERR "Processing data and creating XMLTV output\n") if (!$quiet);
 my $castMap =
   {
     'Actor'                            => 'actor',
-    'Guest Star'                       => 'actor',
-    'Guest Voice'                      => 'actor',
+    'Guest Star'                       => 'guest',
+    'Guest Voice'                      => 'guest',
     'Voice'                            => 'actor',
     'Correspondent'                    => 'guest',
     'Contestant'                       => 'guest',
@@ -2684,7 +2695,7 @@ sub SD_downloadLineups
       }
     $sql1 = "update lineups set name = ?, location = ?, transport = ?, details = ? where lineup = ?";
     $sth1 = $DBH->prepare_cached($sql1);
-    if (!defined($sth))
+    if (!defined($sth1))
       {
         print (STDERR "Unexpected error when preparing statement ($sql1): " . $DBH->errstr . "\n");
         exit(1);
@@ -2717,7 +2728,7 @@ sub SD_downloadLineups
         $sth1->execute();
         if ($sth1->err)
           {
-            print (STDERR "Unexpected error when executing statement ($sql): " . $sth1->errstr . "\n");
+            print (STDERR "Unexpected error when executing statement ($sql1): " . $sth1->errstr . "\n");
             exit(1);
           }
       }
