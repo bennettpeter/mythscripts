@@ -35,10 +35,13 @@ if [[ "$OCUR_SOURCEID" != "" ]] ; then
     grabber="$scriptpath/tv_grab_zz_sdjson_sqlite"
     rm -f /tmp/tv_grab_off*.xml
     "$grabber" --download-only
+    set -x
     for (( offset = 0; offset < 20; offset += 3 )) ; do
-        "$grabber" --days 3 --offset $offset > /tmp/tv_grab_off$offset.xml
-        mythfilldatabase --file --sourceid $OCUR_SOURCEID --xmlfile /tmp/tv_grab_off$offset.xml
+        "$grabber"  --no-download --days 3 --offset $offset > /tmp/tv_grab_off$offset.xml
+        mythfilldatabase --file --sourceid $OCUR_SOURCEID \
+          --xmlfile /tmp/tv_grab_off$offset.xml
     done
+    set -
 else
     mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 fi
