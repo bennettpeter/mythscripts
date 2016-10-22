@@ -241,6 +241,7 @@ if which smbstatus ; then
     while true ; do
         read service pid machine date
         if [[ "$service" == "" ]] ; then break ; fi
+        if [[ "$service" == 'IPC$' ]] ; then break ; fi
         echo Samba connection $service $pid $machine $date
         if [[ "$machine" == "$LocalHostName" ]] ; then continue ; fi
         ping -c 1 "$machine"
