@@ -218,7 +218,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                     videoformat=`mediainfo '--Inform=Video;%Format%' "$episode"`
                     extension=${episode/*./}
                     echo "Episode: $episode. Video Format $videoformat"
-                    if [[ "$videoformat" != "MPEG Video" && "$extension" == "mpg" ]] ; then
+                    if [[ "$videoformat" != "MPEG Video" && "$extension" == "ts" ]] ; then
                         "$scriptpath/notify.py" "tcdaily warning" \
                             "Episode $episode seems to be already transcoded. Format is $videoformat. Continuing anyway."
                     fi
