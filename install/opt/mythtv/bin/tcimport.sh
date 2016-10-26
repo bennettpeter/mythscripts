@@ -67,7 +67,9 @@ if [[ "$mustdelete" == Y || "$mustdelete" == y ]] ; then
     rm -fv "$mountdir/$TCSUBDIR/junk"*/*
 fi
 
-if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts)` != "$mountdir/$TCSUBDIR/*.@(mkv|mpg|mp4|ts)" || -f "$mountdir/$TCSUBDIR/mustrun_tcencode" ]] ; then
+if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts|tsx)` != \
+         "$mountdir/$TCSUBDIR/*.@(mkv|mpg|mp4|ts|tsx)" \
+   || -f "$mountdir/$TCSUBDIR/mustrun_tcencode" ]] ; then
     echo "WARNING: Cannot process tcimport, tcencode is not complete"
     "$scriptpath/notify.py" "tcimport failed" "Cannot process tcimport, tcencode is not complete"
     exit 99
@@ -155,7 +157,8 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 cd "$realdir"
                 oldfile=`find "$VIDEODIR" -name $realfile 2>/dev/null` || true
                 if [[ "$oldfile" == "" ]] ; then
-                    oldfile=`find "$VIDEODIR" -name $basename.mpg -o -name $basename.ts 2>/dev/null` || true
+                    oldfile=`find "$VIDEODIR" -name $basename.mpg -o -name $basename.ts \
+                       -o -name $basename.tsx 2>/dev/null` || true
                 fi
                 if [[ -f "$oldfile" ]] ; then
                     duration=0

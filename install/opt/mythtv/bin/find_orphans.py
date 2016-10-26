@@ -97,7 +97,7 @@ def populate(host=None):
                 if name in f:
                     unfiltered.remove(f)
     for f in list(unfiltered):
-        if not (f.endswith('.mpg') or f.endswith('.nuv') or f.endswith('.ts')):
+        if not (f.endswith('.mpg') or f.endswith('.nuv') or f.endswith('.ts') or f.endswith('.tsx') or f.endswith('.mkv')):
             continue
         orphvids.append(f)
         unfiltered.remove(f)

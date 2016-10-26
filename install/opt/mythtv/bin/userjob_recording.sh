@@ -3,7 +3,7 @@
 # command line - 
 # /opt/mythtv/bin/userjob_recording.sh "%FILE%" "%PROGSTARTISOUTC%" "%PROGENDISOUTC%" "%RECGROUP%" "%TITLE%" "%SUBTITLE%" 
 # filename starttime endtime recgroup
-# 9999_999999999.mpg YYYY-MM-DDThh:mm:ssZ  YYYY-MM-DDThh:mm:ssZ Default
+# 9999_999999999.ts YYYY-MM-DDThh:mm:ssZ  YYYY-MM-DDThh:mm:ssZ Default
 # 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -12,11 +12,6 @@ scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
 date
-
-# Override to use downloaded ffmpeg
-if ! echo $PATH|grep /opt/ffmpeg/bin: ; then
-  PATH="/opt/ffmpeg/bin/:$PATH"
-fi
 
 echo $0 $1 $2 $3 $4 $5 $6
 
@@ -87,7 +82,23 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     if (( actualsecs < minsecs )) ; then
         "$scriptpath/notify.py" "Recording failed" "$title $subtitle is $shortmins minutes short"
     fi
+
+    # Check if it is x264 file and if so rename to tsx extension
+    videoformat=`mediainfo '--Inform=Video;%Format%' "$fullfilename"`
+    extension=${fullfilename/*./}
+    echo "Episode: $fullfilename. Video Format $videoformat"
+    if [[ "$videoformat" == "AVC" && "$extension" == "ts" ]] ; then
+        # rename file to tsx extension
+        mv -v "$fullfilename" "${fullfilename}x"
+        sql1="update recorded set basename = '${filename}x' where basename = '$filename';"
+        sql2="update recordedfile set basename = '${filename}x' where basename = '$filename';"
+        echo "$sql1"
+        echo "$sql2"
+        (
+          echo "$sql1"
+          echo "$sql2"
+        ) |  $mysqlcmd
+    fi
 fi
 
-    
 
