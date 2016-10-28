@@ -2,7 +2,11 @@
 # This must be sourced into bash scripts instead of /etc/mythtv/mysql.txt
 # It sets up environment variables for the fields from config.xml
 
-paramfile=~/.mythtv/config.xml
+if [[ "$MYTHCONFDIR" == "" ]] ; then
+    MYTHCONFDIR="$HOME/.mythtv"
+fi
+
+paramfile=$MYTHCONFDIR/config.xml
 if [[ ! -f $paramfile ]] ; then
     paramfile=/home/$SOFT_USER/.mythtv/config.xml
 fi

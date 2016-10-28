@@ -52,6 +52,11 @@ if (( duration == 0 )) ; then
     echo "Error no duration found for $storagedir/$basename"
     exit 2
 else
+    echo "select data from recordedmarkup " \
+        "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
+    $mysqlcmd
+    echo "update recordedmarkup set data = '$duration' " \
+        "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';"
     echo "update recordedmarkup set data = '$duration' " \
         "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
     $mysqlcmd

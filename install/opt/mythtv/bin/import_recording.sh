@@ -93,6 +93,7 @@ echo action $action
 
 ext=${filename/*./}
 storagedir="$IMPORTDIR"
+mkdir -p $storagedir
 
 if [[ "$action" == I ]] ; then
     # sleep 2 sec to make sure no two files get the same name
@@ -111,21 +112,20 @@ if [[ "$action" == I ]] ; then
 
     basename=${VODCHAN}_${fntime}.$ext
     newbasename=$basename
-    # recordedid left out as it is auto increment
     sql1="INSERT INTO recorded
     (chanid,starttime,endtime,title,subtitle,description,season,episode,category,hostname,bookmark,
     editing,cutlist,autoexpire,commflagged,recgroup,recordid,seriesid,programid,inetref,lastmodified,
     filesize,stars,previouslyshown,originalairdate,preserve,findid,deletepending,transcoder,timestretch,
     recpriority,basename,progstart,progend,playgroup,profile,duplicate,transcoded,watched,storagegroup,
     bookmarkupdate,
-    recgroupid,inputname )
+    recgroupid,recordedid,inputname )
     VALUES(
     $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",0,0,'','$LocalHostName',0,
-    0,0,0,0,'Default','','','','',CURRENT_TIMESTAMP,
+    0,0,0,0,'Default',0,'','','',CURRENT_TIMESTAMP,
     $filesize,0,0,'$originalairdate',0,0,0,0,1,
     0,'$basename','$starttime','$endtime','Default','Default',1,0,0,'Default',
-    '0000-00-00 00:00:00',
-    1,'Import');"
+    null,
+    1,0,'Import');"
 
     sql2="INSERT INTO oldrecorded
     (chanid,starttime,endtime,title,subtitle,description,season,episode,category,
@@ -138,7 +138,12 @@ if [[ "$action" == I ]] ; then
     0,0,'DOWNLOAD',4,1,-3,0,0,0
     );"
 
+    # Need to do recordedfile also
+
     cp -ivLp "$filename" "$storagedir/$basename"
+    # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
+    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$basename" 
+
     echo sudo chown mythtv "$storagedir/$basename"
     sudo chown mythtv "$storagedir/$basename"
     echo "$sql1"
@@ -169,10 +174,14 @@ if [[ "$action" == U ]] ; then
     fi        
     newbasename="${basename%.*}".$ext
     sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime' where chanid = '$chanid' and starttime = '$starttime' ;" 
+    # Need to fix other fields on recordedfile
     sql2="update recordedfile set basename = '$newbasename' where basename = '$basename';"
     mkdir -p "$storagedir/junk/"
     mv -fv "$storagedir/$basename"* "$storagedir/junk/" || true
     cp -ivLp "$filename" "$storagedir/$newbasename"
+    # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
+    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$newbasename" 
+
     echo sudo chown mythtv:mythtv "$storagedir/$newbasename"
     sudo chown mythtv:mythtv "$storagedir/$newbasename"
     echo "$sql1"
