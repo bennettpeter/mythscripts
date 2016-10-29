@@ -72,22 +72,10 @@ if  "$IS_BACKEND"  ; then
     )
 else
     # For non backend
-    # sleep 300
-    set -- `/usr/sbin/nfsstat -s -3 -r|tail -2`
-    nfs_count=$1
     while true ; do
         sleep 300
-        set -- `/usr/sbin/nfsstat -s -3 -r|tail -2`
-        if [[ "$nfs_count" == "$1" ]] ; then
-            if  $scriptpath/mythshutdown.sh ; then
-                setsid $scriptpath/systemshutdown.sh || true
-            fi
-        else
-            $scriptpath/mythshutdown.sh nfs_active || true
-            DATE=`date +%F\ %T\.%N`
-            DATE=${DATE:0:23}
-            echo "$DATE NFS Activity - $1 - don't shut down"
+        if  $scriptpath/mythshutdown.sh ; then
+            setsid $scriptpath/systemshutdown.sh || true
         fi
-        nfs_count=$1
     done
 fi
