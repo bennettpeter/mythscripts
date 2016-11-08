@@ -276,13 +276,13 @@ if [[ "$error" == y ]] ; then
     echo "  Ignored for xvida, must have fixed rate input that will be used for output"
     echo "  For xvidm, xvidfm will be defaulted from input which must be 29.970 or 23.976"
     echo "  For xvidm, xvidfm if sepecified must be 30000/1001 or 24000/1001"
-    echo "-e encoder - x264, ffmpeg4, xvidm, xvida, xvidfm - default x264"
+    echo "-e encoder - x264, ffmpeg4|mpeg4, xvidm, xvida, xvidfm - default x264"
     echo "-f format - mkv, avi, mp4 - default mkv"
     echo "  for xvid* this is ignored and avi is used"
-    echo "-E audio - lame, copy, ffac3, others - default copy"
+    echo "-E audio - lame|mp3, copy, ffac3|ac3, others - default copy"
     echo "  Ignored for xvida - uses copy"
     echo "-q quality - override quality level"
-    echo "  Default is 21, 22 or 23 for x264, 4 for xvidm or ffmpeg4. Lower is better"
+    echo "  Default is 21, 22 or 23 for x264, 4 for xvidm or mpeg4. Lower is better"
     echo "-R audio sample rate for lame - default 48000"
     echo "--crop T:B:L:R Crop parameter, or AUTO. Defaults to AUTO. For no crop use 0:0:0:0"
     echo "  Only for use with x264 and ffmpeg (i.e. HandBrake)"
@@ -355,7 +355,7 @@ if [[ "$preset" != "" ]] ; then
             if [[ "$encoder" != xvid* ]] ; then
                 encoder=xvidm
             fi
-            audio=lame
+            audio=mp3
             # Quality 5 for reality, 4 for scripted show.
             if [[ "$Quality" == "" ]] ; then
                 Quality=5
@@ -365,8 +365,8 @@ if [[ "$preset" != "" ]] ; then
             ;;
         PDVD)
             Height=360
-            encoder=ffmpeg4
-            audio=lame
+            encoder=mpeg4
+            audio=mp3
             ffrate=y
             tomp4=y
             # Only use -q 6 if the source is bad quality and encodes to a big file, more than 500MB/hour
@@ -376,7 +376,7 @@ if [[ "$preset" != "" ]] ; then
             ;;
         ARCHIVE)
             Height=480
-            audio=lame
+            audio=mp3
             ffrate=y
             ;;
         *)
@@ -417,12 +417,13 @@ if [[ "$Width" != "" ]] ; then
 fi
 let maxWidth=maxWidth/2*2
 
-if [[ "$encoder" == ffmpeg4  && "$Quality" == "" ]] ; then
+if [[ ( "$encoder" == ffmpeg4 || "$encoder" == mpeg4 ) \
+      && "$Quality" == "" ]] ; then
     # 5/18/2014 change from 5 to 4
     Quality=4
 fi
 
-if [[ "$audio" == lame && "$isDVD" == N ]] ; then
+if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
     AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
     SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
     if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
@@ -491,7 +492,7 @@ if [[ "$encoder" == xvidm || "$encoder" == xvidfm ]] ; then
             exit 2
         fi
     fi
-    if [[ "$audio" == lame ]] ; then
+    if [[ "$audio" == lame || "$audio" == mp3 ]] ; then
         audio=mp3lame
     fi
     let Width=orgWidth*Height/orgHeight
@@ -567,19 +568,21 @@ else
         # faster & q=23 480p - 24 min, 535 MB
         encoder_opts="--x264-preset $x264_preset --x264-profile high --x264-tune film"
         ;;
-    ffmpeg4)
+    ffmpeg4|mpeg4)
+        encoder=mpeg4
         encoder_opts=" -x mbd=1"
         ;;
     esac
     framerate_parm=
     if [[ "$framerate" != "" ]]; then
-        framerate_parm="-r $framerate"
+        framerate_parm="-r $framerate --cfr"
     fi
     if [[ "$pfrrate" != "" ]]; then
         framerate_parm="-r $pfrrate --pfr"
     fi
     audio_opts=
-    if [[ "$audio" == lame ]]; then
+    if [[ "$audio" == lame || "$audio" == mp3 ]]; then
+        audio=mp3
         audio_opts="--ac 2 --ab 128 --arate $audiorate"
     fi
     crop_parm=
@@ -624,10 +627,18 @@ else
     if [[ "$maxWidth" != "" ]] ; then
         maxWidthParm="-X $maxWidth"
     fi 
+    case $format in
+    mkv)
+        format=av_mkv
+        ;;
+    mp4)
+        format=av_mp4
+        ;;
+    esac
     set -x
     HandBrakeCLI  -i "$input" -o "$output" -f $format -e $encoder $encoder_opts  \
         -q $Quality $framerate_parm -E $audio $audio_opts \
-        --audio-fallback ffac3 $crop_parm $widthParm -l $Height $maxWidthParm \
+        --audio-fallback ac3 $crop_parm $widthParm -l $Height $maxWidthParm \
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
         $chapter_parm $handbrake
     set -
