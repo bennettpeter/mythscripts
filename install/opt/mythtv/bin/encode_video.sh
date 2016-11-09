@@ -308,8 +308,8 @@ if [[ "$error" == y ]] ; then
     exit 2
 fi
 
-extension=${input/*./}
-bname=`basename "$input" .$extension`
+inputext=${input/*./}
+bname=`basename "$input" .$inputext`
 
 extension=$format
 if [[ "$encoder" == xvid* ]] ; then
@@ -642,6 +642,19 @@ else
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
         $chapter_parm $handbrake
     set -
+    numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
+    numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
+    if (( numinsub > 0 && numoutsub == 0 )) ; then
+        # Extract Closed captions
+        srtfile="$output_dname/$output_bname.srt.tmp"
+        ccextractor "$input" -o $srtfile
+        if [[ -f $srtfile ]] ; then
+            # subtitle_parm="--srt-file $srtfile --srt-codeset UTF-8"
+            mkvmerge -o "$output".tmp2 "$output" --default-track 0:0 $srtfile
+            mv -f "$output" "$output".tmp
+            mv -f "$output".tmp2 "$output"
+        fi
+    fi
     if [[ "$tomp4" == y ]] ; then
         outdir=`dirname "$output"`
         outfile=`basename "$output"`
