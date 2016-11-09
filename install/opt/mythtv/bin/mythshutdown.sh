@@ -237,7 +237,7 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
 fi
 
 # Check if anybody is accessing my drives via nfs
-if [[ -f /usr/sbin/nfsstat ]] ; then
+if [[ -f /usr/sbin/nfsstat && -f /proc/net/rpc/nfsd ]] ; then
     userid=`id -un`
     touch /tmp/${userid}_mythshutdown_nfs_count
     prior_nfs_count=`cat /tmp/${userid}_mythshutdown_nfs_count`
@@ -245,13 +245,11 @@ if [[ -f /usr/sbin/nfsstat ]] ; then
         prior_nfs_count=0
     fi
     nfs_count=`/usr/sbin/nfsstat -s -3 -r|tail -2|cut -f1 -d' '`
-    if [[ "$?" == 0 ]] ; then
-        if [[ "$prior_nfs_count" != "$nfs_count" ]] ; then
-            echo "NFS Activity - $nfs_count - don't shut down"
-            rc=1
-        fi
-        echo $nfs_count > /tmp/${userid}_mythshutdown_nfs_count
+    if [[ "$prior_nfs_count" != "$nfs_count" ]] ; then
+        echo "NFS Activity - $nfs_count - don't shut down"
+        rc=1
     fi
+    echo $nfs_count > /tmp/${userid}_mythshutdown_nfs_count
 fi
 
 # Check if anybody is accessing my drives via smb
