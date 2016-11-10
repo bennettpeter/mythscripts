@@ -220,4 +220,11 @@ fi
 #Remove obsoletes
 sudo rm -f /lib/systemd/system-sleep/mythtv_sleep.sh
 
+# Check for presence of ccextractor
+if [[ "$CAN_TRANSCODE" == Y ]] ; then
+    if [[ ! -x /usr/local/bin/ccextractor ]] ; then
+        yes "XXXXXXXX PLEASE INSTALL /usr/local/bin/ccextractor XXXXXXXX" | head -5
+        exit 2
+    fi
+fi
 
