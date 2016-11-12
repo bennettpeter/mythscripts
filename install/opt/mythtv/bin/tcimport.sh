@@ -127,7 +127,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 savewild="${FULLNAME%.*}"
                 for xyz in "$realdir/$basename".* ; do
                     saveext=${xyz/*./}
-                    if [[ "$saveext" = log ]] ; then
+                    if [[ "$saveext" == log || "$saveext" == tmp ]] ; then
                         continue
                     fi
                     # Remove recording date & time from front of name.
