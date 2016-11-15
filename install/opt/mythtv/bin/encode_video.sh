@@ -648,7 +648,8 @@ else
         # Extract Closed captions
         srtfile="$output_dname/$output_bname.srt.tmp"
         ccextractor "$input" -o $srtfile
-        if [[ -f $srtfile ]] ; then
+        srtleng=`ls -l "$srtfile" | cut -d' ' -f5`
+        if (( srtleng > 1000 )) ; then
             # subtitle_parm="--srt-file $srtfile --srt-codeset UTF-8"
             mkvmerge -o "$output".tmp2 "$output" --default-track 0:0 $srtfile
             mv -f "$output" "$output".tmp
