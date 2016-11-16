@@ -60,18 +60,18 @@ fi
 # $scriptpath/checkchannels.sh upcoming
 
 # Daily mythfilldatabase via script. Do not run it from the backend
-prev_mythrefresh=
-if [[ -f $DATADIR/mythrefresh_date ]] ; then
-    prev_mythrefresh=`cat $DATADIR/mythrefresh_date`
+prev_mythfilldatabase=
+if [[ -f $DATADIR/mythfilldatabase_date ]] ; then
+    prev_mythfilldatabase=`cat $DATADIR/mythfilldatabase_date`
 fi
-if [[ "$prev_mythrefresh" != "$today" ]] ; then
+if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     echo $DATE "Running mythfilldatabase."
     $scriptpath/mythfilldatabase.sh >/dev/null 2>&1
     rc=$?
     if [[ "$rc" != 0 ]] ; then
         "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
     fi
-    echo $today > $DATADIR/mythrefresh_date
+    echo $today > $DATADIR/mythfilldatabase_date
     # Daily IP address check
     if [[ -f $DATADIR/ipaddress.txt ]] ; then
         oldipaddress=`cat $DATADIR/ipaddress.txt`
