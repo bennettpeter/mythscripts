@@ -39,7 +39,7 @@ if [[ "$OCUR_SOURCEID" != "" ]] ; then
     for (( offset = 0; offset < 20; offset += 3 )) ; do
         "$grabber"  --no-download --days 3 --offset $offset > /tmp/tv_grab_off$offset.xml
         mythfilldatabase --file --sourceid $OCUR_SOURCEID \
-          --xmlfile /tmp/tv_grab_off$offset.xml
+          --xmlfile /tmp/tv_grab_off$offset.xml --only-update-guide
     done
     set -
 else
