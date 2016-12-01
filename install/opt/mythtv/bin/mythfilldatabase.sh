@@ -33,13 +33,15 @@ today=`date "+%a %Y/%m/%d"`
 if [[ "$OCUR_SOURCEID" != "" ]] ; then
     # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
     grabber="$scriptpath/tv_grab_zz_sdjson_sqlite"
-    rm -f /tmp/tv_grab_off*.xml
+    userid=`id -un`
+    rm -f /tmp/${userid}_tv_grab_off*.xml
     "$grabber" --download-only
     set -x
     for (( offset = 0; offset < 20; offset += 3 )) ; do
-        "$grabber"  --no-download --days 3 --offset $offset > /tmp/tv_grab_off$offset.xml
+        "$grabber"  --no-download --days 3 --offset $offset \
+          > /tmp/${userid}_tv_grab_off$offset.xml
         mythfilldatabase --file --sourceid $OCUR_SOURCEID \
-          --xmlfile /tmp/tv_grab_off$offset.xml --only-update-guide
+          --xmlfile /tmp/${userid}_tv_grab_off$offset.xml --only-update-guide
     done
     set -
 else
