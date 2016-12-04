@@ -325,27 +325,11 @@ else
     eval `ffprobe "$input" -show_streams | egrep '^height=[1-9]|^width=[1-9]'`
     orgHeight=$height
     orgWidth=$width
-    #orgHeight=`mediainfo '--Inform=Video;%Height%' "$input"` || echo Error - mediainfo failed
-    #orgWidth=`mediainfo '--Inform=Video;%Width%' "$input"` || echo Error - mediainfo failed
-    #if [[ "$orgHeight" == "" ]] ; then 
-    #    echo "Cannot find video parameters for $input"
-    #    exit 2
-    #fi
-fi
-
-if [[ "$Height" == "" ]] ; then
     if [[ "$orgHeight" == "" ]] ; then
         orgHeight=`mediainfo '--Inform=Video;%Height%' "$input"` || echo Error - mediainfo failed
     fi
-    Height=$orgHeight
 fi
 
-if [[ "$Height" == "" ]] ; then 
-    echo "Cannot find appropriate height for $input"
-    exit 2
-fi
-
-maxWidth=0
 if [[ "$preset" != "" ]] ; then
     case $preset in
         XVID)
@@ -386,17 +370,25 @@ if [[ "$preset" != "" ]] ; then
     esac
 fi
 
-if [[ "$maxWidth" == 0 ]] ; then
-    let maxWidth=Height*16/9
+if [[ "$Height" == "" ]] ; then
+    Height=$orgHeight
+    maxWidth=0
+else
+    let maxWidth=Height*16/9 1
+fi
+
+if [[ "$Height" == "" ]] ; then 
+    echo "Cannot find appropriate height for $input"
+    exit 2
 fi
 
 if [[ "$morph" == SQ ]] ; then
-    let Width=Height*4/3
+    let Width=Height*4/3 1
 elif [[ "$morph" == SQLB ]] ; then
-    let Width=Height*4/3
-    let Height=Height*3/4
+    let Width=Height*4/3 1
+    let Height=Height*3/4 1
 elif [[ "$morph" == LB ]] ; then
-    let Height=Height*3/4
+    let Height=Height*3/4 1
 fi
 
 
@@ -413,9 +405,9 @@ fi
 # make height and width divisible by 2
 let Height=Height/2*2
 if [[ "$Width" != "" ]] ; then
-    let Width=Width/2*2
+    let Width=Width/2*2 1
 fi
-let maxWidth=maxWidth/2*2
+let maxWidth=maxWidth/2*2 1
 
 if [[ ( "$encoder" == ffmpeg4 || "$encoder" == mpeg4 ) \
       && "$Quality" == "" ]] ; then
@@ -495,8 +487,8 @@ if [[ "$encoder" == xvidm || "$encoder" == xvidfm ]] ; then
     if [[ "$audio" == lame || "$audio" == mp3 ]] ; then
         audio=mp3lame
     fi
-    let Width=orgWidth*Height/orgHeight
-    let Width=Width/2*2
+    let Width=orgWidth*Height/orgHeight 1
+    let Width=Width/2*2 1
     STARTKW=
     if [[ "$startpos" != "" ]]; then 
         STARTKW="-ss"
@@ -624,7 +616,7 @@ else
         widthParm="-w $Width"
         maxWidth=
     fi
-    if [[ "$maxWidth" != "" ]] ; then
+    if (( maxWidth > 0 )) ; then
         maxWidthParm="-X $maxWidth"
     fi 
     case $format in
