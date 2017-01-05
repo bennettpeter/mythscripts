@@ -72,6 +72,12 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
         "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
     fi
     echo $today > $DATADIR/mythfilldatabase_date
+
+    # Print 1 day's upcoming recordings
+    date >> $LOGDIR/mythtv_upcoming_recordings.log
+    "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours 24 \
+        >> $LOGDIR/mythtv_upcoming_recordings.log
+
     # Daily IP address check
     if [[ -f $DATADIR/ipaddress.txt ]] ; then
         oldipaddress=`cat $DATADIR/ipaddress.txt`

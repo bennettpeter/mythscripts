@@ -47,7 +47,3 @@ if [[ "$OCUR_SOURCEID" != "" ]] ; then
 else
     mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 fi
-
-# Print 1 day's upcoming recordings
-date >> $LOGDIR/mythtv_upcoming_recordings.log
-"$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours 24 >> $LOGDIR/mythtv_upcoming_recordings.log
