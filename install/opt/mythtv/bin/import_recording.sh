@@ -138,8 +138,6 @@ if [[ "$action" == I ]] ; then
     0,0,'DOWNLOAD',4,1,-3,0,0,0
     );"
 
-    # Need to do recordedfile also
-
     cp -ivLp "$filename" "$storagedir/$basename"
     # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
     #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$basename" 
@@ -152,6 +150,27 @@ if [[ "$action" == I ]] ; then
       echo "$sql1"
       echo "$sql2"
     ) |  $mysqlcmd
+
+    # Get the recorded id
+    set -- `echo "select recordedid from recorded where basename = '$basename';" | \
+    $mysqlcmd | tail -1`
+    recordedid=$1
+
+    myuser=`id -u -n`
+    echo "General;%FileSize%,'%Format%'," > /tmp/${myuser}_mediainfo.parm
+    echo "Video;%Width%,%Height%,%FrameRate%,%Width%/%Height%,'%Format%'," >> /tmp/${myuser}_mediainfo.parm
+    echo "Audio;'%Format%'" >> /tmp/${myuser}_mediainfo.parm
+
+    mediainfo "--Inform=file:///tmp/${myuser}_mediainfo.parm" "$storagedir/$basename" > /tmp/${myuser}_mediainfo.out 
+
+    sql3="INSERT INTO recordedfile
+    (basename, filesize, container, width, height, fps, aspect, video_codec, audio_codec, audio_sample_rate, audio_channels,  comment, hostname, storagegroup, id, recordedid,  total_bitrate, video_avg_bitrate, video_max_bitrate, audio_avg_bitrate, audio_max_bitrate)
+    VALUES( '$basename', "`cat /tmp/${myuser}_mediainfo.out`", 0,0,'','$LocalHostName','Default',0,
+    $recordedid,0,0,0,0,0);"
+
+    echo "$sql3" 
+    echo "$sql3" | $mysqlcmd
+        
 fi
 
 if [[ "$action" == U ]] ; then
