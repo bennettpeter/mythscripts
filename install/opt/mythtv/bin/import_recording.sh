@@ -102,7 +102,7 @@ if [[ "$action" == I ]] ; then
     time=`date -u +%s`
     chanid=$VODCHAN
     starttime=`date -u --date=@$time "$tmf"`
-    durationmilli=`mediainfo '--Inform=Video;%Duration%' "$filename"`
+    durationmilli=`mediainfo '--Inform=Video;%Duration%' "$filename"|cut -d . -f 1`
     set -- `ls -l "$filename"`
     filesize=$5
     let duration=durationmilli/1000
