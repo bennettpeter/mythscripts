@@ -11,6 +11,7 @@ from datetime import datetime
 from ConfigParser import ConfigParser
 import smtplib
 from email.mime.text import MIMEText
+from email.utils import formatdate
 
 scriptname="notify"
 config=ConfigParser()
@@ -68,6 +69,7 @@ with open(logfilename,"a") as logfile:
         msg['Subject'] = subject
         msg['From'] = "mythtv <" + config.get(" default ","SMTP_SENDER") + ">"
         msg['To'] = destination[0]
+        msg['Date'] = formatdate(localtime=True)
         smtpsrv = smtplib.SMTP_SSL(config.get(" default ","SMTP_HOST"))
         smtpsrv.login(config.get(" default ","SMTP_USER"),privConfig.get(" default ","SMTP_PASSWORD"))
         smtpsrv.sendmail(config.get(" default ","SMTP_SENDER"),destination,msg.as_string())
