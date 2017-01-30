@@ -228,3 +228,5 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
     fi
 fi
 
+# Disable guest logon (after next reboot)
+sudo sh -c 'printf "[Seat:*]\nallow-guest=false\n" >/etc/lightdm/lightdm.conf.d/50-no-guest.conf'
