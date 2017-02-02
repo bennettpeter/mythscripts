@@ -377,6 +377,14 @@ else
     let maxWidth=Height*16/9 1
 fi
 
+if (( Height > 1080)) ; then
+    Height=1080
+fi
+
+if (( maxWidth > 1920 )) ; then
+    maxWidth=1920
+fi
+
 if [[ "$Height" == "" ]] ; then 
     echo "Cannot find appropriate height for $input"
     exit 2
