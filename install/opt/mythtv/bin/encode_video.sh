@@ -381,7 +381,7 @@ if (( Height > 1080)) ; then
     Height=1080
 fi
 
-if (( maxWidth > 1920 )) ; then
+if (( maxWidth == 0 || maxWidth > 1920 )) ; then
     maxWidth=1920
 fi
 
