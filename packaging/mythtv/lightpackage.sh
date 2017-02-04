@@ -38,7 +38,7 @@ codename=`lsb_release -c|cut -f 2`
 source=
 # This expects that remote tracking branches for official
 # repositories start with "mythtv"
-if [[ "$packagebranch" != mythtv* ]] ; then
+if [[ "$packagebranch" != mythtv* && "$packagebranch" != fixes* ]] ; then
     source="peter_"
 fi
 packagename=mythtv-light_${source}${packagerel}_${arch}_$codename
