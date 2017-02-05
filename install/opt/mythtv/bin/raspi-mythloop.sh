@@ -56,7 +56,9 @@ while true ; do
         if [[ "$pwd" == 22 ]] ; then
             $scriptpath/wakeup.sh "$MAINHOST"
             sudo $scriptpath/setgovernor.sh high
-            xinit $scriptpath/startfrontend.sh
+            # Using xinit here fails with unable to open /dev/tty0
+            # so use startx
+            startx $scriptpath/startfrontend.sh
             sudo $scriptpath/setgovernor.sh normal
             break 
         fi
