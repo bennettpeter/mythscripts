@@ -24,7 +24,7 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DB
 
 hostname=`cat /etc/hostname`
 
-pkill mythfrontend
+killall mythfrontend
 # $scriptpath/lirc_drivercheck.sh
 
 if [[ -f /etc/opt/mythtv/remote.xmodmap ]] ; then

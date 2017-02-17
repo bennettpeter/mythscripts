@@ -39,15 +39,15 @@ mount|browse)
                 echo $counter
 #                if [[ $hostname != $VIDEOHOST ]] ; then 
                 if [[ $hostname == $MAINHOST ]] ; then 
-                    mount $dir 1>>$logfile 2>&1 || true
+                    mount $dir || true
                 fi
 #                if [[ `echo $dir/*` != "$dir/*" ]] ; then
                 if nc -z -v $VIDEOHOST 2049 ; then
                     if [[ $hostname != $MAINHOST  && $VIDEOHOST != $MAINHOST  ]] ; then
-                        ssh $MAINHOST "mount $dir" 1>>$logfile 2>&1 || true
-                        ssh $MAINHOST "sleep 15; mythutil --scanvideos" &>>$logfile &
+                        ssh $MAINHOST "mount $dir"  || true
+                        ssh $MAINHOST "sleep 15; mythutil --scanvideos" &
                     elif [[ $hostname == $MAINHOST ]] ; then
-                       (sleep 15; mythutil --scanvideos) &>>$logfile &
+                       (sleep 15; mythutil --scanvideos)  &
                     fi
                     break;
                 fi
@@ -57,22 +57,7 @@ mount|browse)
         echo 99
         # removed --pulsate 
     ) |  zenity --progress --no-cancel --text="<span size=\"$textsize\">Waiting for Video Mount.</span>" --auto-close --title "Please be patient"
-#   for dir in $MOUNTDIR ; do
-#       if [[ -d "$dir/keepalive" ]] ; then
-#           # For some reason I dont understand, this echo takes one and a half minutes
-#           # During that time even listing the keepalive directory hangs for one and a half minutes
-#           # hence the while and &
-#           (
-#               sleep 1
-#               if [[ $hostname != $VIDEOHOST ]] ; then 
-#                   echo "$hostname" > "$dir/keepalive/$hostname" 
-#               fi
-#               if [[ $hostname != $MAINHOST && $VIDEOHOST != $MAINHOST ]] ; then
-#                   echo "$MAINHOST" > "$dir/keepalive/$MAINHOST" 
-#               fi
-#           ) & 
-#       fi
-#   done
+
     if [[ "$REQUEST" == browse ]] ; then
         # jump points are videobrowser videogallery videolistings videomanager
         set -- `hostname -I`
@@ -81,19 +66,14 @@ mount|browse)
     fi
     ;;
 umount)
-    if ping -c 1 $VIDEOHOST ; then
+    if ping -c 1 $VIDEOHOST && ping -c 1 $MAINHOST ; then
         if [[ "$MOUNTDIR" != "" ]] ; then
             for dir in $MOUNTDIR ; do
-#                rm -f "$dir/keepalive/$hostname"
-#                if [[ $hostname != $MAINHOST && $VIDEOHOST != $MAINHOST ]] ; then
-#                    rm -f "$dir/keepalive/$MAINHOST"
-#                fi
-#                if [[ $hostname != $VIDEOHOST ]] ; then 
                 if [[ $hostname == $MAINHOST ]] ; then 
-                    umount -l $dir
+                    umount -l $dir &
                 fi
                 if [[ $hostname != $MAINHOST && $VIDEOHOST != $MAINHOST ]] ; then
-                    ssh $MAINHOST "umount -l $dir"
+                    ssh $MAINHOST "umount -l $dir" &
                 fi
             done
         fi
