@@ -66,6 +66,7 @@ if [[ "$IS_BACKEND" == true ]] ; then
     create_dir $VIDEODIR/video2 2775
     create_dir $VIDEODIR/video3 2775
     create_dir $VIDEODIR/video4 2775
+    create_dir $LOCALVIDEODIR 2775
 fi
 
 # This cannot work becuase remote user is not allowed root access through nfs
