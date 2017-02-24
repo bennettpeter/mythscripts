@@ -6,8 +6,8 @@ set -e
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-exec 1>>$LOGDIR/${scriptname}.log
-exec 2>&1
+# exec 1>>$LOGDIR/${scriptname}.log
+# exec 2>&1
 date
 
 mounted=N
@@ -26,7 +26,7 @@ fi
 if [[ "$vidserver" == UUID ]] ; then
     mounted=Y
 elif [[ "$mounted" == N ]] ; then
-    "$scriptpath/wakeup.sh" $tcserver
+    "$scriptpath/wakeup.sh" $vidserver
     for try in 1 2 3 4 5 6 7 8 9 ; do
         mount "$REMOTEVIDEOMNT" || true
         if [[ `echo "$REMOTEVIDEOMNT"/*` != "$REMOTEVIDEOMNT/*" ]] ; then
@@ -44,15 +44,16 @@ fi
 
 ionice -c3 -p$$
 
-for file in $REMOTEVIDEODIR/*/*.@(mkv|mpg|mp4) ; do
-    series="$(basename "$(dirname "$file")")"
-    episode="$(basename "$file")"
-    mkdir -p "$LOCALVIDEODIR/$series"
-    cp -Lvt "$file" "$LOCALVIDEODIR/$series/$episode"
-    if [[ "$?" != 0 ]] ; then
-        echo "ERROR Copy Failed $file"
-        exit 2
+for file in $REMOTEVIDEODIR/*/*.@(mkv|mpg|mp4|avi) \
+  $REMOTEVIDEODIR/*/*/*.@(mkv|mpg|mp4|avi) ; do
+    if [[ ! -f "$file" ]] ; then
+        continue
     fi
+    shortfn=${file#$REMOTEVIDEODIR/}
+    dirname=$(dirname "$shortfn")
+    episode="$(basename "$file")"
+    mkdir -p "$LOCALVIDEODIR/$dirname"
+    cp -Lvp "$file" "$LOCALVIDEODIR/$dirname/$episode"
     mv -f "$file" "${file}_copied"
 done
 mythutil --scanvideos
