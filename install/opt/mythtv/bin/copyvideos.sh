@@ -44,8 +44,8 @@ fi
 
 ionice -c3 -p$$
 
-for file in $REMOTEVIDEODIR/*/*.@(mkv|mpg|mp4|avi) \
-  $REMOTEVIDEODIR/*/*/*.@(mkv|mpg|mp4|avi) ; do
+for file in $REMOTEVIDEODIR/*/*.@(mkv|mpg|mp4|avi|srt) \
+  $REMOTEVIDEODIR/*/*/*.@(mkv|mpg|mp4|avi|srt) ; do
     if [[ ! -f "$file" ]] ; then
         continue
     fi
