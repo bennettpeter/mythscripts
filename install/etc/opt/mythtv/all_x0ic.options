@@ -3,4 +3,4 @@ ENCODER_OPTIONS[0]=
 SAVE_TRANSCODE[0]=N
 IMPORT_TRANSCODE[0]=Y
 # These options are not subscripted and apply to any transcode
-NEW_RECGROUP=Default
+NEW_RECGROUP=Chicago
