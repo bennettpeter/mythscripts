@@ -69,6 +69,10 @@ if [[ "$USE_CETON" == true ]] ; then
     if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
         "$scriptpath/notify.py" "Startup Problem" "Ceton Problem: $CETON_IP $msg"
         echo "Ceton Problem: $CETON_IP $msg"
+        sudo nmcli connection down "Wired connection 1"
+        sleep 3
+        sudo nmcli connection up "Wired connection 1"
+        sleep 3
     fi
 fi
 
