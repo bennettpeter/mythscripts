@@ -170,6 +170,12 @@ fi
 #syslog
 sudo cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
+#netmanager
+sudo ln -fs /opt/mythtv/bin/10addipaddress.sh \
+  /etc/NetworkManager/dispatcher.d/
+sudo chown root:root /opt/mythtv/bin/10addipaddress.sh
+sudo chmod g-w /opt/mythtv/bin/10addipaddress.sh
+
 if [[ "$daemonrestart" == Y ]] ; then
     sudo systemctl restart rsyslog.service
     sudo systemctl daemon-reload
