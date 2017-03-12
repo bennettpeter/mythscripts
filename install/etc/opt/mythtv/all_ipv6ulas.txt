@@ -1,0 +1,12 @@
+# UUID values and ipv6 link-local addresses
+
+8d8d0532-0b4c-3566-845b-fe9fb4a80d42 fd3d:63f5:6a89:1::10/64 andromeda eth
+0 fd3d:63f5:6a89:1::20/64 cougar eth
+0 fd3d:63f5:6a89:1::30/64 eagle1 eth
+0 fd3d:63f5:6a89:1::40/64 eagle2 eth
+e45aa478-9957-3537-a87e-7396ce3bf6dc fd3d:63f5:6a89:1::50/64 raza eth
+0 fd3d:63f5:6a89:1::51/64 raza wifi
+0 fd3d:63f5:6a89:1::60/64 serenity eth
+0 fd3d:63f5:6a89:1::70/64 tardis eth
+0 fd3d:63f5:6a89:1::71/64 tardis wifi
+0 fd3d:63f5:6a89:1::80/64 viper eth
