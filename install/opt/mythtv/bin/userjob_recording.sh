@@ -43,8 +43,8 @@ use_mediainfo=N
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Calculate recording time 
-    starttimesecs=`date -d "$starttime" "+%s"`
-    endtimesecs=`date -d "$endtime" "+%s"`
+    starttimesecs=`date -ud "$starttime" "+%s"`
+    endtimesecs=`date -ud "$endtime" "+%s"`
     let expectsecs=endtimesecs-starttimesecs
     # Find the recording file
     fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null`
