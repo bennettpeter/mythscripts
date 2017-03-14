@@ -283,10 +283,10 @@ fi
 #    $scriptpath/stb_poweroff.sh
 #fi
 
-if [[ "$rc" == 0 ]] ; then
-    # Unmount videos
-    $scriptpath/mount_videos.sh umount
-fi
+# if [[ "$rc" == 0 ]] ; then
+#    # Unmount videos
+#    $scriptpath/mount_videos.sh umount
+# fi
 echo $rc > $DATADIR/mythshutdown_rc
 echo mythshutdown.sh $reason return code $rc
 exit $rc

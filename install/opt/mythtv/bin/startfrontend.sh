@@ -96,9 +96,9 @@ echo "Screen width $screenwidth, text size $textsize"
         fi
         # nvidia-settings -a '[gpu:0]/GPUPowerMizerMode=0'||nvidia-settings failed
         # gnome-session-save --logout
-        if [[ "$MOUNTDIR" != "" ]] ; then
-            $scriptpath/mount_videos.sh umount
-        fi
+        # if [[ "$MOUNTDIR" != "" ]] ; then
+        #     $scriptpath/mount_videos.sh umount
+        # fi
         if [[ "$USE_MYTHWELCOME" != Y ]] ; then
             #This code is to shutdown the frontend - not wanted if you are using suspend
             #if [[ "$IS_BACKEND" != true && "$rc" == 0 ]] ; then 
