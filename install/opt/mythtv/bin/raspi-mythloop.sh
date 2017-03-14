@@ -15,6 +15,9 @@ scriptname=`basename "$scriptname" .sh`
 hostname=` tr '[a-z]' '[A-Z]' < /etc/hostname`
 font=standard
 
+# Make sure all ip addresses are there
+sudo /sbin/ifup eth0
+
 # Bug in Jessie means rpcbind does not start with system restart
 # It is needed for NFS
 
