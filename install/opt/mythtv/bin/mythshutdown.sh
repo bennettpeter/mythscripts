@@ -231,6 +231,7 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
     # if [[ "$rc" == 0 ]] ; then
         if  ps -e|grep mythfrontend && nc -z -v $MAINHOST $MASTER_BACKEND_PORT; then
             echo "$DATE backend running - frontend running - don't shut down"
+            echo $DATE > $DATADIR/checklogin
             rc=1
         fi
     # fi

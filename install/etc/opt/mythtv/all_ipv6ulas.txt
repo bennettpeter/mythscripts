@@ -10,3 +10,5 @@ b8:27:eb:ed:a0:83 fd3d:63f5:6a89:1::40/64 eagle2 eth
 b8:27:eb:77:1e:ed fd3d:63f5:6a89:1::70/64 tardis eth
 b8:27:eb:22:4b:b8 fd3d:63f5:6a89:1::71/64 tardis wifi
 0 fd3d:63f5:6a89:1::80/64 viper eth
+0 fd3d:63f5:6a89:1::90/64 firefly eth
+0 fd3d:63f5:6a89:1::91/64 firefly wifi
