@@ -15,9 +15,9 @@ exec 2>&1
 date
 
 # Get DB password 
-. $scriptpath/getconfig.sh
+# . $scriptpath/getconfig.sh
 
-mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+# mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
 # Note that I join with cardinput here so that I only get cards that are actually in use.
 # echo "select concat(a.videodevice,' ',a.cardtype) from capturecard a, cardinput i \
@@ -67,32 +67,35 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DB
 if [[ "$USE_CETON" == true ]] ; then
     echo "Checking Ceton $CETON_IP"
     if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
-        "$scriptpath/notify.py" "Startup Problem" "Ceton Problem: $CETON_IP $msg"
+        "$scriptpath/notify.py" "Startup Problem" \
+            "Ceton Problem: $CETON_IP $msg" || echo notify failed
         echo "Ceton Problem: $CETON_IP $msg"
-        sudo nmcli connection down "Wired connection 1"
+        sudo nmcli connection down "Wired connection 1" \
+            || echo nmcli connection down failed
         sleep 3
-        sudo nmcli connection up "Wired connection 1"
+        sudo nmcli connection up "Wired connection 1" \
+            || echo nmcli connection up failed
         sleep 3
     fi
 fi
 
 # set live tv start channel to a valid HD channel number
 # This avoids the problem of failing to open jump file buffer during live TV
-fesetup=
-if [[ "$FE_STARTCHANNEL" != "" && "$FE_SOURCENAME" != "" ]] ; then
-    fesetup="update settings s,channel c, videosource v 
-    set s.data = c.chanid
-    where c.channum = '$FE_STARTCHANNEL'
-    and c.sourceid = v.sourceid
-    and v.name = '$FE_SOURCENAME'
-    and s.value = 'DefaultChanid';"
-    #    and s.hostname = '$LocalHostName'
-fi
+# fesetup=
+# if [[ "$FE_STARTCHANNEL" != "" && "$FE_SOURCENAME" != "" ]] ; then
+#     fesetup="update settings s,channel c, videosource v 
+#    set s.data = c.chanid
+#    where c.channum = '$FE_STARTCHANNEL'
+#    and c.sourceid = v.sourceid
+#    and v.name = '$FE_SOURCENAME'
+#    and s.value = 'DefaultChanid';"
+#    and s.hostname = '$LocalHostName'
+# fi
 
-$mysqlcmd <<EOF || echo mysql failed
-$fesetup
-$fwsetup
-EOF
+# $mysqlcmd <<EOF || echo mysql failed
+# $fesetup
+# $fwsetup
+# EOF
 
 echo "mythstartup.sh completed"
 
