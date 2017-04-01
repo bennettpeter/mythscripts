@@ -175,7 +175,12 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                         continue
                     fi
                     storagedir=`dirname "$oldfile"`
+                    oldbname=`basename "$oldfile"`
                     mkdir -p "$storagedir/junk/"
+                    if [[ "$realfile" == "$oldbname" ]] ; then
+                        mv -n "$oldfile" "${oldfile}_0"
+                        oldfile="${oldfile}_0"
+                    fi
                     if [[ "$followlinks" == Y ]] ; then
                         mv -fv "$realfile" "$storagedir/"
                     else
@@ -235,7 +240,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 fi
             fi
             cd "$maindir"
-            mv -fv "$file" "$file"_done
+            mv -fv "$file" "$file"_encdone
             #if ls "../$basename"* ; then
             #    mv -fv "../$basename"* "$mountdir/$TCSUBDIR/$junkdir/"
             #fi
