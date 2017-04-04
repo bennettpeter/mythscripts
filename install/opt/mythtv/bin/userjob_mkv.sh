@@ -34,6 +34,9 @@ title="$5"
 subtitle="$6"
 chanid="$7"
 
+wkday=`date +%a`
+junktoday=junk$wkday
+
 function errfunc {
     "$scriptpath/notify.py" "userjob_mkv failed" "$title"
     exit 2
@@ -72,8 +75,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     #    exit 2
     #fi
     storagedir=`dirname "$fullfilename"`
-    mkdir -p "$storagedir/junk/"
-    mv -v "$fullfilename" "$storagedir/junk/" || true
+    mkdir -p "$storagedir/$junktoday/"
+    mv -v "$fullfilename" "$storagedir/$junktoday/" || true
     mv -fv "$bname".mkv "$fullfilename"
     #if [[ $? != 0 ]] ; then
     #    "$scriptpath/notify.py" "file rename failed" "$title"

@@ -19,6 +19,9 @@ originalairdate="$4"
 description="$5"
 action="$6"
 
+wkday=`date +%a`
+junktoday=junk$wkday
+
 echo "$@"
 
 if [[ "$filename" == "" || "$title" == "" ]] ; then
@@ -180,7 +183,7 @@ if [[ "$action" == U ]] ; then
     let end_time=time+duration
     endtime=`date -u --date=@$end_time "$tmf"`
 
-    oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk/*' 2>/dev/null` || true
+    oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk*/*' 2>/dev/null` || true
     numfound=`echo "$oldfile"|wc -l`
     if (( numfound > 1 )) ; then
         echo "ERROR Multiple files match $basename"
@@ -195,8 +198,8 @@ if [[ "$action" == U ]] ; then
     sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime' where chanid = '$chanid' and starttime = '$starttime' ;" 
     # Need to fix other fields on recordedfile
     sql2="update recordedfile set basename = '$newbasename' where basename = '$basename';"
-    mkdir -p "$storagedir/junk/"
-    mv -fv "$storagedir/$basename"* "$storagedir/junk/" || true
+    mkdir -p "$storagedir/$junktoday/"
+    mv -fv "$storagedir/$basename"* "$storagedir/$junktoday/" || true
     cp -ivLp "$filename" "$storagedir/$newbasename"
     # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
     #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$newbasename" 

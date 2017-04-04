@@ -29,6 +29,9 @@ if ! echo $PATH|grep /opt/ffmpeg/bin: ; then
   PATH="/opt/ffmpeg/bin/:$PATH"
 fi
 
+wkday=`date +%a`
+junktoday=junk$wkday
+
 echo "Import files after transcoding"
 echo  "Input parameters "
 echo "1 Override mount directory (optional). Default is $TCMOUNTDIR"
@@ -63,8 +66,8 @@ mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//
 
 if [[ "$mustdelete" == Y || "$mustdelete" == y ]] ; then
     echo "Deleting prior run junk files from $VIDEODIR and $mountdir"
-    rm -fv "$VIDEODIR"/*/recordings/junk/*
-    rm -fv "$mountdir/$TCSUBDIR/junk"*/*
+    rm -fv "$VIDEODIR"/*/recordings/$junktoday/*
+    rm -fv "$mountdir/$TCSUBDIR/$junktoday"*/*
 fi
 
 if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts|tsx)` != \
@@ -78,10 +81,10 @@ fi
 for (( counter=0 ; counter<10 ; counter++ )) ; do
     if (( counter == 0 )) ; then
         encodedir=encode
-        junkdir=junk
+        junkdir=$junktoday
     else
         encodedir=encode$counter
-        junkdir=junk$counter
+        junkdir=$junktoday$counter
     fi
     
     if [[ ! -d "$mountdir/$TCSUBDIR/$encodedir" ]] ; then
@@ -176,7 +179,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     fi
                     storagedir=`dirname "$oldfile"`
                     oldbname=`basename "$oldfile"`
-                    mkdir -p "$storagedir/junk/"
+                    mkdir -p "$storagedir/$junktoday/"
                     if [[ "$realfile" == "$oldbname" ]] ; then
                         mv -n "$oldfile" "${oldfile}_0"
                         oldfile="${oldfile}_0"
@@ -232,7 +235,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                             "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
                         $mysqlcmd
                     fi
-                    mv -fv "$oldfile"* "$storagedir/junk/" || true
+                    mv -fv "$oldfile"* "$storagedir/$junktoday/" || true
                 else
                     echo "No match for $file"
                     cd "$maindir"
@@ -241,9 +244,6 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
             fi
             cd "$maindir"
             mv -fv "$file" "$file"_encdone
-            #if ls "../$basename"* ; then
-            #    mv -fv "../$basename"* "$mountdir/$TCSUBDIR/$junkdir/"
-            #fi
             mv -fv "$basename"* "$mountdir/$TCSUBDIR/$junkdir/"
             if [[ "$NEW_RECGROUP" != "" ]] ; then
                 if [[ "$NEW_RECGROUP" == Deleted ]] ; then
@@ -265,16 +265,16 @@ done
 if ls "$mountdir/$TCSUBDIR/"*_done ; then
     for file in "$mountdir/$TCSUBDIR/"*_done ; do
         bname="${file%.*}"
-        mv -fv "$bname".* "$mountdir/$TCSUBDIR/junk/" 
+        mv -fv "$bname".* "$mountdir/$TCSUBDIR/$junktoday/" 
     done
 fi
 echo "Files ready to delete"
 cd "$VIDEODIR"
-ls -l  "$mountdir/$TCSUBDIR/junk"*/* || true
+ls -l  "$mountdir/$TCSUBDIR/$junktoday"*/* || true
 if [[ "$mustdelete" == "" ]] ; then
     echo "Delete? (y/n)"
     read -e deletenow
 fi
 if [[ "$deletenow" == Y || "$deletenow" == y ]] ; then
-    rm -fv "$mountdir/$TCSUBDIR/junk"/*
+    rm -fv "$mountdir/$TCSUBDIR/$junktoday"/*
 fi

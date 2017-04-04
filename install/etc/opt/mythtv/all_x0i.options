@@ -1,4 +1,4 @@
-# Test mp4
+# Force Transcode
 ENCODER_OPTIONS[0]=
 SAVE_TRANSCODE[0]=N
 IMPORT_TRANSCODE[0]=Y

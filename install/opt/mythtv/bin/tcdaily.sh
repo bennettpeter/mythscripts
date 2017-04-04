@@ -28,6 +28,8 @@ accumsize=0
 accummins=0
 files=0
 hostname=`cat /etc/hostname`
+wkday=`date +%a`
+junktoday=junk$wkday
 
 # This will return server name for an NFS mount, 
 # the string "UUID" for a local mount, empty for a mismatch
@@ -93,9 +95,9 @@ if [[ -f "$DATADIR"/mustrun_tcimport ]] ; then
     "$scriptpath"/tcimport.sh "" "$mustdelete"
     if [[ $? != 0 ]] ; then echo ERROR ; exit 2 ; fi
     rm -f "$DATADIR"/mustrun_tcimport
-elif [[ `echo "$VIDEODIR"/*/recordings/junk/*` != "$VIDEODIR/*/recordings/junk/*" ]] ; then
+elif ls "$VIDEODIR"/*/recordings/$junktoday/* ; then
     echo "Deleting prior run junk files from $VIDEODIR"
-    rm -fv "$VIDEODIR"/*/recordings/junk/*
+    rm -fv "$VIDEODIR"/*/recordings/$junktoday/*
 fi
 
 # Get percentage utilization of the video file systems
@@ -103,7 +105,7 @@ fi
 set -- `df -k --total  $VIDEODIR/*/recordings|grep total`
 percentused=${5%\%}
 echo "Video percentage used: $percentused"
-set -- `du -k --total "$VIDEODIR"/*/recordings/junk/ | tail -1`
+set -- `du -k --total "$VIDEODIR"/*/recordings/junk*/ | tail -1`
 junkKB=$1
 if (( junkKB > 10240 && percentused > 2 )) ; then
     let percentused-=2
@@ -163,7 +165,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                             exit 2
                         fi
                         echo "Deleting prior run junk files"
-                        rm -fv "$TCMOUNTDIR/$TCSUBDIR/junk"/*
+                        rm -fv "$TCMOUNTDIR/$TCSUBDIR/$junktoday"/*
                     fi
                     set -- `ls -lL "$episode"`
                     filesize="$5"
