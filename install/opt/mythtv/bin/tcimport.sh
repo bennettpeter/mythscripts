@@ -263,6 +263,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
     fi
 done
 if ls "$mountdir/$TCSUBDIR/"*_done ; then
+    mkdir -p "$mountdir/$TCSUBDIR/$junktoday/" 
     for file in "$mountdir/$TCSUBDIR/"*_done ; do
         bname="${file%.*}"
         mv -fv "$bname".* "$mountdir/$TCSUBDIR/$junktoday/" 
