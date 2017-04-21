@@ -28,5 +28,8 @@ while true ; do
         fi
     done 
     sleep 1d
-
+    # weekly reboot
+    if [[ `date +%a` == Sat ]] ; then
+        sudo shutdown -r now
+    fi
 done &
