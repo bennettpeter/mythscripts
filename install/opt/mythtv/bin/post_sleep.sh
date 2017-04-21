@@ -9,4 +9,8 @@ if systemctl is-enabled mythtv-backend.service ; then
     systemctl start mythtv-backend.service
 fi
 
+if systemctl is-enabled nfs-client.target ; then
+    systemctl restart nfs-client.target
+fi
+
 exit 0

@@ -1,6 +1,6 @@
 
 [Unit]
-Description=Peter Suspend Actions
+Description=Peter Resume Actions
 After=sleep.target
 
 [Service]
