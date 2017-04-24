@@ -101,6 +101,10 @@ if [[ -d $ver ]] ; then
 fi
 chgrp mythtv /opt/mythtv/bin/*
 cd $scriptpath/
+# xmltv
+sudo rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
+sudo ln -fs /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
+  /usr/local/bin/tv_grab_zz_sdjson_sqlite
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
