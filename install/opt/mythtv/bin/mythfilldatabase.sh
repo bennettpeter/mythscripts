@@ -30,6 +30,11 @@ today=`date "+%a %Y/%m/%d"`
 #mythutil --resched
 
 # new design using json api
+
+# This command works fine from v 29. However you don't see the logs from the grabber
+# This takes the same time as the loop below.
+# mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
+
 if [[ "$OCUR_SOURCEID" != "" ]] ; then
     # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
     grabber="$scriptpath/tv_grab_zz_sdjson_sqlite"
@@ -45,5 +50,7 @@ if [[ "$OCUR_SOURCEID" != "" ]] ; then
     done
     set -
 else
-    mythfilldatabase --dd-grab-all --remove-new-channels "$@"
+    mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
+    # Old datadirect method
+    # mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 fi
