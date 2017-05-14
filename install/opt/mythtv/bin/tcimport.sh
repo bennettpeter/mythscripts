@@ -11,11 +11,14 @@
 ## SAVE_TRANSCODE defaults to N
 # IMPORT_TRANSCODE[0]=N
 ## IMPORT_TRANSCODE defaults to Y
+# ADD_DESCRIPTION[0]=" Archived 480p."
 # Above repeated for 1 - 9 as required
 # NEW_RECGROUP=Default
 ## NEW_RECGROUP is not subscripted and applies to any transcode
 ## NEW_RECGROUP defaults to nothing. 
 ## If all SAVE_TRANSCODE are N, NEW_RECGROUP is set to Default
+##  This is to prevent endless re-transcoding if you forget to set it.
+## ADD_DESCRIPTION will only be applied if there is a NEW_RECGROUP.
 
 set -e
 
@@ -111,6 +114,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
             . "../$basename.settings"
             IMPORT_TRANSCODE[$counter]=Y
             SAVE_TRANSCODE[$counter]=N
+            ADD_DESCRIPTION[$counter]=
             unset NEW_RECGROUP
             . "../$basename.options" || true
             for xyz in "${IMPORT_TRANSCODE[@]}"; do
@@ -119,6 +123,8 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 fi
             done            
             if [[ "$xyz" != Y  && "$NEW_RECGROUP" == "" ]] ; then
+                # This is to prevent an endless loop of re-transcoding
+                # a file every day if you mess up the settings.
                 NEW_RECGROUP=Default
             fi
             if [[ "${SAVE_TRANSCODE[counter]}" = Y ]] ; then
@@ -250,6 +256,11 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     sql_extra=", autoexpire = 9999 "
                 else
                     sql_extra=
+                fi
+                if [[ "${ADD_DESCRIPTION[counter]}" != "" ]] ; then
+                    sql_extra="$sql_extra, description = CONCAT(
+                         substr(description,1,15900),
+                                  '${ADD_DESCRIPTION[counter]}')"
                 fi
                 set -- `echo "select recgroupid from recgroups where recgroup = '$NEW_RECGROUP';" | \
                     $mysqlcmd | tail -1`

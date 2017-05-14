@@ -1,6 +1,7 @@
 # Orphan Black, Believe, Resurrection
 ENCODER_OPTIONS[0]="-l 720 --ffrate"
 SAVE_TRANSCODE[0]=Y
+ADD_DESCRIPTION[0]=" Archived 720p."
 IMPORT_TRANSCODE[0]=N
 # These options are not subscripted and apply to any transcode
 NEW_RECGROUP=Default
