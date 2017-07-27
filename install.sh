@@ -103,7 +103,8 @@ chgrp mythtv /opt/mythtv/bin/*
 cd $scriptpath/
 # xmltv
 sudo rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
-sudo ln -fs /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
+# Need to move this not link it so it is not in the path twice
+sudo mv -f /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
   /usr/local/bin/tv_grab_zz_sdjson_sqlite
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
