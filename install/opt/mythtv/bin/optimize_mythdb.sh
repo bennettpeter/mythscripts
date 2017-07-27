@@ -6,8 +6,11 @@ set -e
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 
+if [[ "$MYTHTVDIR" == "" ]] ; then
+    MYTHTVDIR=/usr
+fi
 
-OPT_MYTHDB='/usr/share/doc/mythtv-backend/contrib/maintenance/optimize_mythdb.pl'
+OPT_MYTHDB='$MYTHTVDIR/share/doc/mythtv-backend/contrib/maintenance/optimize_mythdb.pl'
 LOG='/var/log/mythtv_scripts/optimize_mythdb.log'
 
 echo "Started ${OPT_MYTHDB} on `date`" >> ${LOG}
