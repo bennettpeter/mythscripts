@@ -29,6 +29,7 @@ if [[ "$packagever" != "$gitver" ]] ; then
     exit 2
 fi
 packagever=`echo $packagever|sed  's/-pre/~pre/'`
+packagever=`echo $packagever|sed  's/-rc/~rc/'`
 packagerel=$packagever-$subrelease
 gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
 installdir=`dirname "$gitbasedir"`
