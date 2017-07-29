@@ -90,7 +90,7 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
         fi
     fi
     # Check if multi_encode.sh script is running
-    # if there are other encoders add them here 
+    # if there are other encoders add them here
     encoders='HandBrakeCLI|mencoder|avconv|ffmpeg|avidemux3_cli'
     if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
         echo $DATE "multi_encode is running, don't shut down for 5 min."
@@ -103,6 +103,8 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
         echo $DATE "starting tcencode, don't shut down for 5 min."
         rc=1
     fi
+    # Experimental command for checking if HandBrake is in a loop
+    ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
 fi
 # Check for generic hostlock
 for file in "$LOCALSTORE/keepalive"/* $KEEPALIVE_HOSTS ; do
