@@ -4,8 +4,8 @@ scriptpath=`dirname "$scriptname"`
 set -e
 
 gitbasedir=`git rev-parse --show-toplevel`
-projname=`basename $PWD`
 
+# This will get projname and destdir
 . "$scriptpath/getdestdir.source"
 
 echo destination is  $destdir. Press enter to continue.

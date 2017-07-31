@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=MythTV Frontend
-Comment=A frontend for all content on a mythtv-backend
-GenericName=MythTV Viewer
-Exec=@env@/usr/bin/mythfrontend --logpath /tmp
-Type=Application
-Encoding=UTF-8
-Icon=/usr/share/pixmaps/mythtv.png
-Categories=GNOME;Application;AudioVideo;Audio;Video
