@@ -35,11 +35,22 @@ if (( REBOOT_DAYS < 1 )) ; then
     REBOOT_DAYS=1
 fi
 
+// cols = 90 or SD TV, 240 on HD TV
+cols=`tput cols`
+
+if (( cols < 120 )) ; then
+    sp="       "
+    ln=$'\n'
+else
+    sp="                    "
+    ln=$'\n\n\n\n'
+fi
+
 if [[ `tty` != /dev/tty1 ]] ; then
     while true ; do
         clear
-        echo;echo
-        figlet -f $font  "       $hostname"$'\n'"       Please Press"$'\n'"       Enter or OK"
+        echo "$ln"
+        figlet -f $font  "${sp}$hostname"$'\n'"${sp}Please Press"$'\n'"${sp}Enter or OK"
         pwd=
         read -s pwd
         sudo chvt 1
@@ -50,8 +61,8 @@ fi
 
 while true ; do
     clear
-    echo;echo
-    figlet -f $font  "       $hostname"$'\n'"       22 - MythTV"$'\n'"       99 - Unplug"
+    echo "$ln"
+    figlet -f $font  "${sp}$hostname"$'\n'"${sp}22 - MythTV"$'\n'"${sp}99 - Unplug"
     retry=Y
     pwd=
     while [[ "$retry" == Y ]] ; do
@@ -67,8 +78,8 @@ while true ; do
         fi
         if [[ "$pwd" == 99 ]] ; then 
             clear
-            echo;echo
-            figlet -f $font "       Shutting down"
+            echo "$ln"
+            figlet -f $font "${sp}Shutting down"
             sleep 3
             sudo shutdown -P now
         fi
@@ -79,7 +90,7 @@ while true ; do
         date +%F > $DATADIR/reboot_date
         clear
         echo;echo
-        figlet -f $font "       Restarting"
+        figlet -f $font "${sp}Restarting"
         sudo shutdown -r now
     fi
 done
