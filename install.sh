@@ -134,16 +134,6 @@ if [[ "$USE_MONITOR" == Y ]] ; then
         sudo cp install/etc/init/mythtv-monitor.conf /etc/init/
     fi
 fi
-if [[ "$mythver" == 0.27* ]] ; then
-    sudo rsync -rv install/usr/ /usr/
-else
-    if [[ -d /usr/share/mythtv/themes/defaultmenu ]] ; then
-        sudo rm -rf /usr/share/mythtv/themes/petermenu
-        sudo cp -r /usr/share/mythtv/themes/defaultmenu /usr/share/mythtv/themes/petermenu
-        cd /
-        sudo patch -p1 < $scriptpath/install/menu.patch
-    fi
-fi
 cd $scriptpath/
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
