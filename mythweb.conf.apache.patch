@@ -1,0 +1,46 @@
+diff --git a/mythweb.conf.apache b/etc/apache2/sites-available/mythmst.conf
+index 14d0e0f..6676d49 100644
+--- a/mythweb.conf.apache
++++ b/etc/apache2/sites-available/mythmst.conf
+@@ -28,13 +28,16 @@
+ #    /var/www/html/mythweb
+ #    /srv/www/htdocs/mythweb
+ #
+-    <Directory "/var/www/html/data">
++    <Directory "/var/www/html/mythmst/data">
+         # For Apache 2.2
+         #Options -All +FollowSymLinks +IncludesNoExec
+         # For Apache 2.4+
+         Options +FollowSymLinks +IncludesNoExec
+     </Directory>
+-    <Directory "/var/www/html" >
++    <Directory "/var/www/html/mythmst" >
++
++    require ip 127.0.0.1 192.168.0.0/16
++    require ip fd3d:63f5:6a89:1::/64
+ 
+     ############################################################################
+     # I *strongly* urge you to turn on authentication for MythWeb.  It is disabled
+@@ -67,10 +70,10 @@
+         #
+         # This is unneeded due to the upnp setup via the backend
+         #
+-        #    setenv db_server        "localhost"
+-        #    setenv db_name          "mythconverg"
+-        #    setenv db_login         "mythtv"
+-        #    setenv db_password      "mythtv"
++        setenv db_server        "localhost"
++        setenv db_name          "mythdbmst"
++        setenv db_login         "mythmst"
++        setenv db_password      "mythtv"
+ 
+         #
+         # By default, MythWeb uses the hostname program to look up the hostname of the
+@@ -86,6 +89,7 @@
+         # contains the directories like languages and templates.  eg.
+         #
+         #   setenv include_path      "/usr/share/mythweb"
++            setenv include_path      "/home/peter/proj/build/mythtv/master/usr/share/mythtv/bindings/php"
+ 
+         # If you want MythWeb to email php/database errors (and a backtrace) to you,
+         # uncomment and set the email address below.
