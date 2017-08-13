@@ -7,7 +7,7 @@
 # That file must be removed and this is used instead
 # Called from myth_dailyrun.sh
 
-set -e -u
+set -e
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 
