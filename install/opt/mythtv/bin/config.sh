@@ -13,6 +13,7 @@ fi
 branch=`git branch | grep '*'| cut -f2 -d' '`
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../config_${projname}.out
 echo "branch: $branch" >> $gitbasedir/../config_${projname}.out
+echo "$branch" > $gitbasedir/../config_${projname}.branch
 
 case $projname in
     mythtv)
@@ -32,9 +33,6 @@ case $projname in
         set -
         ;;
     mythplugins)
-        echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../config_${projname}.out
-        echo "branch: $branch" >> $gitbasedir/../config_${projname}.out
-        echo "ver: $ver" >> $gitbasedir/../config_${projname}.out
         . "$scriptpath/getdestdir.source"
         mkdir -p $destdir
         sourcedir=`echo $destdir|sed s/mythplugins/mythtv/`

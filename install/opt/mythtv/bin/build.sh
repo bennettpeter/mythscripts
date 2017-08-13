@@ -13,6 +13,12 @@ fi
 branch=`git branch | grep '*'| cut -f2 -d' '`
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../build_${projname}.out
 echo "branch: $branch" >> $gitbasedir/../build_${projname}.out
+config_branch=`cat $gitbasedir/../config_${projname}.branch` || true
+if [[ "$branch" != "$config_branch" ]] ; then
+    echo "Need to run config again. Branch=$branch Config=$config_branch"
+    exit 2
+fi
+
 numjobs=5
 if [[ `arch` == arm* ]] ; then
     numjobs=3
