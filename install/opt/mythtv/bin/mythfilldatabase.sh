@@ -37,7 +37,7 @@ today=`date "+%a %Y/%m/%d"`
 
 if [[ "$OCUR_SOURCEID" != "" ]] ; then
     # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
-    grabber="$scriptpath/tv_grab_zz_sdjson_sqlite"
+    grabber="/usr/local/bin/tv_grab_zz_sdjson_sqlite"
     userid=`id -un`
     rm -f /tmp/${userid}_tv_grab_off*.xml
     "$grabber" --download-only
