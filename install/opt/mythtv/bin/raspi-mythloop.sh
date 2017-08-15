@@ -72,7 +72,7 @@ while true ; do
             sudo $scriptpath/setgovernor.sh high
             # Using xinit here fails with unable to open /dev/tty0
             # so use startx
-            startx $scriptpath/startfrontend.sh
+            startx $scriptpath/startfrontend29.sh
             sudo $scriptpath/setgovernor.sh normal
             break 
         fi
