@@ -24,7 +24,7 @@ case $project in
     mythtv|mythplugins)
         basedir=$destdir/usr
         set -x
-        export PATH=$basedir/bin:$PATH
+        export PATH=$basedir/bin:$basedir/local/bin:$PATH
         export MYTHTVDIR=$basedir
         export LD_LIBRARY_PATH=$basedir/lib:$basedir/share/mythtv/lib:$LD_LIBRARY_PATH
         export MYTHCONFDIR=$HOME/.mythtv-$shortname
