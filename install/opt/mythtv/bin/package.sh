@@ -48,8 +48,8 @@ case $projname in
     mythtv)
         packagename=mythtv-light_${source}${packagerel}_${arch}_$codename
         echo Package $packagename
-        if [[ -f $installdir/$packagename.deb ]] ; then
-            echo $installdir/$packagename.deb already exists - run with a subrelease number
+        if [[ -f $installdir/$packagename.deb || -d $installdir/$packagename ]] ; then
+            echo $installdir/$packagename already exists - run with a subrelease number
             exit 2
         fi
         rm -rf $installdir/$packagename $installdir/$packagename.deb
@@ -80,13 +80,17 @@ Architecture: $arch
 Essential: no
 Installed-Size: `du -B1024 -d0 $installdir/$packagename | cut  -f1`
 Maintainer: Peter Bennett <pbennett@mythtv.org>
-Depends: $deps libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, libexiv2-13 | libexiv2-14, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb, python-urlgrabber, libcec3, libfftw3-double3, libfftw3-single3, libass5, libfftw3-3, libraw1394-11, libiec61883-0, libavc1394-0, fonts-liberation, libva-drm1
+Depends: $deps libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, libexiv2-13 | libexiv2-14, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb, python-urlgrabber, libcec3, libfftw3-double3, libfftw3-single3, libass5, libfftw3-3, libraw1394-11, libiec61883-0, libavc1394-0, fonts-liberation, libva-drm1, python-pip, python-future, python-requests, python-requests-cache
 Conflicts: mythtv-common, mythtv-frontend, mythtv-backend
 Homepage: http://www.mythtv.org
 Description: MythTV Light
  Lightweight package that installs MythTV in one package, front end
  and backend. Does not install database or services.
 FINISH
+#        cat >$installdir/$packagename/DEBIAN/postinst <<FINISH
+# pip install --upgrade future requests_cache requests
+# FINISH
+#        chmod 755 $installdir/$packagename/DEBIAN/postinst
         mkdir -p $installdir/$packagename/usr/share/applications/
         cat >$installdir/$packagename/usr/share/applications/mythtv.desktop \
         <<FINISH
