@@ -10,12 +10,14 @@ if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
     "$scriptpath/prepare_source.sh"
 fi
 
+. "$scriptpath/setccache.source"
+
 branch=`git branch | grep '*'| cut -f2 -d' '`
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../build_${projname}.out
-echo "branch: $branch" >> $gitbasedir/../build_${projname}.out
+echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../build_${projname}.out
 config_branch=`cat $gitbasedir/../config_${projname}.branch` || true
-if [[ "$SCHROOT_CHROOT_NAME/$branch" != "$config_branch" ]] ; then
-    echo "Need to run config again. Branch=$SCHROOT_CHROOT_NAME/$branch Config=$config_branch"
+if [[ "$arch/$codename/$branch" != "$config_branch" ]] ; then
+    echo "Need to run config again. Now=$arch/$codename/$branch Config=$config_branch"
     exit 2
 fi
 

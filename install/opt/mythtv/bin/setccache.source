@@ -1,0 +1,8 @@
+# sourced from scripts to setup ccache
+# also returns arch and codename to caller
+
+arch=`dpkg-architecture -q DEB_TARGET_ARCH`
+codename=`lsb_release -c|cut -f 2`
+export CCACHE_DIR=$HOME/.ccache-$codename-$arch
+
+ccache -M 5G -F 0

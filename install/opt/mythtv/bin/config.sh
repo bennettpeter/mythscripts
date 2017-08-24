@@ -10,10 +10,13 @@ git clean -xfd
 if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
     "$scriptpath/prepare_source.sh"
 fi
+. "$scriptpath/setccache.source"
 branch=`git branch | grep '*'| cut -f2 -d' '`
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../config_${projname}.out
-echo "branch: $branch" >> $gitbasedir/../config_${projname}.out
-echo "$SCHROOT_CHROOT_NAME/$branch" > $gitbasedir/../config_${projname}.branch
+echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../config_${projname}.out
+echo "$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
+
+. "$scriptpath/setccache.source"
 
 case $projname in
     mythtv)
