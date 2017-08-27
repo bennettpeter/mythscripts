@@ -1,9 +1,9 @@
 #!/bin/bash
 # Install packages needed for mythtv scripts
 
-sudo apt-get install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort
+sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort gdebi-core
 
-sudo apt-get install fswebcam
+sudo apt install fswebcam
 
 if [[ `arch` == x86_64 ]] ; then
     wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -

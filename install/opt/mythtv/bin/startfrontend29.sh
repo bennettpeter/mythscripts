@@ -22,9 +22,21 @@ fi
 xset s off         # don't activate screensaver
 xset -dpms         # disable DPMS (Energy Star) features.
 xset s noblank     # don't blank the video device
+
+if [[ `arch` == armv* ]] ; then
+    sudo $scriptpath/setgovernor.sh high
+fi
+
 mythfrontend -O libCECEnabled=$CEC_ENABLED
 
-# One of these should work !
-gnome-session-quit --no-prompt
-xfce4-session-logout --logout
+if [[ `arch` == armv* ]] ; then
+    sudo $scriptpath/setgovernor.sh normal
+fi
 
+if [[ `arch` == arm* ]] ; then
+    killall lxsession
+else
+    # One of these should work !
+    gnome-session-quit --no-prompt
+    xfce4-session-logout --logout
+fi
