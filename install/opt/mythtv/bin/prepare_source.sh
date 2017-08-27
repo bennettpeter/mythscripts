@@ -8,8 +8,9 @@ if [[ `arch` == arm* ]] ; then
     rm -f $gitbasedir/../testing.patch
     if [[ -f $gitbasedir/../patch/testing.patch ]] ; then
         cp $gitbasedir/../patch/testing.patch $gitbasedir/../
-        git apply $gitbasedir/../testing.patch
+        git apply -v $gitbasedir/../testing.patch
     fi
 else
+    git diff --check
     git diff > $gitbasedir/../patch/testing.patch
 fi
