@@ -33,6 +33,18 @@ if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh normal
 fi
 
+if ! systemctl is-active mythtv-monitor.service ; then
+    s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
+    priorreboot=`cat $DATADIR/reboot_date`
+    if [[ "$priorreboot" = "$s7daysago" || "$priorreboot" < "$s7daysago" ]] ; then
+        date +%F > $DATADIR/reboot_date
+        clear
+        echo;echo
+        figlet -f $font "${sp}Restarting"
+        sudo shutdown -r now
+    fi
+fi
+
 if [[ `arch` == arm* ]] ; then
     killall lxsession
 else
