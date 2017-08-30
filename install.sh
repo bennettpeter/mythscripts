@@ -151,6 +151,18 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! systemctl is-enabled peter-resume.service ; then
         sudo systemctl enable peter-resume.service 
     fi
+
+    os=`cat /etc/issue|sed "s/ .*//"`
+    if [[ "$os" == Raspbian ]] ; then
+        if ! diff install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service ; then
+            sudo cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
+            daemonrestart=Y
+        fi
+        if ! systemctl is-enabled peter-addips.service ; then
+            sudo systemctl enable peter-addips.service
+        fi
+    fi
+
     if ! grep ^HandlePowerKey /etc/systemd/logind.conf ; then
         echo "HandlePowerKey=ignore" | sudo tee -a /etc/systemd/logind.conf
         daemonrestart=Y
