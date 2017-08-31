@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Webcam
+After=multi-user.target
+
+[Service]
+Type=simple
+User=catch22
+UMask=0002
+ExecStart=/opt/mythtv/bin/webcam.sh
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -163,6 +163,16 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         fi
     fi
 
+    if [[ "$WEBCAM" == Y ]] ; then
+        if ! diff install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service ; then
+            sudo cp install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service
+            daemonrestart=Y
+        fi
+        if ! systemctl is-enabled peter-webcam.service ; then
+            sudo systemctl enable peter-webcam.service
+        fi
+    fi
+
     if ! grep ^HandlePowerKey /etc/systemd/logind.conf ; then
         echo "HandlePowerKey=ignore" | sudo tee -a /etc/systemd/logind.conf
         daemonrestart=Y
