@@ -33,7 +33,8 @@ if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh normal
 fi
 
-if ! systemctl is-active mythtv-monitor.service ; then
+if ! systemctl is-active mythtv-monitor.service \
+&& ! systemctl is-active mythtv-backend.service ; then
     s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
     priorreboot=`cat $DATADIR/reboot_date`
     if [[ "$priorreboot" = "$s7daysago" || "$priorreboot" < "$s7daysago" ]] ; then
