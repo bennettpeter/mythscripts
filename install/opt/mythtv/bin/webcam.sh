@@ -32,4 +32,5 @@ while true ; do
     if [[ `date +%a` == Sat ]] ; then
         sudo shutdown -r now
     fi
-done &
+done
+
