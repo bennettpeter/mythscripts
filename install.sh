@@ -43,7 +43,7 @@ create_dir() {
     sudo chmod $perm "$1"
 }
 
-mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
+# mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
 
 $scriptpath/fixpermissions.sh
 

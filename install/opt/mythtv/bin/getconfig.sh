@@ -56,3 +56,5 @@ if [[ "$DBHostName" == "" ]] ; then
     echo "ERROR parsing config.xml"
 fi
 
+mysqlcmd="mysql -N --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+

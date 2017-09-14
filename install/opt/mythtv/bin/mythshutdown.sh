@@ -170,12 +170,23 @@ fi
 
 if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; then
     idletime=`DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user xprintidle`
+    echo "idletime: $idletime"
     # 15 minutes time out
+    if [[ -f /tmp/mythshutdown_prior_idletime ]] ; then
+        prior_idletime=`cat /tmp/mythshutdown_prior_idletime`
+    else
+        prior_idletime=0
+    fi
+    let prior_idletime=prior_idletime+300000
+    if (( idletime > prior_idletime)) ; then
+        idletime=$prior_idletime
+    fi
     if (( idletime < 900000 )) ; then
         echo "$DATE Primary screen x activity going on recently - $idletime - don't shut down"
         echo $DATE > $DATADIR/checklogin
         rc=1
     fi
+    echo $idletime > /tmp/mythshutdown_prior_idletime
     unset DISPLAY
 fi
 

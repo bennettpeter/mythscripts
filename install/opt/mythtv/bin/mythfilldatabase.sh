@@ -35,22 +35,35 @@ today=`date "+%a %Y/%m/%d"`
 # This takes the same time as the loop below.
 # mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
 
-if [[ "$OCUR_SOURCEID" != "" ]] ; then
+# Get DB password from /etc/mythtv/config.xml Also get mysqlcmd
+. $scriptpath/getconfig.sh
+
+echo "select sourceid, name from videosource where xmltvgrabber = 'tv_grab_zz_sdjson_sqlite';" \
+    | $mysqlcmd > $DATADIR/videosource.txt
+
+# expect names comcast and ota
+
+while read -r sourceid sourcename
+do
+    echo Processing $sourcename with id $sourceid
     # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
     grabber="/usr/local/bin/tv_grab_zz_sdjson_sqlite"
     userid=`id -un`
-    rm -f /tmp/${userid}_tv_grab_off*.xml
-    "$grabber" --download-only
+    rm -f /tmp/${userid}_tv_grab_$sourcename_off*.xml
+    "$grabber" --download-only \
+        --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf
     set -x
     for (( offset = 0; offset < 20; offset += 3 )) ; do
         "$grabber"  --no-download --days 3 --offset $offset \
-          > /tmp/${userid}_tv_grab_off$offset.xml
-        mythfilldatabase --file --sourceid $OCUR_SOURCEID \
-          --xmlfile /tmp/${userid}_tv_grab_off$offset.xml --only-update-guide
+        --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
+          > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml
+        mythfilldatabase --file --sourceid $sourceid \
+          --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml --only-update-guide
     done
     set -
-else
-    mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
-    # Old datadirect method
-    # mythfilldatabase --dd-grab-all --remove-new-channels "$@"
-fi
+done < $DATADIR/videosource.txt
+
+# other way
+# mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
+# Old datadirect method
+# mythfilldatabase --dd-grab-all --remove-new-channels "$@"
