@@ -187,6 +187,7 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; t
         rc=1
     fi
     echo $idletime > /tmp/mythshutdown_prior_idletime
+    chgrp mythtv /tmp/mythshutdown_prior_idletime
     unset DISPLAY
 fi
 

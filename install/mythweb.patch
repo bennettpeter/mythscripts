@@ -1,0 +1,56 @@
+diff --git a/mythweb.conf.apache b/mythweb.conf.apache
+index 14d0e0f..d6d9e96 100644
+--- a/mythweb.conf.apache
++++ b/mythweb.conf.apache
+@@ -28,13 +28,16 @@
+ #    /var/www/html/mythweb
+ #    /srv/www/htdocs/mythweb
+ #
+-    <Directory "/var/www/html/data">
++    <Directory "/var/www/html/mythweb/data">
+         # For Apache 2.2
+         #Options -All +FollowSymLinks +IncludesNoExec
+         # For Apache 2.4+
+         Options +FollowSymLinks +IncludesNoExec
+     </Directory>
+-    <Directory "/var/www/html" >
++    <Directory "/var/www/html/mythweb" >
++
++    require ip 127.0.0.1 192.168.0.0/16
++    require ip fd3d:63f5:6a89:1::/64
+ 
+     ############################################################################
+     # I *strongly* urge you to turn on authentication for MythWeb.  It is disabled
+@@ -72,6 +75,11 @@
+         #    setenv db_login         "mythtv"
+         #    setenv db_password      "mythtv"
+ 
++             setenv db_server        "localhost"
++             setenv db_name          "mythdb28"
++             setenv db_login         "myth28"
++             setenv db_password      "mythtv"
++
+         #
+         # By default, MythWeb uses the hostname program to look up the hostname of the
+         # machine it runs on.  If this reports incorrect data, or you run MythWeb on a
+@@ -86,6 +94,7 @@
+         # contains the directories like languages and templates.  eg.
+         #
+         #   setenv include_path      "/usr/share/mythweb"
++        setenv include_path  "/home/peter/proj/build/mythtv/BRANCH/usr/share/mythtv/bindings/php"
+ 
+         # If you want MythWeb to email php/database errors (and a backtrace) to you,
+         # uncomment and set the email address below.
+diff --git a/mythweb.php b/mythweb.php
+index 3df04b1..090a8a9 100644
+--- a/mythweb.php
++++ b/mythweb.php
+@@ -14,7 +14,7 @@
+     }
+ 
+ // Path to the MythTV bindings that are now installed by the MythTV package
+-    ini_set('include_path', '/usr/local/share/mythtv/bindings/php/'.PATH_SEPARATOR.'/usr/share/mythtv/bindings/php/'.PATH_SEPARATOR.ini_get('include_path'));
++    ini_set('include_path', ini_get('include_path').PATH_SEPARATOR.'/usr/local/share/mythtv/bindings/php/'.PATH_SEPARATOR.'/usr/share/mythtv/bindings/php/');
+ 
+ // Init
+     require_once 'includes/init.php';
