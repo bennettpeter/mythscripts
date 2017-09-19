@@ -4,7 +4,7 @@ set -e
 gitbasedir=`git rev-parse --show-toplevel`
 if [[ `arch` == arm* ]] ; then
     mount /srv/ahome || true
-    git checkout .
+    git checkout $gitbasedir
     rm -f $gitbasedir/../testing.patch
     if [[ -s $gitbasedir/../patch/testing.patch ]] ; then
         cp $gitbasedir/../patch/testing.patch $gitbasedir/../

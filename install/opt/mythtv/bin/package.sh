@@ -173,16 +173,16 @@ Conflicts: mythtv-common, mythtv-frontend, mythtv-backend
 Homepage: http://www.mythtv.org
 Description: MythTV Plugins Light
  MythTV plugins for the MythTV Light package. MythTV Light must be installed
- before this package. The following plugins are included for Raspberry Pi:
+ before this package. The following plugins are included:
   MythArchive 
   MythBrowser
+  MythGallery
   MythGame
   MythMusic
   MythNetvision
   MythNews
   MythWeather
   MythZoneMinder
- The MythGallery plugin is not included as it requires OpenGL
 FINISH
         cd $installdir
         chmod -R  g-w,o-w $packagename

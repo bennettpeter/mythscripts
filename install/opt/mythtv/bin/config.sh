@@ -69,10 +69,10 @@ case $projname in
         git clean -xfd
         basedir=$destdir/usr
         export PYTHONPATH=$basedir/local/lib/python2.7/dist-packages
-        config_opt=
-        if [[ `arch` == arm* ]] ; then
-            config_opt="--disable-mythgallery"
-        fi
+        config_opt="--enable-mythgallery"
+        # if [[ `arch` == arm* ]] ; then
+        #     config_opt="--disable-mythgallery"
+        # fi
         ./configure --prefix=$destdir/usr \
          $config_opt | tee -a  $gitbasedir/../config_${projname}.out
          set -
