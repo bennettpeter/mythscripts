@@ -21,6 +21,7 @@ if (( `date -r $DATADIR/mythshutdown_rc +%s` + 300 >  `date +%s` )) ; then
     fi
 fi
 date
+userid=`id -un`
 
 # Get a date/time stamp to add to log output
 DATE=`date +%F\ %T\.%N`
@@ -172,8 +173,8 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; t
     idletime=`DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user xprintidle`
     echo "idletime: $idletime"
     # 15 minutes time out
-    if [[ -f /tmp/mythshutdown_prior_idletime ]] ; then
-        prior_idletime=`cat /tmp/mythshutdown_prior_idletime`
+    if [[ -f /tmp/${userid}_mythshutdown_prior_idletime ]] ; then
+        prior_idletime=`cat /tmp/${userid}_mythshutdown_prior_idletime`
     else
         prior_idletime=0
     fi
@@ -186,8 +187,7 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; t
         echo $DATE > $DATADIR/checklogin
         rc=1
     fi
-    echo $idletime > /tmp/mythshutdown_prior_idletime
-    chgrp mythtv /tmp/mythshutdown_prior_idletime
+    echo $idletime > /tmp/${userid}_mythshutdown_prior_idletime
     unset DISPLAY
 fi
 
@@ -241,19 +241,19 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
         echo "$DATE zenity running - frontend is starting - don't shut down"
         rc=1
     fi
-    # if front end and backend are both running do not shut down
-    # if [[ "$rc" == 0 ]] ; then
-        if  ps -e|grep mythfrontend && nc -z -v $MAINHOST $MASTER_BACKEND_PORT; then
-            echo "$DATE backend running - frontend running - don't shut down"
+    # If frontend running and not in standby, do not shut down
+    if  pidof mythfrontend ; then
+        fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
+        if [[ "$fstate" != standbymode ]] ; then
+            echo "$DATE frontend running - $fstate - don't shut down"
             echo $DATE > $DATADIR/checklogin
             rc=1
         fi
-    # fi
+    fi
 fi
 
 # Check if anybody is accessing my drives via nfs
 if [[ -f /usr/sbin/nfsstat && -f /proc/net/rpc/nfsd ]] ; then
-    userid=`id -un`
     touch /tmp/${userid}_mythshutdown_nfs_count
     prior_nfs_count=`cat /tmp/${userid}_mythshutdown_nfs_count`
     if [[ "$prior_nfs_count" == "" ]] ; then
