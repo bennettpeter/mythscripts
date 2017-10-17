@@ -6,7 +6,7 @@ set -e
 gitbasedir=`git rev-parse --show-toplevel`
 projname=`basename $PWD`
 
-git clean -xfd
+git clean -Xfd
 if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
     "$scriptpath/prepare_source.sh"
 fi
@@ -46,7 +46,7 @@ case $projname in
             exit 2
         fi
         cd ../mythtv
-        git clean -xfd
+        git clean -Xfd
         config_opt=
         if [[ `arch` == arm* ]] ; then
             if echo "$branch" | grep "0.28" ; then
@@ -66,7 +66,7 @@ case $projname in
         cp libs/libmythbase/mythconfig.h libs/libmythbase/mythconfig.mak \
          $destdir/usr/include/mythtv/
         cd ../mythplugins
-        git clean -xfd
+        git clean -Xfd
         basedir=$destdir/usr
         export PYTHONPATH=$basedir/local/lib/python2.7/dist-packages
         config_opt="--enable-mythgallery"
