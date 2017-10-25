@@ -21,6 +21,9 @@ projname=`basename $PWD`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`
 branch=`git branch | grep '*'| cut -f2 -d' ' | sed 's!/!-!g'`
+if [[ "$branch" == '(HEAD' ]] ; then
+    branch=`git branch | grep '*'| cut -f3 -d' '`
+fi
 
 dirty=`git status --porcelain|grep -v "^??"|wc -l`
 

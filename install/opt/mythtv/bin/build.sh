@@ -13,6 +13,9 @@ fi
 . "$scriptpath/setccache.source"
 
 branch=`git branch | grep '*'| cut -f2 -d' '`
+if [[ "$branch" == '(HEAD' ]] ; then
+    branch=`git branch | grep '*'| cut -f3 -d' '`
+fi
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../build_${projname}.out
 echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../build_${projname}.out
 config_branch=`cat $gitbasedir/../config_${projname}.branch` || true
