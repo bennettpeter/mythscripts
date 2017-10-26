@@ -30,6 +30,13 @@ echo "$files" >&2
 if [[ "$?" != 0 ]] ; then exit 2 ; fi
 git diff --cached --check >&2
 rc=$?
+if [[ "$rc" != 0 ]] ; then
+    echo ERROR - type Y to ignore the error. >&2
+    read xxxx
+    if [[ "$xxxx" == Y ]] ; then
+        rc=0
+    fi
+fi
 if [[ "$rc" == 0 ]] ; then
     git status >&2
     if [[ "$build" == n ]] ; then

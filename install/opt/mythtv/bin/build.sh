@@ -28,5 +28,7 @@ numjobs=5
 if [[ `arch` == arm* ]] ; then
     numjobs=3
 fi
-setsid make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out
-echo Completed build
+# setsid make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out
+setsid make -j $numjobs &>> $gitbasedir/../build_${projname}.out &
+tail -f $gitbasedir/../build_${projname}.out
+# echo Completed build
