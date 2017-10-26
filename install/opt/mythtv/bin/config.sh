@@ -72,7 +72,8 @@ case $projname in
         git clean -Xfd
         basedir=$destdir/usr
         export PYTHONPATH=$basedir/local/lib/python2.7/dist-packages
-        config_opt="--enable-mythgallery"
+        config_opt=
+        # config_opt="--enable-mythgallery"
         # if [[ `arch` == arm* ]] ; then
         #     config_opt="--disable-mythgallery"
         # fi
