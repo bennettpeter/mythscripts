@@ -26,7 +26,7 @@ fi
 
 numjobs=5
 if [[ `arch` == arm* ]] ; then
-    numjobs=3
+    numjobs=2
 fi
 # setsid make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out
 setsid make -j $numjobs &>> $gitbasedir/../build_${projname}.out &

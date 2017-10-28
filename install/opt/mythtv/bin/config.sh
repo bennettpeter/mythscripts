@@ -39,6 +39,8 @@ case $projname in
         set -
         ;;
     mythplugins)
+        # Reset the mythtv config because this overwrites it
+        rm $gitbasedir/../config_mythtv.branch
         . "$scriptpath/getdestdir.source"
         mkdir -p $destdir
         sourcedir=`echo $destdir|sed s/mythplugins/mythtv/`
