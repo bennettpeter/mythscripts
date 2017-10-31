@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install packages needed for mythtv scripts
 
-sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort gdebi-core
+sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix
 
 sudo apt install fswebcam
 
