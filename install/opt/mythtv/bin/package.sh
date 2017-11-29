@@ -35,7 +35,18 @@ if [[ "$packagever" != "$gitver" ]] ; then
     echo ERROR Package version $packagever does not match git version $gitver
     exit 2
 fi
+# Change dash to tilde in some cases
+# Note that according to debian (with any numbers or letters)
+# 30-Pre > 30
+# 30~Pre < 30
+# 30-Pre < 30.0
 packagever=`echo $packagever|sed  's/-pre/~pre/'`
+# Skip this check for 30 because there are already
+# some builds out there with 30-Pre.
+# If the release version is 30.0 it will be OK.
+if [[ "$v" != 30-Pre* ]] ; then
+    packagever=`echo $packagever|sed  's/-Pre/~Pre/'`
+fi
 packagever=`echo $packagever|sed  's/-rc/~rc/'`
 packagerel=$packagever-$subrelease
 gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`

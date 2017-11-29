@@ -3,6 +3,7 @@
 set -e
 rc=0
 gitbasedir=`git rev-parse --show-toplevel`
+mkdir -p $gitbasedir/../patch/
 if [[ `arch` == arm* ]] ; then
     mount /srv/ahome || true
     git checkout $gitbasedir
