@@ -15,8 +15,6 @@ if [[ "$BUILDDEST" == "" ]] ; then
     echo "BUILDDEST=$BUILDDEST" >> $HOME/.buildrc
 fi
 
-### BUILDDEST=$HOME/proj/build
-### xenial32bit/mythtv/mythtv-master
 projname=`basename $PWD`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`

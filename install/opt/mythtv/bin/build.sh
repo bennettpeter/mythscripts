@@ -21,7 +21,13 @@ echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../build_$
 config_branch=`cat $gitbasedir/../config_${projname}.branch` || true
 if [[ "$arch/$codename/$branch" != "$config_branch" ]] ; then
     echo "Need to run config again. Now=$arch/$codename/$branch Config=$config_branch"
-    exit 2
+    echo "Type I to Ignore once, O to override branch setting."
+    read -e resp
+    if [[ "$resp" == O ]]; then
+        echo "$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
+    elif [[ "$resp" != I ]]; then
+        exit 2
+    fi
 fi
 
 numjobs=5

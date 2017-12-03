@@ -23,7 +23,7 @@ echo "$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
 
 case $projname in
     mythtv)
-        config_opt=
+        config_opt="--enable-libmp3lame"
         if [[ `arch` == arm* ]] ; then
             if echo "$branch" | grep "0.28" ; then
                 omx_option="--enable-openmax"
@@ -35,7 +35,7 @@ case $projname in
               --disable-vaapi"
         fi
         set -x
-        ./configure --prefix=/usr $config_opt |& tee -a $gitbasedir/../config_${projname}.out
+        ./configure --prefix=/usr $config_opt "$@" |& tee -a $gitbasedir/../config_${projname}.out
         set -
         ;;
     mythplugins)
@@ -52,7 +52,9 @@ case $projname in
         fi
         cd ../mythtv
         git clean -Xfd
-        config_opt=
+        config_opt="--enable-libmp3lame"
+        # Temporary for ffmpeg fixing
+        config_opt="$config_opt --enable-crystalhd"
         if [[ `arch` == arm* ]] ; then
             if echo "$branch" | grep "0.28" ; then
                 omx_option="--enable-openmax"
@@ -65,7 +67,7 @@ case $projname in
         fi
         set -x
         ./configure --prefix=$destdir/usr \
-          --runprefix=/usr $config_opt | tee -a  $gitbasedir/../config_${projname}.out
+          --runprefix=/usr $config_opt "$@" | tee -a  $gitbasedir/../config_${projname}.out
         rm -rf $destdir
         cp -a $sourcedir/ $destdir/
         cp libs/libmythbase/mythconfig.h libs/libmythbase/mythconfig.mak \
