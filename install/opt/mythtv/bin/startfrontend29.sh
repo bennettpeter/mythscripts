@@ -15,6 +15,7 @@ exec 2>&1
 date
 
 killall mythfrontend
+killall firefox
 
 if [[ "$CEC_ENABLED" != 1 ]] ; then
     CEC_ENABLED=0
@@ -25,13 +26,35 @@ xset s noblank     # don't blank the video device
 
 if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh high
-fi
-
-mythfrontend -O libCECEnabled=$CEC_ENABLED
-
-if [[ `arch` == armv* ]] ; then
+    mythfrontend -O libCECEnabled=$CEC_ENABLED
     sudo $scriptpath/setgovernor.sh normal
-fi
+else
+    resp=X
+    while [[ "$resp" != "" ]]; do
+        xrandr -s 640x480
+        sleep 1
+
+resp=$(zenity --list --column="Pick One" <<EOF
+MythTV
+ShowMax
+Amazon Video
+EOF
+)
+        xrandr -s 1920x1080
+        sleep 1
+        case $resp in
+        MythTV)
+            mythfrontend -O libCECEnabled=$CEC_ENABLED
+            ;;
+        ShowMax)
+            firefox https://www.showmax.com/eng/
+            ;;
+        Amazon\ Video)
+            firefox https://www.amazon.com/gp/video/watchlist/ref=sv_atv_8
+            ;;
+        esac
+    done
+fi    
 
 if ! systemctl is-active mythtv-monitor.service \
 && ! systemctl is-active mythtv-backend.service ; then
