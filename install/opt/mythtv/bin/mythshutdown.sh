@@ -236,11 +236,11 @@ fi
 
 #removed && "$rc" == 0
 if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
-    # if front end waiting for backend to start do not shut down
-    if ps -e|grep zenity ; then
-        echo "$DATE zenity running - frontend is starting - don't shut down"
-        rc=1
-    fi
+#    # if front end waiting for backend to start do not shut down
+#    if ps -e|grep zenity ; then
+#        echo "$DATE zenity running - frontend is starting - don't shut down"
+#        rc=1
+#    fi
     # If frontend running and not in standby, do not shut down
     if  pidof mythfrontend ; then
         fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
