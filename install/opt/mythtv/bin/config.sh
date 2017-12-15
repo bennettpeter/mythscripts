@@ -42,7 +42,7 @@ case $projname in
         ;;
     mythplugins)
         # Reset the mythtv config because this overwrites it
-        rm $gitbasedir/../config_mythtv.branch
+        rm -f $gitbasedir/../config_mythtv.branch
         . "$scriptpath/getdestdir.source"
         mkdir -p $destdir
         sourcedir=`echo $destdir|sed s/mythplugins/mythtv/`
@@ -79,10 +79,10 @@ case $projname in
         basedir=$destdir/usr
         export PYTHONPATH=$basedir/local/lib/python2.7/dist-packages
         config_opt=
-        # config_opt="--enable-mythgallery"
-        # if [[ `arch` == arm* ]] ; then
-        #     config_opt="--disable-mythgallery"
-        # fi
+        config_opt="--enable-mythgallery"
+        if [[ `arch` == arm* ]] ; then
+            config_opt="--disable-mythgallery"
+        fi
         ./configure --prefix=$destdir/usr \
          $config_opt | tee -a  $gitbasedir/../config_${projname}.out
          set -
