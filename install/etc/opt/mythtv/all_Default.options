@@ -1,0 +1,2 @@
+# default options
+ENCODER_OPTIONS[0]="--crop 0:0:0:0"

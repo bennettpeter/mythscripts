@@ -240,7 +240,12 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                         . "$epbname.settings"
                         $mustecho cp -f -v $symlinks "$filename" "$TCMOUNTDIR/$TCSUBDIR/"
                         bname="${bname%.*}"
-                        $mustecho ln -s -f -v "/etc/opt/mythtv/$RECGROUP.options" "$TCMOUNTDIR/$TCSUBDIR/$bname.options"
+                        optname=$RECGROUP
+                        if [[ ! -f "/etc/opt/mythtv/$optname.options" ]] ; then
+                            optname=Default
+                        fi
+                        $mustecho ln -s -f -v "/etc/opt/mythtv/$optname.options" \
+                            "$TCMOUNTDIR/$TCSUBDIR/$bname.options"
                         $mustecho cp -f "$epbname.settings" "$TCMOUNTDIR/$TCSUBDIR/$bname.settings"
                         let files=files+1 1
                         let accumsize=accumsize+filesize 1
