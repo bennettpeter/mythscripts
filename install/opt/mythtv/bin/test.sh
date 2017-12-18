@@ -35,6 +35,8 @@ case $project in
         ;;
     jampal)
         basedir=$destdir/usr
-        exec $basedir/share/jampal/scripts/jampal.sh "$@"
+        export PATH=$basedir/bin:$PATH
+        # exec $basedir/share/jampal/scripts/jampal.sh $pgm "$@"
+        exec $pgm "$@"
         ;;
 esac
