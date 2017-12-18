@@ -16,7 +16,8 @@ branch=`git branch | grep '*'| cut -f2 -d' '`
 if [[ "$branch" == '(HEAD' ]] ; then
     branch=`git branch | grep '*'| cut -f3 -d' '`
 fi
-echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../build_${projname}.out
+date > $gitbasedir/../build_${projname}.out
+echo "chroot: $SCHROOT_CHROOT_NAME" >> $gitbasedir/../build_${projname}.out
 echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../build_${projname}.out
 config_branch=`cat $gitbasedir/../config_${projname}.branch` || true
 if [[ "$arch/$codename/$branch" != "$config_branch" ]] ; then
@@ -34,7 +35,19 @@ numjobs=5
 if [[ `arch` == arm* ]] ; then
     numjobs=2
 fi
-setsid make -j $numjobs &>> $gitbasedir/../build_${projname}.out &
-# less +F
-tail -f $gitbasedir/../build_${projname}.out
-# echo Completed build
+
+# less +F or tail -f
+# tail -f $gitbasedir/../build_${projname}.out &
+# tailpid=$!
+rc=0
+make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out || rc=$?
+# wait $! || rc=$?
+
+if [[ "$rc" == 0 ]] ; then
+    echo $'\n'"Build complete - Successful"
+else
+    echo $'\n'"ERROR ERROR Build Failed rc = $rc"
+fi
+echo "$gitbasedir/../build_${projname}.out"
+# sleep 1
+# kill $tailpid

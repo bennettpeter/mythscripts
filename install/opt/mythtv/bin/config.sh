@@ -69,7 +69,7 @@ case $projname in
         fi
         set -x
         ./configure --prefix=$destdir/usr \
-          --runprefix=/usr $config_opt "$@" | tee -a  $gitbasedir/../config_${projname}.out
+          --runprefix=/usr $config_opt "$@" |& tee -a  $gitbasedir/../config_${projname}.out
         rm -rf $destdir
         cp -a $sourcedir/ $destdir/
         cp libs/libmythbase/mythconfig.h libs/libmythbase/mythconfig.mak \
@@ -84,7 +84,7 @@ case $projname in
             config_opt="--disable-mythgallery"
         fi
         ./configure --prefix=$destdir/usr \
-         $config_opt | tee -a  $gitbasedir/../config_${projname}.out
+         $config_opt |& tee -a  $gitbasedir/../config_${projname}.out
          set -
         ;;
 esac
