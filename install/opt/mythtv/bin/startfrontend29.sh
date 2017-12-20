@@ -38,6 +38,7 @@ resp=$(zenity --list --column="Pick One" <<EOF
 MythTV
 ShowMax
 Amazon Video
+Freeform
 EOF
 )
         xrandr -s 1920x1080
@@ -51,6 +52,9 @@ EOF
             ;;
         Amazon\ Video)
             firefox https://www.amazon.com/gp/video/watchlist/ref=sv_atv_8
+            ;;
+        Freeform)
+            firefox https://freeform.go.com/
             ;;
         esac
     done
