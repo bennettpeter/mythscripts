@@ -36,12 +36,13 @@ if [[ `arch` == arm* ]] ; then
     numjobs=2
 fi
 
-# less +F or tail -f
-# tail -f $gitbasedir/../build_${projname}.out &
-# tailpid=$!
 rc=0
-make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out || rc=$?
-# wait $! || rc=$?
+if [[ ! -f Makefile ]] ; then
+    echo ERROR No Makefile found.
+    rc=999
+else
+    make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out || rc=$?
+fi
 
 if [[ "$rc" == 0 ]] ; then
     echo $'\n'"Build complete - Successful"
@@ -49,5 +50,3 @@ else
     echo $'\n'"ERROR ERROR Build Failed rc = $rc"
 fi
 echo "$gitbasedir/../build_${projname}.out"
-# sleep 1
-# kill $tailpid
