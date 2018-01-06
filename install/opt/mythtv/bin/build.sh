@@ -41,6 +41,7 @@ if [[ ! -f Makefile ]] ; then
     echo ERROR No Makefile found.
     rc=999
 else
+    set -o pipefail
     make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out || rc=$?
 fi
 

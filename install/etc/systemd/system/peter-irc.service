@@ -1,0 +1,17 @@
+
+[Unit]
+Description=IRC
+After=multi-user.target
+Requires=dbus.socket
+
+[Service]
+Type=simple
+User=pi
+UMask=0002
+ExecStart=/usr/bin/screen -d -m -S irc weechat
+RemainAfterExit=yes
+Restart=no
+ExecStop=/usr/bin/screen -S irc -X quit
+
+[Install]
+WantedBy=multi-user.target

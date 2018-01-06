@@ -173,6 +173,16 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         fi
     fi
 
+    if [[ "$IRC" == Y ]] ; then
+        if ! diff install/etc/systemd/system/peter-irc.service /etc/systemd/system/peter-irc.service ; then
+            sudo cp install/etc/systemd/system/peter-irc.service /etc/systemd/system/peter-irc.service
+            daemonrestart=Y
+        fi
+        if ! systemctl is-enabled peter-irc.service ; then
+            sudo systemctl enable peter-irc.service
+        fi
+    fi
+
     if ! grep ^HandlePowerKey /etc/systemd/logind.conf ; then
         echo "HandlePowerKey=ignore" | sudo tee -a /etc/systemd/logind.conf
         daemonrestart=Y
