@@ -214,7 +214,8 @@ if [[ "$action" == U ]] ; then
     ) |  $mysqlcmd
 fi
 
-$scriptpath/repair_duration.sh $storagedir/$newbasename
+mythutil --clearseektable --chanid "$chanid" --starttime "$starttime"
+# $scriptpath/repair_duration.sh $storagedir/$newbasename
 
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 echo Make sure the program is not busy being transcoded at this time
