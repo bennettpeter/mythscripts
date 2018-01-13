@@ -15,8 +15,8 @@ fi
 
 # bluetooth service immediately restarts if stopped
 # restart command does nothing
-if systemctl is-enabled bluetooth.service ; then
-    systemctl stop bluetooth.service
-fi
+#if systemctl is-enabled bluetooth.service ; then
+#    systemctl stop bluetooth.service
+#fi
 
 exit 0
