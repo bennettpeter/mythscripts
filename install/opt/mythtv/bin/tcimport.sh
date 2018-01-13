@@ -210,37 +210,37 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                         echo "update recordedfile set basename = '$realfile' where basename like '$basename.%';" | \
                         $mysqlcmd
                     fi
-                    mythcommflag --rebuild  --chanid "$chanid" --starttime "$starttime" || echo Return Code is $?
+                    mythutil --clearseektable --chanid "$chanid" --starttime "$starttime"
+                    # || echo Return Code is $?
                     # Fix duration
-                    # duration=`mediainfo '--Inform=Video;%Duration%' "$storagedir/$realfile"` || echo Return Code is $?
-                    millisecsv=`mediainfo '--Inform=Video;%Duration%' "$storagedir/$realfile"`
+                    #millisecsv=`mediainfo '--Inform=Video;%Duration%' "$storagedir/$realfile"`
                     # 21600000 = 6 hours
-                    if (( millisecsv > 21600000 )) ; then
-                        echo "Wacky video length of $millisecsv ignored, set to 0"
-                        # 60000 = 1 minute
-                        millisecsv=0
-                    fi
+                    #if (( millisecsv > 21600000 )) ; then
+                    #    echo "Wacky video length of $millisecsv ignored, set to 0"
+                    #    # 60000 = 1 minute
+                    #    millisecsv=0
+                    #fi
                     # the tab and cut is to select just the first audio stream length
-                    millisecsa=`mediainfo '--Inform=Audio;%Duration%'$'\t' "$storagedir/$realfile" | cut -f 1`
+                    #millisecsa=`mediainfo '--Inform=Audio;%Duration%'$'\t' "$storagedir/$realfile" | cut -f 1`
                     # 21600000 = 6 hours
-                    if (( millisecsa > 21600000 )) ; then
-                        echo "Wacky audio length of $millisecsa ignored, set to 0"
-                        millisecsa=0
-                    fi
-                    if (( millisecsv > millisecsa )) ; then
-                        duration=$millisecsv
-                    else
-                        duration=$millisecsa
-                    fi
-                    if (( duration == 0 )) ; then
-                        echo "Error no duration found for $file"
-                    else
+                    #if (( millisecsa > 21600000 )) ; then
+                    #    echo "Wacky audio length of $millisecsa ignored, set to 0"
+                    #    millisecsa=0
+                    #fi
+                    #if (( millisecsv > millisecsa )) ; then
+                    #    duration=$millisecsv
+                    #else
+                    #    duration=$millisecsa
+                    #fi
+                    #if (( duration == 0 )) ; then
+                    #    echo "Error no duration found for $file"
+                    #else
                         ## Add 5 minutes
                         ## - not needed     let duration=duration+300000
-                        echo "update recordedmarkup set data = '$duration' " \
-                            "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
-                        $mysqlcmd
-                    fi
+                    #    echo "update recordedmarkup set data = '$duration' " \
+                    #        "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
+                    #    $mysqlcmd
+                    #fi
                     mv -fv "$oldfile"* "$storagedir/$junktoday/" || true
                 else
                     echo "No match for $file"
