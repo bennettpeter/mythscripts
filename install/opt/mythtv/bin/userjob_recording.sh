@@ -28,9 +28,11 @@ subtitle="$6"
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
 # Get the duplicate flag
-set -- `echo "select duplicate from recorded where basename = '$filename';" | \
+set -- `echo "select duplicate, starttime, endtime from recorded where basename = '$filename';" | \
 $mysqlcmd | tail -1`
 duplicate=$1
+db_starttime="$2 $3"
+db_endtime="$4 $5"
 
 echo "Filename: $filename   duplicate: $duplicate"
 
@@ -46,6 +48,9 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     starttimesecs=`date -ud "$starttime" "+%s"`
     endtimesecs=`date -ud "$endtime" "+%s"`
     let expectsecs=endtimesecs-starttimesecs
+    db_starttimesecs=`date -ud "$db_starttime" "+%s"`
+    db_endtimesecs=`date -ud "$db_endtime" "+%s"`
+    let db_expectsecs=db_endtimesecs-db_starttimesecs
     # Find the recording file
     fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null`
     if [[ "$use_mediainfo" == Y ]] ; then
@@ -73,19 +78,34 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
         actualsecs=`echo "$duration / 1" | bc`
         ## END Find length using ffprobe
     fi
+    extension=${fullfilename/*./}
+    if [[ "$extension" == mkv ]] ; then
+        type=Transcode
+    else
+        type=Recording
+    fi
     echo "Full file name: $fullfilename"
     echo "Expected leng(secs): $expectsecs"
+    echo "DB Expected leng(secs): $db_expectsecs"
     echo "Actual leng(secs): $actualsecs"
-    let minsecs=expectsecs-60
-    echo "Minimum leng(secs): $minsecs"
+    let minsecs=expectsecs
+    echo "Minimum leng(secs): $minsecs - 60"
     let shortmins=(expectsecs-actualsecs)/60
-    if (( actualsecs < minsecs )) ; then
-        "$scriptpath/notify.py" "Recording failed" "$title $subtitle is $shortmins minutes short"
+    if (( actualsecs < minsecs - 60 )) ; then
+        "$scriptpath/notify.py" "$type failed" "$title $subtitle is $shortmins minutes short"
+    fi
+    let maxsecs=expectsecs
+    if (( db_expectsecs > maxsecs )) ; then
+        let maxsecs=db_expectsecs
+    fi
+    echo "Maximum leng(secs): $maxsecs + 60"
+    let overmins=(actualsecs-maxsecs)/60
+    if (( actualsecs > maxsecs + 60 )) ; then
+        "$scriptpath/notify.py" "$type failed" "$title $subtitle shows $overmins minutes over"
     fi
 
     # Check if it is x264 file and if so rename to tsx extension
     videoformat=`mediainfo '--Inform=Video;%Format%' "$fullfilename"`
-    extension=${fullfilename/*./}
     echo "Episode: $fullfilename. Video Format $videoformat"
     if [[ "$videoformat" == "AVC" && "$extension" == "ts" ]] ; then
         # rename file to tsx extension

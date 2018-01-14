@@ -244,6 +244,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     #    $mysqlcmd
                     #fi
                     mv -fv "$oldfile"* "$storagedir/$junktoday/" || true
+                    mythutil --queuejob userjob1 --chanid "$chanid" --starttime "$starttime"
                 else
                     echo "No match for $file"
                     cd "$maindir"
