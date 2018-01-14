@@ -182,6 +182,8 @@ if [[ "$action" == U ]] ; then
     time=`date -u "--date=$starttime" +%s`
     let end_time=time+duration
     endtime=`date -u --date=@$end_time "$tmf"`
+    set -- `ls -l "$filename"`
+    filesize=$5
 
     oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk*/*' 2>/dev/null` || true
     numfound=`echo "$oldfile"|wc -l`
@@ -195,9 +197,9 @@ if [[ "$action" == U ]] ; then
         storagedir=`dirname "$oldfile"`
     fi        
     newbasename="${basename%.*}".$ext
-    sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime' where chanid = '$chanid' and starttime = '$starttime' ;" 
+    sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime', filesize = $filesize where chanid = '$chanid' and starttime = '$starttime' ;" 
     # Need to fix other fields on recordedfile
-    sql2="update recordedfile set basename = '$newbasename' where basename = '$basename';"
+    sql2="update recordedfile set basename = '$newbasename', filesize = $filesize, video_codec = 'H264' where basename = '$basename';"
     mkdir -p "$storagedir/$junktoday/"
     mv -fv "$storagedir/$basename"* "$storagedir/$junktoday/" || true
     cp -ivLp "$filename" "$storagedir/$newbasename"

@@ -30,17 +30,15 @@ if [[ -f "$fullfilename" ]] ; then
     fi
     chanid=$1
     starttime="$2 $3"
-    # mythcommflag --rebuild  --chanid "$chanid" --starttime "$starttime" || echo Return Code is $?
-    # Fix duration
-    duration=`mediainfo '--Inform=Video;%Duration%' "$fullfilename"` || echo Return Code is $?
-    if [[ "$duration" == "" ]] ; then
-        echo "Error no duration found for $bname"
-        exit 2
-    else
-        echo "update recordedmarkup set data = '$duration' " \
-            "where chanid = '$chanid' and starttime = '$starttime' and type = '33' and mark = '0';" | \
-        $mysqlcmd
-    fi
+    mythutil --clearseektable --chanid "$chanid" --starttime "$starttime"
+
+    set -- `ls -l "$fullfilename"`
+    filesize=$5
+
+    echo "update recorded set filesize = $filesize where chanid = '$chanid' and starttime = '$starttime';" | \
+    $mysqlcmd
+    echo "update recordedfile set filesize = $filesize, video_codec = 'H264' where basename = '$basename';" | \
+    $mysqlcmd
 else
     echo "No match in filesystem for for $bname"
     exit 2

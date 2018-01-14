@@ -199,15 +199,17 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     chmod +r "$storagedir/$realfile"
                     chmod g+w "$storagedir/$realfile"
                     chgrp mythtv "$storagedir/$realfile"
+                    set -- `ls -l "$storagedir/$realfile"`
+                    filesize=$5
                     # Find the chanid and starttime for the file
                     set -- `echo "select chanid, starttime from recorded where basename like '$basename.%';" | \
                     $mysqlcmd | tail -1`
                     chanid=$1
                     starttime="$2 $3"
-                    echo "update recorded set basename = '$realfile', transcoded = 1 where basename like '$basename.%';" | \
+                    echo "update recorded set basename = '$realfile', transcoded = 1, filesize = $filesize where basename like '$basename.%';" | \
                     $mysqlcmd
                     if [[ "$mythver" != 0.27* ]] ; then
-                        echo "update recordedfile set basename = '$realfile' where basename like '$basename.%';" | \
+                        echo "update recordedfile set basename = '$realfile', filesize = $filesize, video_codec = 'H264' where basename like '$basename.%';" | \
                         $mysqlcmd
                     fi
                     mythutil --clearseektable --chanid "$chanid" --starttime "$starttime"
