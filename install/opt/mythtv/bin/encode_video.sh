@@ -27,6 +27,8 @@ length=
 x264_preset=faster
 audiorate=48000
 Quality=
+extra_handbrake=
+handbrake=
 
 while (( "$#" >= 1 )) ; do
     case $1 in
@@ -69,6 +71,14 @@ while (( "$#" >= 1 )) ; do
             if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -l." ; error=y 
             else
                 Height="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -w)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -w." ; error=y 
+            else
+                Width="$2"
+                extra_handbrake="--no-keep-display-aspect --custom-anamorphic"
                 shift||rc=$?
             fi
             ;;
@@ -266,6 +276,10 @@ if [[ "$error" == y ]] ; then
     echo "  480 = encode to 480 rows for DVD quality"
     echo "  720 = encode to 720 rows"
     echo "  1080 = override size found with mediainfo for on demand recordings"
+    echo "-w width Number of columns e.g. 640, 1280, 1920"
+    echo "  This will distort the picture by forcing a particular size of the "
+    echo "  final video. This should be used with crop otherwise auto crop "
+    echo "  may result in an unexpected aspect ratio. "
     echo "--preset"
     echo "  XVID = encode xvid and lame to 360 rows for compatibility for small DVD player"
     echo "       This creates an avi file using xvidm and avidemux"
@@ -392,11 +406,14 @@ fi
 
 if [[ "$morph" == SQ ]] ; then
     let Width=Height*4/3 1
+    extra_handbrake="--no-keep-display-aspect --custom-anamorphic"
 elif [[ "$morph" == SQLB ]] ; then
     let Width=Height*4/3 1
     let Height=Height*3/4 1
+    extra_handbrake="--no-keep-display-aspect --custom-anamorphic"
 elif [[ "$morph" == LB ]] ; then
     let Height=Height*3/4 1
+    extra_handbrake="--no-keep-display-aspect --custom-anamorphic"
 fi
 
 
@@ -640,7 +657,7 @@ else
         -q $Quality $framerate_parm -E $audio $audio_opts \
         --audio-fallback ac3 $crop_parm $widthParm -l $Height $maxWidthParm \
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
-        $chapter_parm $handbrake
+        $chapter_parm $handbrake $extra_handbrake
     set -
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
