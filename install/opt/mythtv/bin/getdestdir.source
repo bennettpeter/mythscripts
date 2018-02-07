@@ -18,6 +18,11 @@ fi
 projname=`basename $PWD`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
 codename=`lsb_release -c|cut -f 2`
+if [[ "$SCHROOT_CHROOT_NAME" == "" ]] ; then
+    chprefix=
+else
+    chprefix="chroot-${SCHROOT_CHROOT_NAME}-"
+fi
 branch=`git branch | grep '*'| cut -f2 -d' ' | sed 's!/!-!g'`
 if [[ "$branch" == '(HEAD' ]] ; then
     branch=`git branch | grep '*'| cut -f3 -d' '`
@@ -31,7 +36,7 @@ else
     dirty="-tst"
 fi
 
-longname="$codename-$arch/$projname/$branch$dirty"
+longname="$chprefix$codename-$arch/$projname/$branch$dirty"
 destdir="$BUILDDEST/$longname"
 
 # Check short name
@@ -40,7 +45,7 @@ if [[ ! -f $HOME/.buildnames ]] ; then
 fi
 rc=0
 shortname=
-grep "longname=$longname" $HOME/.buildnames > /tmp/buildnames$$.txt || rc=$?
+grep -w "longname=$longname$" $HOME/.buildnames > /tmp/buildnames$$.txt || rc=$?
 
 if [[ "$rc" == 0 ]] ; then
     . /tmp/buildnames$$.txt

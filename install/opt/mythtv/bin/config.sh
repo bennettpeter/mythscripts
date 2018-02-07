@@ -15,9 +15,14 @@ branch=`git branch | grep '*'| cut -f2 -d' '`
 if [[ "$branch" == '(HEAD' ]] ; then
     branch=`git branch | grep '*'| cut -f3 -d' '`
 fi
+if [[ "$SCHROOT_CHROOT_NAME" == "" ]] ; then
+    chprefix=
+else
+    chprefix="chroot-${SCHROOT_CHROOT_NAME}-"
+fi
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../config_${projname}.out
 echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../config_${projname}.out
-echo "$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
+echo "$chprefix$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
 
 . "$scriptpath/setccache.source"
 
