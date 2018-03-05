@@ -5,6 +5,19 @@ set -e
 
 gitbasedir=`git rev-parse --show-toplevel`
 
+projname=`basename $PWD`
+
+if [[ "$projname" == android ]] ; then
+    apk_file=`ls -1tr mythfrontend-*.apk | tail -1`
+    if [[ "$apk_file" == "" ]] ; then
+        echo "ERROR - No apk file found"
+        exit 2
+    fi
+    ./installapk.sh "$apk_file" 2>&1 | tee install.log
+    echo "results in install.log"
+    exit
+fi
+
 # This will get projname and destdir
 . "$scriptpath/getdestdir.source"
 

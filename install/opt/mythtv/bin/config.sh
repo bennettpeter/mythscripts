@@ -6,6 +6,19 @@ set -e
 gitbasedir=`git rev-parse --show-toplevel`
 projname=`basename $PWD`
 
+case $projname in
+    myth*)
+        ;;
+    android)
+        rm  -fv build64/mythtv/stamp_configure_android
+        exit
+        ;;
+    *)
+        echo "ERROR - Unknown project $projname" >&2
+        exit 2
+        ;;
+esac
+
 git clean -Xfd
 if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
     "$scriptpath/prepare_source.sh"

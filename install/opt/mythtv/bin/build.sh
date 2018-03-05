@@ -6,6 +6,15 @@ set -e
 gitbasedir=`git rev-parse --show-toplevel`
 projname=`basename $PWD`
 
+if [[ "$projname" == android ]] ; then
+    pushd ../../mythtv/mythtv/
+    "$scriptpath/prepare_source.sh"
+    popd
+    ./mythbuild.sh 2>&1 | tee mythbuild.log
+    echo "results in mythbuild.log"
+    exit
+fi
+
 if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
     "$scriptpath/prepare_source.sh"
 fi
