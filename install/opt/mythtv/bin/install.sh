@@ -13,6 +13,7 @@ if [[ "$projname" == android ]] ; then
         echo "ERROR - No apk file found"
         exit 2
     fi
+    echo "Installing $apk_file"
     ./installapk.sh "$apk_file" 2>&1 | tee install.log
     echo "results in install.log"
     exit
