@@ -12,6 +12,6 @@ if [[ "$SCHROOT_CHROOT_NAME" == "" ]] ; then
 else
     chprefix="chroot-${SCHROOT_CHROOT_NAME}-"
 fi
-export CCACHE_DIR=$HOME/.ccache-$chprefix$codename-$arch
+#export CCACHE_DIR=$HOME/.ccache-$chprefix$codename-$arch
 
-ccache -M 5G -F 0
+ccache -M 10G -F 0
