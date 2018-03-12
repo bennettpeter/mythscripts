@@ -12,20 +12,21 @@ sel="$1"
 build=n
 if [[ "$sel" == build ]] ; then
     build=y
-    sel=all
+    shift
 fi
     
-eval files="$(echo '$'T$sel)"
-if [[ "$files" == "" ]] ; then
-    echo Required: all curr or ticket number >&2
-    echo $Tlist >&2
-    exit 2
-fi
+#~ eval files="$(echo '$'T$sel)"
+#~ if [[ "$files" == "" ]] ; then
+    #~ echo Required: all curr or ticket number >&2
+    #~ echo $Tlist >&2
+    #~ exit 2
+#~ fi
 
-shift
+files=.
+
 git status >&2
-echo Files to diff: >&2
-echo "$files" >&2
+#~ echo Files to diff: >&2
+#~ echo "$files" >&2
 (cd "$gitbasedir"; git add $files >&2)
 if [[ "$?" != 0 ]] ; then exit 2 ; fi
 git diff --cached --check >&2
