@@ -28,6 +28,7 @@ gitbranch=`git branch | grep '*'| cut -f2 -d' '`
 if [[ "$gitbranch" == '(HEAD' ]] ; then
     gitbranch=`git branch | grep '*'| cut -f3 -d' '`
 fi
+# example of packagever 30-Pre-545-g51d6fdf
 packagever=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Version"|cut -d ' ' -f 4|cut -c2-`
 packagebranch=`env LD_LIBRARY_PATH=$sourcedir/usr/lib $sourcedir/usr/bin/mythutil --version |grep "MythTV Branch"|cut -d ' ' -f 4`
 echo Package branch: $packagebranch, git branch: $gitbranch
@@ -44,7 +45,7 @@ packagever=`echo $packagever|sed  's/-pre/~pre/'`
 # Skip this check for 30 because there are already
 # some builds out there with 30-Pre.
 # If the release version is 30.0 it will be OK.
-if [[ "$v" != 30-Pre* ]] ; then
+if [[ "$packagever" != 30-Pre* ]] ; then
     packagever=`echo $packagever|sed  's/-Pre/~Pre/'`
 fi
 packagever=`echo $packagever|sed  's/-rc/~rc/'`
@@ -95,7 +96,7 @@ Architecture: $arch
 Essential: no
 Installed-Size: `du -B1024 -d0 $installdir/$packagename | cut  -f1`
 Maintainer: Peter Bennett <pbennett@mythtv.org>
-Depends: $deps libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb, python-urlgrabber, libcec3 | libcec4, libfftw3-double3, libfftw3-single3, libass5, libfftw3-3, libraw1394-11, libiec61883-0, libavc1394-0, fonts-liberation, libva-drm1, libmp3lame0
+Depends: $deps libavahi-compat-libdnssd1, libqt5widgets5, libqt5script5, libqt5sql5-mysql, libqt5xml5, libqt5network5, libqt5webkit5, pciutils, libva-x11-1, libva-glx1, libqt5opengl5, libdbi-perl,  libdbd-mysql-perl, libnet-upnp-perl, python-lxml, python-mysqldb, python-urlgrabber, libcec3 | libcec4, libfftw3-double3, libfftw3-single3, libass5, libfftw3-3, libraw1394-11, libiec61883-0, libavc1394-0, fonts-liberation, libva-drm1, libmp3lame0, libxv1, libpulse0
 Conflicts: mythtv-common, mythtv-frontend, mythtv-backend
 Homepage: http://www.mythtv.org
 Description: MythTV Light
