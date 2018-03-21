@@ -10,7 +10,7 @@ if [[ "$projname" == android ]] ; then
     pushd ../../mythtv/mythtv/
     "$scriptpath/prepare_source.sh"
     popd
-    ./mythbuild.sh 2>&1 | tee mythbuild.log
+    ./mythbuild.sh "$@" 2>&1 | tee mythbuild.log
     echo "results in mythbuild.log"
     exit
 fi
