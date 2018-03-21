@@ -52,11 +52,12 @@ if [[ "$rc" == 0 ]] ; then
 fi
 
 if [[ "$shortname" == "" ]] ; then
-    cat $HOME/.buildnames
-    echo "Please choose a short name for $longname"
-    read -e shortname
+    shortname=${chprefix:7:1}${chprefix: -1}${codename:0:1}
+    shortname=$shortname${arch:0:1}${arch: -1}${projname:0:1}${projname: -2}
+    shortname=$shortname${branch:0:1}${branch: -1}${dirty:1:1}
     echo "shortname=$shortname longname=$longname" >> $HOME/.buildnames
 fi
+echo "Build shortname=$shortname longname=$longname"
 
 
 

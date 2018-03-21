@@ -6,44 +6,27 @@ set -e
 gitbasedir=`git rev-parse --show-toplevel`
 projname=`basename $PWD`
 
-case $projname in
-    myth*)
-        ;;
-    android)
-        rm  -fv build64/mythtv/stamp_configure_android
-        exit
-        ;;
-    *)
-        echo "ERROR - Unknown project $projname" >&2
-        exit 2
-        ;;
-esac
-
-git clean -Xfd
-if [[ -x "$scriptpath/prepare_source.sh" ]] ; then
-    "$scriptpath/prepare_source.sh"
+if [[ -f $HOME/.buildrc ]] ; then
+    . $HOME/.buildrc
 fi
+
 . "$scriptpath/setccache.source"
 branch=`git branch | grep '*'| cut -f2 -d' '`
 if [[ "$branch" == '(HEAD' ]] ; then
     branch=`git branch | grep '*'| cut -f3 -d' '`
 fi
-if [[ "$SCHROOT_CHROOT_NAME" == "" ]] ; then
-    chprefix=
-else
-    chprefix="chroot-${SCHROOT_CHROOT_NAME}-"
-fi
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../config_${projname}.out
 echo "arch: $arch codename: $codename branch: $branch" >> $gitbasedir/../config_${projname}.out
 echo "$chprefix$arch/$codename/$branch" > $gitbasedir/../config_${projname}.branch
 
-. "$scriptpath/setccache.source"
-
 case $projname in
     mythtv)
+        git clean -Xfd
+        if which $BUILD_PREPARE ; then
+            $BUILD_PREPARE
+        fi
         config_opt="--enable-libmp3lame"
-        # Temporary for ffmpeg fixing
-        config_opt="$config_opt --enable-crystalhd"
+        config_opt="$config_opt $MYTHTV_CONFIG_OPT_EXTRA"
         if [[ `arch` == arm* ]] ; then
             if echo "$branch" | grep "0.28" ; then
                 omx_option="--enable-openmax"
@@ -59,6 +42,10 @@ case $projname in
         set -
         ;;
     mythplugins)
+        git clean -Xfd
+        if which $BUILD_PREPARE ; then
+            $BUILD_PREPARE
+        fi
         # Reset the mythtv config because this overwrites it
         rm -f $gitbasedir/../config_mythtv.branch
         . "$scriptpath/getdestdir.source"
@@ -73,8 +60,7 @@ case $projname in
         cd ../mythtv
         git clean -Xfd
         config_opt="--enable-libmp3lame"
-        # Temporary for ffmpeg fixing
-        config_opt="$config_opt --enable-crystalhd"
+        config_opt="$config_opt $MYTHTV_CONFIG_OPT_EXTRA"
         if [[ `arch` == arm* ]] ; then
             if echo "$branch" | grep "0.28" ; then
                 omx_option="--enable-openmax"
@@ -104,6 +90,10 @@ case $projname in
         ./configure --prefix=$destdir/usr \
          $config_opt |& tee -a  $gitbasedir/../config_${projname}.out
          set -
+        ;;
+    *)
+        echo "ERROR Unrecognized project $projname"
+        exit 2
         ;;
 esac
 echo Completed configure

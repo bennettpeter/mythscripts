@@ -11,17 +11,16 @@ gitbasedir=`git rev-parse --show-toplevel`
 gitpath="$PWD"
 
 sourcedir=$destdir
-subrelease=$1
 
 if [[ "$sourcedir" == "" ]] ; then
     echo Before running this the latest version must be built
     echo with --prefix=/usr --runprefix=/usr and installed
-    echo Parameter 1 = subrelease number
+    echo Parameter 1 = SUBRELEASE number
     echo Run this from the git source directory
     exit 2
 fi
 sourcedir=`readlink -f "$sourcedir"`
-if [[ "$subrelease" == "" ]] ; then subrelease=0 ; fi
+if [[ "$SUBRELEASE" == "" ]] ; then SUBRELEASE=0 ; fi
 gitver=`git -C "$gitpath" describe --dirty|cut -c2-`
 # gitbranch=`git branch|grep "^\* "|cut -b3-`
 gitbranch=`git branch | grep '*'| cut -f2 -d' '`
@@ -49,7 +48,7 @@ if [[ "$packagever" != 30-Pre* ]] ; then
     packagever=`echo $packagever|sed  's/-Pre/~Pre/'`
 fi
 packagever=`echo $packagever|sed  's/-rc/~rc/'`
-packagerel=$packagever-$subrelease
+packagerel=$packagever-$SUBRELEASE
 gitbasedir=`git -C "$gitpath" rev-parse --show-toplevel`
 installdir=`dirname "$gitbasedir"`
 arch=`dpkg-architecture -q DEB_TARGET_ARCH`
@@ -65,8 +64,10 @@ case $projname in
         packagename=mythtv-light_${source}${packagerel}_${arch}_$codename
         echo Package $packagename
         if [[ -f $installdir/$packagename.deb || -d $installdir/$packagename ]] ; then
-            echo $installdir/$packagename already exists - run with a subrelease number
-            exit 2
+            echo $installdir/$packagename already exists - incrementing SUBRELEASE number
+            let SUBRELEASE=SUBRELEASE+1
+            export SUBRELEASE
+            exec "$scriptname"
         fi
         rm -rf $installdir/$packagename $installdir/$packagename.deb
         cp -a "$sourcedir/" "$installdir/$packagename/"
@@ -103,10 +104,6 @@ Description: MythTV Light
  Lightweight package that installs MythTV in one package, front end
  and backend. Does not install database or services.
 FINISH
-#        cat >$installdir/$packagename/DEBIAN/postinst <<FINISH
-# pip install --upgrade future requests_cache requests
-# FINISH
-#        chmod 755 $installdir/$packagename/DEBIAN/postinst
         mkdir -p $installdir/$packagename/usr/share/applications/
         cat >$installdir/$packagename/usr/share/applications/mythtv.desktop \
         <<FINISH
@@ -155,8 +152,10 @@ FINISH
         packagename=mythplugins-light_${source}${packagerel}_${arch}_$codename
         echo Package $packagename
         if [[ -f $installdir/$packagename.deb ]] ; then
-            echo $installdir/$packagename.deb already exists - run with a subrelease number
-            exit 2
+            echo $installdir/$packagename already exists - incrementing SUBRELEASE number
+            let SUBRELEASE=SUBRELEASE+1
+            export SUBRELEASE
+            exec "$scriptname"
         fi
         if [[ ! -d $installdir/$mythtvpackagename ]] ; then
             echo $installdir/$mythtvpackagename does not exist.

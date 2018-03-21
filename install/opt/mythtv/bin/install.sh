@@ -22,8 +22,7 @@ fi
 # This will get projname and destdir
 . "$scriptpath/getdestdir.source"
 
-echo destination is  $destdir. Press enter to continue.
-read xx
+echo destination is  $destdir.
 
 echo "chroot: $SCHROOT_CHROOT_NAME" > $gitbasedir/../install_${projname}.out
 echo "branch: $branch" >> $gitbasedir/../install_${projname}.out
@@ -33,6 +32,8 @@ case $projname in
         rm -rf $destdir
         mkdir -p $destdir
         export INSTALL_ROOT=$destdir
+        ;;
+    mythplugins)
         ;;
     jampal)
         rm -rf $destdir
