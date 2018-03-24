@@ -16,6 +16,7 @@ while (( $# > 0 )) ; do
     --configopt|-c)
         configopt="$2"
         shift 2
+        ;;
     *)
         echo ERROR invalid option "$1"
         exit 2

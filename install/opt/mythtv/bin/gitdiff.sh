@@ -43,7 +43,7 @@ if [[ "$rc" == 0 ]] ; then
     if [[ "$build" == n ]] ; then
         echo enter to continue >&2; read xxxx
     fi    
-    git diff --cached "$@"
+    git diff --cached  --binary "$@"
     rc=$?
     if [[ -t 1 ]] ; then rc=0 ; fi
 fi
