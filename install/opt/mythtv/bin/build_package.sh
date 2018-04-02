@@ -19,12 +19,20 @@ while (( $# > 0 )) ; do
         ;;
     *)
         echo ERROR invalid option "$1"
+        echo "Valid options:"
+        echo "--sourcedir|-d <dirname>"
+        echo "  Source directory if it is not the current directory"
+        echo "--configopt|-c \"options\""
+        echo "  Additional configure options"
         exit 2
         ;;
   esac
 done
 
 projname=`basename $PWD`
+
+# Prompt for build destination if not already set
+. "$scriptpath/getdestdir.source"
 
 "$scriptpath/config.sh" $configopt
 

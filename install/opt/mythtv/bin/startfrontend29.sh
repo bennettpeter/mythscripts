@@ -30,7 +30,7 @@ if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh normal
 else
     resp=X
-    while [[ "$resp" != "" ]]; do
+#    while [[ "$resp" != "" ]]; do
         xrandr -s 640x480
         sleep 1
 
@@ -57,7 +57,7 @@ EOF
             firefox https://freeform.go.com/
             ;;
         esac
-    done
+#    done
 fi    
 
 if ! systemctl is-active mythtv-monitor.service \
