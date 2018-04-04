@@ -58,6 +58,6 @@ if [[ "$shortname" == "" ]] ; then
     echo "shortname=$shortname longname=$longname" >> $HOME/.buildnames
 fi
 echo "Build shortname=$shortname longname=$longname"
-
+rm -f /tmp/buildnames$$.txt
 
 

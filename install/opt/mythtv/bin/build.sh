@@ -53,10 +53,11 @@ else
     set -o pipefail
     make -j $numjobs |& tee -a $gitbasedir/../build_${projname}.out || rc=$?
 fi
+echo Log File:
+echo "$gitbasedir/../build_${projname}.out"
 
 if [[ "$rc" == 0 ]] ; then
-    echo $'\n'"Build complete - Successful"
+    echo $'\n'"Build complete - Successful" on `date`
 else
-    echo $'\n'"ERROR ERROR Build Failed rc = $rc"
+    echo $'\n'"ERROR ERROR Build Failed rc = $rc" on `date`
 fi
-echo "$gitbasedir/../build_${projname}.out"

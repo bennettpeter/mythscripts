@@ -20,10 +20,10 @@ if [[ "$rc" != 0 ]] ; then
     exit 2
 fi
 
-
 . /tmp/buildnames$$.txt
 
 destdir=
 if [[ "$longname" != "" ]] ; then
     destdir=$BUILDDEST/$longname
 fi
+rm -f /tmp/buildnames$$.txt

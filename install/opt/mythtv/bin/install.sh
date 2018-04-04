@@ -42,4 +42,4 @@ case $projname in
         ;;
 esac
 make install |& tee -a $gitbasedir/../install_${projname}.out
-echo Install Complete
+echo Install Complete on `date`
