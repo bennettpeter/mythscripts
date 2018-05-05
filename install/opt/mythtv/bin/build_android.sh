@@ -15,7 +15,8 @@ if [[ "$projname" == android ]] ; then
         $BUILD_PREPARE
     fi
     popd
-    ./mythbuild.sh --no-plugins "$@" 2>&1 | tee mythbuild.log
+    # add  --no-plugins for non plugin build in future.
+    ./mythbuild.sh "$@" 2>&1 | tee mythbuild.log
     echo "results in mythbuild.log"
 fi
 
