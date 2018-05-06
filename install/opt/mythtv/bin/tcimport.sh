@@ -68,14 +68,14 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DB
 mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
 
 if [[ "$mustdelete" == Y || "$mustdelete" == y ]] ; then
-    echo "Deleting prior run junk files from $VIDEODIR and $mountdir"
+    echo "Deleting prior run junk files from $VIDEODIR and $TCSTORAGEDIR"
     rm -fv "$VIDEODIR"/*/recordings/$junktoday/*
-    rm -fv "$mountdir/$TCSUBDIR/$junktoday"*/*
+    rm -fv "$TCSTORAGEDIR/$TCSUBDIR/$junktoday"*/*
 fi
 
-if [[ `echo "$mountdir/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts|tsx)` != \
-         "$mountdir/$TCSUBDIR/*.@(mkv|mpg|mp4|ts|tsx)" \
-   || -f "$mountdir/$TCSUBDIR/mustrun_tcencode" ]] ; then
+if [[ `echo "$TCSTORAGEDIR/$TCSUBDIR"/*.@(mkv|mpg|mp4|ts|tsx)` != \
+         "$TCSTORAGEDIR/$TCSUBDIR/*.@(mkv|mpg|mp4|ts|tsx)" \
+   || -f "$TCSTORAGEDIR/$TCSUBDIR/mustrun_tcencode" ]] ; then
     echo "WARNING: Cannot process tcimport, tcencode is not complete"
     "$scriptpath/notify.py" "tcimport failed" "Cannot process tcimport, tcencode is not complete"
     exit 99
@@ -90,11 +90,11 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
         junkdir=$junktoday$counter
     fi
     
-    if [[ ! -d "$mountdir/$TCSUBDIR/$encodedir" ]] ; then
+    if [[ ! -d "$TCSTORAGEDIR/$TCSUBDIR/$encodedir" ]] ; then
         continue
     fi
-    cd "$mountdir/$TCSUBDIR/$encodedir"
-    mkdir -p "$mountdir/$TCSUBDIR/$junkdir"
+    cd "$TCSTORAGEDIR/$TCSUBDIR/$encodedir"
+    mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/$junkdir"
 
     if  ls *.@(mkv|mp4) >/dev/null 2>/dev/null ; then 
         maindir="$PWD"
@@ -131,7 +131,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                 # example FULLNAME
                 # FULLNAME="x4a/Father Brown/150919-1800 150108 SE The Sign of the Broken Sword.mpg"
                 savedir=`dirname "$FULLNAME"`
-                mkdir -p "$mountdir/$TCSUBDIR/save$counter/$savedir"
+                mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$savedir"
                 # savewild is full name without extension
                 savewild="${FULLNAME%.*}"
                 for xyz in "$realdir/$basename".* ; do
@@ -144,12 +144,12 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                     # Remove SE if there is no episode info
                     newname=`echo "$newname" | sed 's!/\([0-9][0-9][0-9][0-9][0-9][0-9]\) SE !/\1 !'`
                     # In case there are duplicates of the same name (e.g. recording was split in 2), keep full name.
-                    if [[ -f "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext" ]] ; then
-                        mv -v --backup=numbered "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext" \
-                              "$mountdir/$TCSUBDIR/save$counter/$newname Part 1.$saveext"
+                    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname.$saveext" ]] ; then
+                        mv -v --backup=numbered "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname.$saveext" \
+                              "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname Part 1.$saveext"
                     fi
-                    if [[ -f "$mountdir/$TCSUBDIR/save$counter/$newname Part 1.$saveext" ]] ; then
-                        lastnum=`echo "$mountdir/$TCSUBDIR/save$counter/$newname Part "?."$saveext" \
+                    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname Part 1.$saveext" ]] ; then
+                        lastnum=`echo "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname Part "?."$saveext" \
                           | sed "s/.* //;s/\..*//"`
                         if [[ "$lastnum" == "?" ]] ; then
                             lastnum=0
@@ -159,7 +159,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                             newname="$newname Part $lastnum"
                         fi
                     fi
-                    ln -v --backup=numbered "$xyz" "$mountdir/$TCSUBDIR/save$counter/$newname.$saveext"
+                    ln -v --backup=numbered "$xyz" "$TCSTORAGEDIR/$TCSUBDIR/save$counter/$newname.$saveext"
                 done
             fi
             if [[ "${IMPORT_TRANSCODE[counter]}" == Y ]] ; then
@@ -253,7 +253,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
             fi
             cd "$maindir"
             mv -fv "$file" "$file"_encdone
-            mv -fv "$basename"* "$mountdir/$TCSUBDIR/$junkdir/"
+            mv -fv "$basename"* "$TCSTORAGEDIR/$TCSUBDIR/$junkdir/"
             if [[ "$NEW_RECGROUP" != "" ]] ; then
                 if [[ "$NEW_RECGROUP" == Deleted ]] ; then
                     sql_extra=", autoexpire = 9999 "
@@ -276,20 +276,20 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
         done
     fi
 done
-if ls "$mountdir/$TCSUBDIR/"*_done ; then
-    mkdir -p "$mountdir/$TCSUBDIR/$junktoday/" 
-    for file in "$mountdir/$TCSUBDIR/"*_done ; do
+if ls "$TCSTORAGEDIR/$TCSUBDIR/"*_done ; then
+    mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/$junktoday/"
+    for file in "$TCSTORAGEDIR/$TCSUBDIR/"*_done ; do
         bname="${file%.*}"
-        mv -fv "$bname".* "$mountdir/$TCSUBDIR/$junktoday/" 
+        mv -fv "$bname".* "$TCSTORAGEDIR/$TCSUBDIR/$junktoday/"
     done
 fi
 echo "Files ready to delete"
 cd "$VIDEODIR"
-ls -l  "$mountdir/$TCSUBDIR/$junktoday"*/* || true
+ls -l  "$TCSTORAGEDIR/$TCSUBDIR/$junktoday"*/* || true
 if [[ "$mustdelete" == "" ]] ; then
     echo "Delete? (y/n)"
     read -e deletenow
 fi
 if [[ "$deletenow" == Y || "$deletenow" == y ]] ; then
-    rm -fv "$mountdir/$TCSUBDIR/$junktoday"/*
+    rm -fv "$TCSTORAGEDIR/$TCSUBDIR/$junktoday"/*
 fi

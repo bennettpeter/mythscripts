@@ -1,6 +1,10 @@
 #!/bin/bash
 # Export files for transcoding
 
+# -----------------------------------
+# Note this is not used by daily runs
+# -----------------------------------
+
 set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -34,9 +38,9 @@ if [[ "$5" != "" ]] ; then
 fi
 
 mount "$mountdir" || true
-mkdir -p "$mountdir/$TCSUBDIR/hostlock/"
+mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/hostlock/"
 hostname=`cat /etc/hostname`
-echo "hold" > "$mountdir/$TCSUBDIR/hostlock/$hostname"
+echo "hold" > "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
 
 echo make links to shows ...
 $scriptpath/mythlinks.sh
@@ -79,7 +83,7 @@ for grpdir in $srchgrp "$RECGROUP" ; do
                 if (( counter > NUMSKIP )) ; then
                     if [[ "$episode" == *.mpg ]] ; then
                         echo "Title: $titledir, Episode: $episode"
-                        cp -fv `readlink "$episode"` "$mountdir/$TCSUBDIR/"
+                        cp -fv `readlink "$episode"` "$TCSTORAGEDIR/$TCSUBDIR/"
                         let files=files+1
                     fi
                 fi
@@ -90,6 +94,6 @@ for grpdir in $srchgrp "$RECGROUP" ; do
         fi
     done
 done
-echo $files files copied to "$mountdir/$TCSUBDIR/"
-rm -f "$mountdir/$TCSUBDIR/hostlock/$hostname"
+echo $files files copied to "$TCSTORAGEDIR/$TCSUBDIR/"
+rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
 

@@ -79,15 +79,15 @@ fi
 
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
     # Do not shut down if hold is set
-    mkdir -p  "$TCMOUNTDIR/$TCSUBDIR/"
-    if [[ -f "$TCMOUNTDIR/$TCSUBDIR/hostlock" ]] ; then
-        otherhost=`cat "$TCMOUNTDIR/$TCSUBDIR/hostlock"` 
+    mkdir -p  "$TCSTORAGEDIR/$TCSUBDIR/"
+    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock" ]] ; then
+        otherhost=`cat "$TCSTORAGEDIR/$TCSUBDIR/hostlock"`
         if ping -c 1 $otherhost || ( sleep 5 && ping -c 1 $otherhost ) ; then
             echo $DATE "hostlock set by $otherhost, don't shut down for 5 min."
             rc=1
         else
             echo $DATE "Expired hostlock set by $otherhost, removed."
-            rm -f "$TCMOUNTDIR/$TCSUBDIR/hostlock"
+            rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock"
         fi
     fi
     # Check if multi_encode.sh script is running
@@ -99,7 +99,7 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
     elif ps -ef|egrep "$encoders"|egrep -v "grep " ; then
         echo $DATE "encoders are running, don't shut down for 5 min."
         rc=1
-    elif [[ -f "$TCMOUNTDIR/$TCSUBDIR"/mustrun_tcencode ]] ; then
+    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/mustrun_tcencode ]] ; then
         nohup "$scriptpath/tcencode.sh" >/dev/null 2>&1 &
         echo $DATE "starting tcencode, don't shut down for 5 min."
         rc=1

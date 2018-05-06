@@ -8,7 +8,7 @@ scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
 
-cd "$TCMOUNTDIR/$TCSUBDIR"
+cd "$TCSTORAGEDIR/$TCSUBDIR"
 
 date 
 

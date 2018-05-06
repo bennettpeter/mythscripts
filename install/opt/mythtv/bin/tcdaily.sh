@@ -74,14 +74,14 @@ function wakeup_server {
             fi
             sleep 10
         done
-        echo "$hostname" > "$TCMOUNTDIR/keepalive/$hostname"
+        echo "$hostname" > "$TCSTORAGEDIR/keepalive/$hostname"
         mounted=Y
     fi
 }
 
 function exitfunc {
     if [[ "$mounted" == Y ]] ; then
-        rm -f "$TCMOUNTDIR/keepalive/$hostname"
+        rm -f "$TCSTORAGEDIR/keepalive/$hostname"
         if [[ "$tcserver" != UUID ]] ; then
             umount "$TCMOUNTDIR" || true
         fi
@@ -159,13 +159,13 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                 if [[ "$episode" < "$lastdate" ]] ; then
                     if [[ "$mounted" == N ]] ; then
                         wakeup_server
-                        if  ls "$TCMOUNTDIR/$TCSUBDIR"/*.@(mpg|ts|tsx|mkv|mp4) 2>/dev/null ; then
-                            echo "ERROR There are prior transcode files already in $TCMOUNTDIR/$TCSUBDIR , aborting"
-                            "$scriptpath/notify.py" "tcdaily failed" "There are prior transcode files already in $TCMOUNTDIR/$TCSUBDIR"
+                        if  ls "$TCSTORAGEDIR/$TCSUBDIR"/*.@(mpg|ts|tsx|mkv|mp4) 2>/dev/null ; then
+                            echo "ERROR There are prior transcode files already in $TCSTORAGEDIR/$TCSUBDIR , aborting"
+                            "$scriptpath/notify.py" "tcdaily failed" "There are prior transcode files already in $TCSTORAGEDIR/$TCSUBDIR"
                             exit 2
                         fi
                         echo "Deleting prior run junk files"
-                        rm -fv "$TCMOUNTDIR/$TCSUBDIR/$junktoday"/*
+                        rm -fv "$TCSTORAGEDIR/$TCSUBDIR/$junktoday"/*
                     fi
                     set -- `ls -lL "$episode"`
                     filesize="$5"
@@ -228,25 +228,25 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                     bname=`basename "$filename"`
                     if [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
                         echo "$episode - $bname is recorded from VOD, skip"
-                    elif [[ -f "$TCMOUNTDIR/$TCSUBDIR"/${bname}_failed ]] ; then
+                    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed ]] ; then
                         "$scriptpath/notify.py" "Transcode failed" "$episode - $bname"
-                        mv -f "$TCMOUNTDIR/$TCSUBDIR"/${bname}_failed "$TCMOUNTDIR/$TCSUBDIR"/${bname}_failed_reported
-                    elif [[ -f "$TCMOUNTDIR/$TCSUBDIR"/${bname}_failed_reported ]] ; then
+                        mv -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed_reported
+                    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed_reported ]] ; then
                         echo "Already reported failed $episode - $bname , skip"
-                    elif [[ -f "$TCMOUNTDIR/$TCSUBDIR"/${bname} ]] ; then
+                    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname} ]] ; then
                         echo "Already copied $episode - $bname , skip"
                     else
                         epbname=`basename "${episode%.*}"`
                         . "$epbname.settings"
-                        $mustecho cp -f -v $symlinks "$filename" "$TCMOUNTDIR/$TCSUBDIR/"
+                        $mustecho cp -f -v $symlinks "$filename" "$TCSTORAGEDIR/$TCSUBDIR/"
                         bname="${bname%.*}"
                         optname=$RECGROUP
                         if [[ ! -f "/etc/opt/mythtv/$optname.options" ]] ; then
                             optname=Default
                         fi
                         $mustecho ln -s -f -v "/etc/opt/mythtv/$optname.options" \
-                            "$TCMOUNTDIR/$TCSUBDIR/$bname.options"
-                        $mustecho cp -f "$epbname.settings" "$TCMOUNTDIR/$TCSUBDIR/$bname.settings"
+                            "$TCSTORAGEDIR/$TCSUBDIR/$bname.options"
+                        $mustecho cp -f "$epbname.settings" "$TCSTORAGEDIR/$TCSUBDIR/$bname.settings"
                         let files=files+1 1
                         let accumsize=accumsize+filesize 1
                         let accummins=accummins+minutes 1
@@ -259,9 +259,9 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
 done
 
 if (( files > 0 )) ; then
-    echo "run" > "$TCMOUNTDIR/$TCSUBDIR"/mustrun_tcencode
+    echo "run" > "$TCSTORAGEDIR/$TCSUBDIR"/mustrun_tcencode
     echo "run" > "$DATADIR"/mustrun_tcimport
 fi
 
-echo $files files, size $accumsize bytes, length $accummins minutes copied to "$TCMOUNTDIR/$TCSUBDIR/"
+echo $files files, size $accumsize bytes, length $accummins minutes copied to "$TCSTORAGEDIR/$TCSUBDIR/"
 
