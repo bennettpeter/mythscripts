@@ -74,6 +74,10 @@ fi
 #    create_dir $TCMOUNTDIR/keepalive 2775
 #fi
 
+if [[ "$CAN_TRANSCODE" == Y ]] ; then
+    create_dir $TCSTORAGEDIR/keepalive 2775
+fi
+
 mkdir -p $scriptpath/backup/
 if [[ -f /etc/opt/mythtv/mythtv.conf ]] ; then
     if ! diff install/etc/opt/mythtv/${hostname}_mythtv.conf /etc/opt/mythtv/mythtv.conf ; then
