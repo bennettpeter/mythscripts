@@ -144,7 +144,12 @@ x_user=`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`
 # this fixes it to just take the first
 set -- $x_user
 x_user="$1"
-xrdp_users=`pidof Xvnc|wc -w`
+xvnc_users=`pidof Xvnc|wc -w`
+xrdp_users=`pidof xrdp|wc -w`
+if (( xrdp_users > 0 )) ; then
+    let xrdp_users=xrdp_users-1
+fi
+let xrdp_users=xrdp_users+xvnc_users
 
 if [[ -f $DATADIR/checklogin && "$rc" == 0 ]] ; then
     rm -f $DATADIR/checklogin
@@ -160,7 +165,7 @@ if [[ "$reason" != powerbtn && "$ssh_users" != 0 ]] ; then
     rc=1
 fi
 
-if [[ "$xrdp_users" != 0 ]] ; then
+if (( xrdp_users > 0 )) ; then
     echo $DATE Somebody is still logged in via xrdp, don\'t shut down!
     echo $DATE > $DATADIR/checklogin
     rc=1
