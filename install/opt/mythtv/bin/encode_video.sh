@@ -661,6 +661,10 @@ else
     set -
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
+    ffprobe "$input" |& grep "Closed Captions";cc=$?
+    if (( cc == 0  )) ; then
+        let numinsub=numinsub+1
+    fi
     if (( numinsub > 0 && numoutsub == 0 )) ; then
         # Extract Closed captions
         srtfile="$output_dname/$output_bname.srt.tmp"
