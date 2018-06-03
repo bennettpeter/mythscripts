@@ -657,8 +657,10 @@ else
         -q $Quality $framerate_parm -E $audio $audio_opts \
         --audio-fallback ac3 $crop_parm $widthParm -l $Height $maxWidthParm \
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
-        $chapter_parm $handbrake $extra_handbrake
+        $chapter_parm $handbrake $extra_handbrake ; rc=$?
     set -
+    echo HandBrakeCLI Return Code $rc
+    if [[ "$rc" != 0 ]] ; then exit $rc ; fi
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     ffprobe "$input" |& grep "Closed Captions";cc=$?
@@ -666,7 +668,7 @@ else
         let numinsub=numinsub+1
     fi
     if (( numinsub > 0 && numoutsub == 0 )) ; then
-        # Extract Closed captions
+        echo Extract Closed captions
         srtfile="$output_dname/$output_bname.srt.tmp"
         ccextractor "$input" -o $srtfile
         srtleng=`ls -l "$srtfile" | cut -d' ' -f5`
