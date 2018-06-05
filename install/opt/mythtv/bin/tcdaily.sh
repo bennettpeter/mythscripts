@@ -235,6 +235,8 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                         echo "Already reported failed $episode - $bname , skip"
                     elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname} ]] ; then
                         echo "Already copied $episode - $bname , skip"
+                    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_done ]] ; then
+                        echo "Already transcoded $episode - $bname , skip"
                     else
                         epbname=`basename "${episode%.*}"`
                         . "$epbname.settings"
