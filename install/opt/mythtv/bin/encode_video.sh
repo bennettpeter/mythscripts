@@ -658,12 +658,12 @@ else
         --audio-fallback ac3 $crop_parm $widthParm -l $Height $maxWidthParm \
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
         $chapter_parm $handbrake $extra_handbrake ; rc=$?
-    set -
     echo HandBrakeCLI Return Code $rc
     if [[ "$rc" != 0 ]] ; then exit $rc ; fi
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
-    ffprobe "$input" |& grep "Closed Captions";cc=$?
+    cc=0
+    ffprobe "$input" |& grep "Closed Captions" || cc=$?
     if (( cc == 0  )) ; then
         let numinsub=numinsub+1
     fi
@@ -684,7 +684,6 @@ else
         outfile=`basename "$output"`
         outfilebase="${outfile%.*}"
         mp4outfile="$outdir/$outfilebase.mp4"
-        set -x
         ffmpeg -y -i "$output"  -acodec copy -vcodec copy -f mp4  "$mp4outfile"
     fi
     if [[ "$toavi" == y ]] ; then
@@ -692,13 +691,11 @@ else
         outfile=`basename "$output"`
         outfilebase="${outfile%.*}"
         avioutfile="$outdir/$outfilebase.avi"
-        set -x
         "$scriptname" -i "$output" -o "$avioutfile" -e xvidm 
     fi
     if [[ "$tomp4" == y || "$toavi" == y ]] ; then
         srtoutfile="$outdir/$outfilebase.srt"
         mkvextract tracks "$output" 2:"$srtoutfile" || echo "Subtitle extract failed"
-        set -
     fi
 
 fi
