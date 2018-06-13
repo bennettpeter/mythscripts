@@ -252,12 +252,13 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
 #    fi
     # If frontend running and not in standby, do not shut down
     if  pidof mythfrontend ; then
-        fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
-        if [[ "$fstate" != standbymode ]] ; then
+        # This now (6/13/2018) causes a brief pause in playback so dont use it
+        # fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
+        # if [[ "$fstate" != standbymode ]] ; then
             echo "$DATE frontend running - $fstate - don't shut down"
             echo $DATE > $DATADIR/checklogin
             rc=1
-        fi
+        # fi
     fi
 fi
 
