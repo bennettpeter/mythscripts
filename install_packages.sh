@@ -7,6 +7,9 @@ sudo apt install git
 
 sudo apt install fswebcam
 
+# These are for backend
+sudo apt install xmltv apache2 php php-mysql
+
 if [[ `arch` == x86_64 ]] ; then
     wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
     # Add this to /etc/apt/sources.list.d/mkvtoolnix.download.list:

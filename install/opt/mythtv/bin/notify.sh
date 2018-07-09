@@ -5,6 +5,9 @@
 # Content
 # [mail, nomail] default mail
 
+echo  OBSOLETE - use notify.py
+exit 99
+
 set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
