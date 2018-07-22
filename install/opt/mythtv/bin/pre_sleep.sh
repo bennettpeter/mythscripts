@@ -3,7 +3,7 @@
 #This is run before sleep, hibernate, etc.
 
 killall mythfrontend
-systemctl stop mythtv-backend.service
+# systemctl stop mythtv-backend.service
 
 # systemctl stop mysql.service
 
