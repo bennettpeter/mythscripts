@@ -243,25 +243,6 @@ if ps -e|grep 'mythweb\.pl' ; then
     rc=1
 fi
 
-#removed && "$rc" == 0
-if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn ]] ; then
-#    # if front end waiting for backend to start do not shut down
-#    if ps -e|grep zenity ; then
-#        echo "$DATE zenity running - frontend is starting - don't shut down"
-#        rc=1
-#    fi
-    # If frontend running and not in standby, do not shut down
-    if  pidof mythfrontend ; then
-        # This now (6/13/2018) causes a brief pause in playback so dont use it
-        # fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
-        # if [[ "$fstate" != standbymode ]] ; then
-            echo "$DATE frontend running - $fstate - don't shut down"
-            echo $DATE > $DATADIR/checklogin
-            rc=1
-        # fi
-    fi
-fi
-
 # Check if anybody is accessing my drives via nfs
 if [[ -f /usr/sbin/nfsstat && -f /proc/net/rpc/nfsd ]] ; then
     touch /tmp/${userid}_mythshutdown_nfs_count
@@ -301,6 +282,24 @@ if [[ "$canshut" == 0 ]] ; then
     echo $DATE "CPU Busy - idle = $idle %, don't shut down for 10 min"
     echo $DATE > $DATADIR/checklogin
     rc=1
+fi
+
+if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn && "$rc" == 0 ]] ; then
+#    # if front end waiting for backend to start do not shut down
+#    if ps -e|grep zenity ; then
+#        echo "$DATE zenity running - frontend is starting - don't shut down"
+#        rc=1
+#    fi
+    # If frontend running and not in standby, do not shut down
+    if  pidof mythfrontend ; then
+        # This now (6/13/2018) causes a brief pause in playback so only use it after other checks
+        fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
+        if [[ "$fstate" != standbymode ]] ; then
+            echo "$DATE frontend running - $fstate - don't shut down"
+            echo $DATE > $DATADIR/checklogin
+            rc=1
+        fi
+    fi
 fi
 
 #if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
