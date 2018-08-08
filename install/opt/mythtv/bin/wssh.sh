@@ -3,12 +3,16 @@
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 ssh_port=22
+connect_ssh=Y
 
 while (( "$#" >= 1 )) ; do
     case $1 in
         -p)
             ssh_port="$2"
             shift||rc=$?
+            ;;
+        -n)
+            connect_ssh=N
             ;;
         -*)
             err=Y
@@ -24,6 +28,7 @@ done
 if [[ "$err" == Y || "$machine" == "" ]] ; then 
     echo "Parameters"
     echo "-p port"
+    echo "-n [do not connect ssh]"
     echo "machine"
     exit 2
 fi
@@ -35,5 +40,8 @@ for (( counter=0 ; counter<maxcount ; counter+=1 )) ; do
     nc -z -v $machine $ssh_port && break
     sleep 0.2
 done
-ssh -p $ssh_port $machine
+
+if [[ "$connect_ssh" == Y ]] ; then
+    ssh -p $ssh_port $machine
+fi
 
