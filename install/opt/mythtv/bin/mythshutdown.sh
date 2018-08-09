@@ -284,7 +284,7 @@ if [[ "$canshut" == 0 ]] ; then
     rc=1
 fi
 
-if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn && "$rc" == 0 ]] ; then
+if [[ "$IS_BACKEND" != true && "$reason" != powerbtn ]] ; then
 #    # if front end waiting for backend to start do not shut down
 #    if ps -e|grep zenity ; then
 #        echo "$DATE zenity running - frontend is starting - don't shut down"
@@ -292,8 +292,9 @@ if [[ "$IS_BACKEND" != true  && "$reason" != powerbtn && "$rc" == 0 ]] ; then
 #    fi
     # If frontend running and not in standby, do not shut down
     if  pidof mythfrontend ; then
-        # This now (6/13/2018) causes a brief pause in playback so only use it after other checks
-        fstate=`echo query location | nc -q 1 localhost 6546 | grep "#" | sed "s/# //"|dos2unix`
+        fstate=`( sleep 1 ; echo query location ; sleep 1 ; echo quit ) \
+                | nc localhost 6546 | grep "#" | head -1 | sed  "s/# //" \
+                | dos2unix`
         if [[ "$fstate" != standbymode ]] ; then
             echo "$DATE frontend running - $fstate - don't shut down"
             echo $DATE > $DATADIR/checklogin
