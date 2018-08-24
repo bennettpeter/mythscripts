@@ -8,7 +8,7 @@ projname=`basename $PWD`
 case $projname in
     android)
 #        rm -vf build64/mythtv/stamp_configure_android
-        ./mythbuild.sh fresh
+        ./mythbuild.sh "$@" fresh
         ;;
     *)
         "$scriptpath/config.sh" "$@"
