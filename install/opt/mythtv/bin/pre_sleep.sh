@@ -2,6 +2,12 @@
 #systemd
 #This is run before sleep, hibernate, etc.
 
+# Prevent duplicate sleep requests
+DATE=`date +%F\ %T\.%N`
+DATADIR=/var/opt/mythtv
+echo $DATE > $DATADIR/checklogin
+chown mythtv:mythtv $DATADIR/checklogin
+
 killall mythfrontend
 # systemctl stop mythtv-backend.service
 
