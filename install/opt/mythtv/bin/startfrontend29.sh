@@ -26,7 +26,33 @@ xset s noblank     # don't blank the video device
 
 if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh high
-    mythfrontend -O libCECEnabled=$CEC_ENABLED
+
+resp=$(zenity --list --column="Pick One" <<EOF
+MythTV
+ShowMax
+Amazon Video
+Freeform
+AlJazeera
+EOF
+)
+    case $resp in
+    MythTV)
+        mythfrontend -O libCECEnabled=$CEC_ENABLED
+        ;;
+    ShowMax)
+        chromium-browser https://www.showmax.com/eng/
+        ;;
+    Amazon\ Video)
+        chromium-browser https://www.amazon.com/gp/video/watchlist/ref=sv_atv_8
+        ;;
+    Freeform)
+        chromium-browser https://freeform.go.com/
+        ;;
+    AlJazeera)
+        chromium-browser https://www.aljazeera.com/live/
+        ;;
+    esac
+
     sudo $scriptpath/setgovernor.sh normal
 else
     resp=X
@@ -39,6 +65,7 @@ MythTV
 ShowMax
 Amazon Video
 Freeform
+AlJazeera
 EOF
 )
         xrandr -s 1920x1080
@@ -55,6 +82,9 @@ EOF
             ;;
         Freeform)
             firefox https://freeform.go.com/
+            ;;
+        AlJazeera)
+            firefox https://www.aljazeera.com/live/
             ;;
         esac
 #    done
