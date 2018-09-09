@@ -24,10 +24,10 @@ if [[ "$today" == Sat* ]]; then
     fi
     if [[ "$prev_dbbackup" != "$today" ]] ; then
         # Reboot the ceton infinitv
-        if [[ "$USE_CETON" == true ]] ; then
-            echo $DATE "Rebooting Ceton Infinitv"
-            wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
-        fi
+        #if [[ "$USE_CETON" == true ]] ; then
+        #    echo $DATE "Rebooting Ceton Infinitv"
+        #    wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
+        #fi
         echo $DATE "Running mythtv_db_backup."
         $scriptpath/mythtv_dbbackup.sh >> $LOGDIR/mythtv_dbbackup.log 2>&1
         rc=$?
