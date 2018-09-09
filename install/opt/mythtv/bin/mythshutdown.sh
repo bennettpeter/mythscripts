@@ -312,6 +312,15 @@ fi
 #    # Unmount videos
 #    $scriptpath/mount_videos.sh umount
 # fi
+
+if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
+    # Reboot the ceton infinitv
+    if [[ "$USE_CETON" == true ]] ; then
+        echo $DATE "Rebooting Ceton Infinitv"
+        wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
+    fi
+fi
+
 echo $rc > $DATADIR/mythshutdown_rc
 echo mythshutdown.sh $reason return code $rc
 exit $rc
