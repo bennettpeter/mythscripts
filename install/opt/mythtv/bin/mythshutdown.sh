@@ -316,7 +316,9 @@ fi
 if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
     # Reboot the ceton infinitv
     if [[ "$USE_CETON" == true ]] ; then
-        count=`find "$VIDEODIR" -newer $DATADIR/last_ceton_reboot -name '*.ts*' 2>/dev/null | wc -l`
+        find "$VIDEODIR" -newer $DATADIR/last_ceton_reboot \
+          \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | tee /tmp/find$$
+        count=`cat /tmp/find$$ | wc -l`
         if (( count > 0 )) ; then
             echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')' 
             echo reboot suppressed.
