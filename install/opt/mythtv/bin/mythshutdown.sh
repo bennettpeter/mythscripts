@@ -316,13 +316,12 @@ fi
 if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
     # Reboot the ceton infinitv
     if [[ "$USE_CETON" == true ]] ; then
-        find "$VIDEODIR" -newer $DATADIR/last_ceton_reboot \
+        find "$VIDEODIR"/video*/recordings -newer $DATADIR/last_ceton_reboot \
           \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | tee /tmp/find$$
         count=`cat /tmp/find$$ | wc -l`
         if (( count > 0 )) ; then
             echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')' 
-            echo reboot suppressed.
-            # wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
+            wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
             date > $DATADIR/last_ceton_reboot
         fi
     fi
