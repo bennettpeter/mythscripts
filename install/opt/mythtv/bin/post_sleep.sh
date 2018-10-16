@@ -2,6 +2,8 @@
 #systemd
 #This is run after sleep, hibernate, etc.
 
+. /etc/opt/mythtv/mythtv.conf 
+
 #if systemctl is-enabled mysql.service ; then
 #    systemctl start mysql.service
 #fi
@@ -13,10 +15,11 @@
 #    systemctl restart nfs-client.target
 #fi
 
-# bluetooth service immediately restarts if stopped
-# restart command does nothing
-#if systemctl is-enabled bluetooth.service ; then
-#    systemctl stop bluetooth.service
-#fi
+# restart bluetooth when needed
+if [[ "$RESTART_BLUETOOTH" == Y ]] ; then
+    if systemctl is-enabled bluetooth.service ; then
+        systemctl restart bluetooth.service
+    fi
+fi
 
 exit 0
