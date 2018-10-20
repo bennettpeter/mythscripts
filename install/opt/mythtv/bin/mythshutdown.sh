@@ -193,7 +193,7 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; t
     fi
     if (( idletime < 900000 )) ; then
         echo "$DATE Primary screen x activity going on recently - $idletime - don't shut down"
-        echo $DATE > $DATADIR/checklogin
+        # echo $DATE > $DATADIR/checklogin
         rc=1
     fi
     echo $idletime > /tmp/${userid}_mythshutdown_prior_idletime
