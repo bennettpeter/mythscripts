@@ -3,6 +3,9 @@
 
 sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix
 
+#raspberry pi
+sudo apt install figlet gdebi-core dos2unix ansible
+
 sudo apt install git
 
 sudo apt install fswebcam
