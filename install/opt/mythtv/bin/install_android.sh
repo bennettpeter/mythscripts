@@ -10,6 +10,7 @@ projname=`basename $PWD`
 
 if [[ "$projname" == android ]] ; then
     ARM64=0
+    $HOME/android/setenv.sh
     source ./make.inc
     if [[ "$opt" == "--oldarm" ]] ; then
         apk_file=`ls -1tr mythfrontend-*-armold-*.apk | tail -1`
