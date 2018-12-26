@@ -1,6 +1,6 @@
 #!/bin/bash
 # Export files for roaming MythTV
-# TODO - copy channels from .mythtv directory
+
 set -e
 
 . /etc/opt/mythtv/mythtv.conf
@@ -27,10 +27,11 @@ echo "SELECT basename FROM recorded
         where recgroups.recgroup in ($ROAM_CATEGORIES);" | \
         $mysqlcmd > /tmp/files$$.txt
 
+# NOTE THIS ONLY WORKS IF RECORDING DIRECTORIES AND FILES HAVE NO SPACES IN THE NAMES
 while read -r filename ; do
-    fullfilename=`find "$VIDEODIR" -name $filename 2>/dev/null` || true
+    fullfilename=`find "$VIDEODIR" -name "$filename" -o -name "$filename.*" 2>/dev/null` || true
     if [[ "$fullfilename" != "" ]] ; then
-        ln -s "$fullfilename" "$LINKSDIR"/roam/$filename
+        ln -s $fullfilename "$LINKSDIR"/roam/
     fi
 done < /tmp/files$$.txt
 
@@ -58,6 +59,7 @@ mkdir -p $ROAMDIR/recordings
 rsync -vLdpt --chmod=g+w --delete-before "$LINKSDIR"/roam/ $ROAMDIR/recordings/
 
 mkdir -p $ROAMDIR/channels
+# CHANNEL_ICON_DIR example /home/mythtv/.mythtv/channels
 rsync -vdpt  --chmod=g+w --delete-before "$CHANNEL_ICON_DIR"/ $ROAMDIR/channels/
 
 for subdir in $otherdirs ; do
