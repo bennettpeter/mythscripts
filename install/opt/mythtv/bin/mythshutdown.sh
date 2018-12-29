@@ -79,17 +79,17 @@ fi
 
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
     # Do not shut down if hold is set
-    mkdir -p  "$TCSTORAGEDIR/$TCSUBDIR/"
-    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock" ]] ; then
-        otherhost=`cat "$TCSTORAGEDIR/$TCSUBDIR/hostlock"`
-        if ping -c 1 $otherhost || ( sleep 5 && ping -c 1 $otherhost ) ; then
-            echo $DATE "hostlock set by $otherhost, don't shut down for 5 min."
-            rc=1
-        else
-            echo $DATE "Expired hostlock set by $otherhost, removed."
-            rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock"
-        fi
-    fi
+#    mkdir -p  "$TCSTORAGEDIR/$TCSUBDIR/"
+#    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock" ]] ; then
+#        otherhost=`cat "$TCSTORAGEDIR/$TCSUBDIR/hostlock"`
+#        if ping -c 1 $otherhost || ( sleep 5 && ping -c 1 $otherhost ) ; then
+#            echo $DATE "hostlock set by $otherhost, don't shut down for 5 min."
+#            rc=1
+#        else
+#            echo $DATE "Expired hostlock set by $otherhost, removed."
+#            rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock"
+#        fi
+#    fi
     # Check if multi_encode.sh script is running
     # if there are other encoders add them here
     encoders='HandBrakeCLI|ffmpeg|avidemux3_cli'
@@ -108,18 +108,18 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
     ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
 fi
 # Check for generic hostlock
-for file in "$LOCALSTORE/keepalive"/* $KEEPALIVE_HOSTS ; do
-    otherhost=`basename "$file"`
-    if [[ "$otherhost" != '*' ]] ; then
-        if ping -c 1 $otherhost || ( sleep 5 && ping -c 1 $otherhost ) ; then
-            echo $DATE "keepalive set by $otherhost, don't shut down for 5 min."
-            rc=1
-        else
-            echo $DATE "Expired keepalive set by $otherhost, removed."
-            rm -f "$file"
-        fi
-    fi
-done
+#for file in "$LOCALSTORE/keepalive"/* $KEEPALIVE_HOSTS ; do
+#    otherhost=`basename "$file"`
+#    if [[ "$otherhost" != '*' ]] ; then
+#        if ping -c 1 $otherhost || ( sleep 5 && ping -c 1 $otherhost ) ; then
+#            echo $DATE "keepalive set by $otherhost, don't shut down for 5 min."
+#            rc=1
+#        else
+#            echo $DATE "Expired keepalive set by $otherhost, removed."
+#            rm -f "$file"
+#        fi
+#    fi
+#done
 
 # Find unix id of SOFT_USER
 soft_unix_id=`grep ^$SOFT_USER: /etc/passwd|cut -d : -s -f 3`
@@ -237,9 +237,15 @@ if [[ "$access" != "" && "$reason" != powerbtn ]] ; then
 fi
 
 # Check if playing a show over http
-if ps -e|grep 'mythweb\.pl' ; then
-    echo $DATE "mythweb.pl is running, don't shut down for 10 min."
-    echo $DATE > $DATADIR/checklogin
+#if ps -e|grep 'mythweb\.pl' ; then
+#    echo $DATE "mythweb.pl is running, don't shut down for 10 min."
+#    echo $DATE > $DATADIR/checklogin
+#    rc=1
+#fi
+
+# Check if roamexport is running
+if ps -ef|grep roamexport.sh|grep -v grep ; then
+    echo $DATE "roamexport.sh is running, don't shut down for 5 min."
     rc=1
 fi
 

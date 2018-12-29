@@ -38,9 +38,9 @@ if [[ "$5" != "" ]] ; then
 fi
 
 mount "$mountdir" || true
-mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/hostlock/"
-hostname=`cat /etc/hostname`
-echo "hold" > "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
+# mkdir -p "$TCSTORAGEDIR/$TCSUBDIR/hostlock/"
+# hostname=`cat /etc/hostname`
+# echo "hold" > "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
 
 echo make links to shows ...
 $scriptpath/mythlinks.sh
@@ -95,5 +95,5 @@ for grpdir in $srchgrp "$RECGROUP" ; do
     done
 done
 echo $files files copied to "$TCSTORAGEDIR/$TCSUBDIR/"
-rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
+# rm -f "$TCSTORAGEDIR/$TCSUBDIR/hostlock/$hostname"
 

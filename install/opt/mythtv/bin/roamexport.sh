@@ -1,12 +1,15 @@
 #!/bin/bash
 # Export files for roaming MythTV
+# run with nohup - output goes to scripts directory
 
 set -e
-
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
+exec 1>>$LOGDIR/${scriptname}.log
+exec 2>&1
+date
 
 if [[ ! -d "$LINKSDIR" ]] ; then
     mkdir -p "$LINKSDIR"

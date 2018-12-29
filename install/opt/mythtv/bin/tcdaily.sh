@@ -74,14 +74,14 @@ function wakeup_server {
             fi
             sleep 10
         done
-        echo "$hostname" > "$TCSTORAGEDIR/keepalive/$hostname"
+#        echo "$hostname" > "$TCSTORAGEDIR/keepalive/$hostname"
         mounted=Y
     fi
 }
 
 function exitfunc {
     if [[ "$mounted" == Y ]] ; then
-        rm -f "$TCSTORAGEDIR/keepalive/$hostname"
+#        rm -f "$TCSTORAGEDIR/keepalive/$hostname"
         if [[ "$tcserver" != UUID ]] ; then
             umount "$TCMOUNTDIR" || true
         fi
