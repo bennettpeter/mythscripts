@@ -19,7 +19,8 @@ filename="$1"
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
 bname=`basename "$filename"`
-fullfilename=`find "$VIDEODIR" -name "$bname" 2>/dev/null` || true
+#fullfilename=`find "$VIDEODIR" -name "$bname" 2>/dev/null` || true
+fullfilename=`ls "$VIDEODIR"/video*/recordings/"$bname" 2>/dev/null` || true
 if [[ -f "$fullfilename" ]] ; then
     # Find the chanid and starttime for the file
     set -- `echo "select chanid, starttime from recorded where basename = '$bname';" | \
