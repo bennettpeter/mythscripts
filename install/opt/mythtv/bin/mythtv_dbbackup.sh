@@ -11,20 +11,16 @@ set -e
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 
-# DBNAME="mythconverg"
-# DEBIAN="--defaults-extra-file=/etc/mysql/debian.cnf"
-
-# /usr/bin/mysqlcheck $DEBIAN -s $DBNAME
-
 echo "Started ${scriptname} on `date`" 
 
 if [[ "$MYTHTVDIR" == "" ]] ; then
     MYTHTVDIR=/usr
 fi
 
-$MYTHTVDIR/share/mythtv/mythconverg_backup.pl
+# get DB details
+. $scriptpath/getconfig.sh
 
-# /usr/bin/logger -p daemon.info -i -t${0##*/} "$DBNAME checked and backedup."
+$MYTHTVDIR/share/mythtv/mythconverg_backup.pl --rotateglob "$DBName-????-??????????????.sql*"
 
 $scriptpath/optimize_mythdb.sh
 
