@@ -52,7 +52,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     db_endtimesecs=`date -ud "$db_endtime" "+%s"`
     let db_expectsecs=db_endtimesecs-db_starttimesecs
     # Find the recording file
-    fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null`
+    #fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null`
+    fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null` || true
     if [[ "$use_mediainfo" == Y ]] ; then
         ## Find length using mediainfo
         millisecsv=`mediainfo '--Inform=Video;%Duration%' "$fullfilename"`

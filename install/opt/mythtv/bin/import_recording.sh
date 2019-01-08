@@ -188,7 +188,8 @@ if [[ "$action" == U ]] ; then
     set -- `ls -l "$filename"`
     filesize=$5
 
-    oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk*/*' 2>/dev/null` || true
+    # oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk*/*' 2>/dev/null` || true
+    oldfile=`ls "$VIDEODIR"/video*/recordings/"$basename" 2>/dev/null` || true
     numfound=`echo "$oldfile"|wc -l`
     if (( numfound > 1 )) ; then
         echo "ERROR Multiple files match $basename"

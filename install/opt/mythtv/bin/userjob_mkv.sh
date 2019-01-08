@@ -52,7 +52,8 @@ ionice -c3 -p$$
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Find the recording file
-    fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null` || true
+    #fullfilename=`find "$VIDEODIR" -name "$filename" 2>/dev/null` || true
+    fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null` || true
     echo Found file: $fullfilename .
     fileformat=`mediainfo '--Inform=General;%Format%' "$fullfilename"`
     if [[ "$fileformat" == Matroska ]] ; then

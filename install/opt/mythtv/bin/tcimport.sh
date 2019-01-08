@@ -164,10 +164,14 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
             fi
             if [[ "${IMPORT_TRANSCODE[counter]}" == Y ]] ; then
                 cd "$realdir"
-                oldfile=`find "$VIDEODIR" -name $realfile 2>/dev/null` || true
+                #oldfile=`find "$VIDEODIR" -name $realfile 2>/dev/null` || true
+                oldfile=`ls "$VIDEODIR"/video*/recordings/"$realfile" 2>/dev/null` || true
                 if [[ "$oldfile" == "" ]] ; then
-                    oldfile=`find "$VIDEODIR" -name $basename.mpg -o -name $basename.ts \
-                       -o -name $basename.tsx 2>/dev/null` || true
+                    #oldfile=`find "$VIDEODIR" -name $basename.mpg -o -name $basename.ts \
+                    #   -o -name $basename.tsx 2>/dev/null` || true
+                    oldfile=`ls "$VIDEODIR"/video*/recordings/basename.mpg \
+                                "$VIDEODIR"/video*/recordings/basename.ts \
+                                "$VIDEODIR"/video*/recordings/basename.tsx 2>/dev/null` || true
                 fi
                 if [[ -f "$oldfile" ]] ; then
                     duration=0

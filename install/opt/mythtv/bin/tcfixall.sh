@@ -15,7 +15,7 @@ scriptname=`basename "$scriptname" .sh`
 
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
-for dir in "$VIDEODIR"/video?/recordings/ ; do
+for dir in "$VIDEODIR"/video*/recordings/ ; do
     cd "$dir"
     for file in *.mkv ; do
         basename="${file%.mkv}"

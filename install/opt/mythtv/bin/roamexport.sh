@@ -32,7 +32,9 @@ echo "SELECT basename FROM recorded
 
 # NOTE THIS ONLY WORKS IF RECORDING DIRECTORIES AND FILES HAVE NO SPACES IN THE NAMES
 while read -r filename ; do
-    fullfilename=`find "$VIDEODIR" -name "$filename" -o -name "$filename.*" 2>/dev/null` || true
+    # fullfilename=`find "$VIDEODIR" -name "$filename" -o -name "$filename.*" 2>/dev/null` || true
+    fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" \
+        "$VIDEODIR"/video*/recordings/"$filename".* 2>/dev/null` || true
     if [[ "$fullfilename" != "" ]] ; then
         ln -s $fullfilename "$LINKSDIR"/roam/
     fi
