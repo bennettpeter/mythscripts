@@ -3,9 +3,10 @@
 scriptpath=$HOME/proj/github.com/MythTV/packaging/deb-light
 set -e
 
-projname=`basename $PWD`
+PROJNAME=`basename $PWD`
+export PROJNAME
 
-case $projname in
+case $PROJNAME in
     android)
         build_android.sh "$@"
         ;;
