@@ -296,6 +296,12 @@ if [[ "$IS_BACKEND" != true && "$reason" != powerbtn ]] ; then
 #        echo "$DATE zenity running - frontend is starting - don't shut down"
 #        rc=1
 #    fi
+    # If backend running then this is a roaming system
+    # In that case do not shut down.
+    if  pidof mythbackend ; then
+        echo "$DATE mythbackend running - don't shut down"
+        rc=1
+    fi
     # If frontend running and not in standby, do not shut down
     if  pidof mythfrontend ; then
         fstate=`( sleep 1 ; echo query location ; sleep 1 ; echo quit ) \

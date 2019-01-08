@@ -148,13 +148,13 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! systemctl is-enabled peter-suspend.service ; then
         sudo systemctl enable peter-suspend.service 
     fi
-    if ! diff install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service ; then
-        sudo cp install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service
-        daemonrestart=Y
-    fi
-    if ! systemctl is-enabled peter-resume.service ; then
-        sudo systemctl enable peter-resume.service 
-    fi
+#    if ! diff install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service ; then
+#        sudo cp install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service
+#        daemonrestart=Y
+#    fi
+#    if ! systemctl is-enabled peter-resume.service ; then
+#        sudo systemctl enable peter-resume.service
+#    fi
 
     os=`cat /etc/issue|sed "s/ .*//"`
     if [[ "$os" == Raspbian ]] ; then
