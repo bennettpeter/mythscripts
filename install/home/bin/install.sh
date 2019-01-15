@@ -14,9 +14,14 @@ case $projname in
         "$scriptpath/install.sh" "$@"
         gitbasedir=`git rev-parse --show-toplevel`
         if [[ -s $gitbasedir/../patch/build.patch ]] ; then
-            set -x
-            cp -a $gitbasedir/../patch/build.patch $destdir/usr/share/mythtv/build.patch
+            cp -av $gitbasedir/../patch/build.patch $destdir/usr/share/mythtv/build.patch
         fi
+        for file in $gitbasedir/../patch/Peter/${projname}_*.patch ; do
+            if [[ -s "$file" ]] ; then
+                cp -av "$file" $destdir/usr/share/mythtv/
+            fi
+        done
+
         ;;
     *)
         "$scriptpath/install.sh" "$@"
