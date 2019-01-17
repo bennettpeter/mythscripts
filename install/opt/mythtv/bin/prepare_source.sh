@@ -2,6 +2,7 @@
 # Prepare source for build
 set -e
 option="$1"
+option="$1"
 rc=0
 gitbasedir=`git rev-parse --show-toplevel`
 mkdir -p $gitbasedir/../patch/ 2>/dev/null || true
@@ -9,7 +10,21 @@ project=`basename "$PWD"`
 for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
     if [[ -s "$file" ]] ; then
         echo Reverse $file
-        git apply --reverse $file || true
+        # Reset timestamp on all the files after unpatching.
+        # This is to make sure install does not try to build them again.
+        filelist=`grep "^diff --git" /home/peter/Dropbox/proj/patch/Peter/mythtv_ignore_version_check.patch | sed "s#diff --git ##;s#a/##;s# b/.*##"`
+        pushd "$gitbasedir"
+        mkdir /tmp/build$$/
+        cp -p $filelist /tmp/build$$
+        rrc=0
+        git apply --reverse $file || rrc=$?
+        for sfile in $filelist ; do
+            if [[ "$rrc" == 0 ]] ; then
+                touch $sfile -r /tmp/build$$/`basename $sfile`
+            fi
+            rm -f /tmp/build$$/`basename $sfile`
+        done
+        popd
     fi
 done
 if [[ "$option" == done ]] ; then
