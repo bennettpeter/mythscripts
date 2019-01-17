@@ -3,8 +3,16 @@
 scriptpath=$HOME/proj/github.com/MythTV/packaging/deb-light
 set -e
 
+if [[ -f $HOME/.buildrc ]] ; then
+    . $HOME/.buildrc
+fi
+
 # This will get projname and destdir
 . "$scriptpath/getdestdir.source"
+
+if [[ "$INSTALL_PREPARE" != "" ]] ; then
+    $INSTALL_PREPARE
+fi
 
 case $projname in
     android)
@@ -27,3 +35,8 @@ case $projname in
         "$scriptpath/install.sh" "$@"
         ;;
 esac
+
+if [[ "$INSTALL_DONE" != "" ]] ; then
+    $INSTALL_DONE
+fi
+
