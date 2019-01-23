@@ -12,7 +12,7 @@ for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
         echo Reverse $file
         # Reset timestamp on all the files after unpatching.
         # This is to make sure install does not try to build them again.
-        filelist=`grep "^diff --git" /home/peter/Dropbox/proj/patch/Peter/mythtv_ignore_version_check.patch | sed "s#diff --git ##;s#a/##;s# b/.*##"`
+        filelist=`grep "^diff --git" "$file" | sed "s#diff --git ##;s#a/##;s# b/.*##"`
         pushd "$gitbasedir"
         mkdir /tmp/build$$/
         cp -p $filelist /tmp/build$$
