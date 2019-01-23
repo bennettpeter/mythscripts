@@ -16,6 +16,7 @@ date
 
 killall mythfrontend
 killall firefox
+showmenu=N
 
 if [[ "$CEC_ENABLED" != 1 ]] ; then
     CEC_ENABLED=0
@@ -26,7 +27,10 @@ xset s noblank     # don't blank the video device
 
 if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh high
+fi
 
+if [[ "$showmenu" == Y ]] ; then
+    if [[ `arch` == armv* ]] ; then
 resp=$(zenity --list --column="Pick One" <<EOF
 MythTV
 ShowMax
@@ -35,28 +39,25 @@ Freeform
 AlJazeera
 EOF
 )
-    case $resp in
-    MythTV)
-        mythfrontend -O libCECEnabled=$CEC_ENABLED
-        ;;
-    ShowMax)
-        chromium-browser https://www.showmax.com/eng/
-        ;;
-    Amazon\ Video)
-        chromium-browser https://www.amazon.com/gp/video/watchlist/ref=sv_atv_8
-        ;;
-    Freeform)
-        chromium-browser https://freeform.go.com/
-        ;;
-    AlJazeera)
-        chromium-browser https://www.aljazeera.com/live/
-        ;;
-    esac
-
-    sudo $scriptpath/setgovernor.sh normal
-else
-    resp=X
-#    while [[ "$resp" != "" ]]; do
+        case $resp in
+        MythTV)
+            mythfrontend -O libCECEnabled=$CEC_ENABLED
+            ;;
+        ShowMax)
+            chromium-browser https://www.showmax.com/eng/
+            ;;
+        Amazon\ Video)
+            chromium-browser https://www.amazon.com/gp/video/watchlist/ref=sv_atv_8
+            ;;
+        Freeform)
+            chromium-browser https://freeform.go.com/
+            ;;
+        AlJazeera)
+            chromium-browser https://www.aljazeera.com/live/
+            ;;
+        esac
+    else
+        resp=X
         xrandr -s 640x480
         sleep 1
 
@@ -87,8 +88,13 @@ EOF
             firefox https://www.aljazeera.com/live/
             ;;
         esac
-#    done
-fi    
+    fi
+else
+    mythfrontend -O libCECEnabled=$CEC_ENABLED
+fi
+if [[ `arch` == armv* ]] ; then
+    sudo $scriptpath/setgovernor.sh normal
+fi
 
 if ! systemctl is-active mythtv-monitor.service \
 && ! systemctl is-active mythtv-backend.service ; then
@@ -96,9 +102,6 @@ if ! systemctl is-active mythtv-monitor.service \
     priorreboot=`cat $DATADIR/reboot_date`
     if [[ "$priorreboot" = "$s7daysago" || "$priorreboot" < "$s7daysago" ]] ; then
         date +%F > $DATADIR/reboot_date
-        clear
-        echo;echo
-        figlet -f $font "${sp}Restarting"
         sudo shutdown -r now
     fi
 fi
