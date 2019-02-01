@@ -2,7 +2,6 @@
 # Prepare source for build
 set -e
 option="$1"
-option="$1"
 rc=0
 gitbasedir=`git rev-parse --show-toplevel`
 mkdir -p $gitbasedir/../patch/ 2>/dev/null || true
@@ -40,12 +39,14 @@ if [[ `arch` == arm* ]] ; then
 else
     gitdiff.sh build > $gitbasedir/../patch/build.patch || rc=$?
 fi
-for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
-    if [[ -s "$file" ]] ; then
-        echo Apply $file
-        git apply -v $file || rc=$?
-    fi
-done
+if [[ "$option" == Peter }} ; then
+    for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
+        if [[ -s "$file" ]] ; then
+            echo Apply $file
+            git apply -v $file || rc=$?
+        fi
+    done
+fi
 if [[ "$rc" != 0 ]] ; then
     echo ERROR - type Y to ignore the error. >&2
     read xxxx
