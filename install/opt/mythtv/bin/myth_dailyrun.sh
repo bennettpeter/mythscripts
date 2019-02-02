@@ -120,6 +120,10 @@ fi
 if [[ "$run_roamexport" == Y ]] ; then
     # Run roamexport to keep portable drive up to date
     $scriptpath/roamexport.sh
+    rc=$?
+    if [[ "$rc" != 0 ]] ; then
+        "$scriptpath/notify.py" "roamexport failed" "roamexport.sh"
+    fi
 fi
 
 # Check cable box once a day

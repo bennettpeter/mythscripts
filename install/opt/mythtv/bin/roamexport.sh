@@ -11,6 +11,11 @@ exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
 date
 
+if [[ `id -nu` != mythtv ]] ; then
+    echo "ERROR This must run under mythtv user"
+    exit 2
+fi
+
 if [[ ! -d "$LINKSDIR" ]] ; then
     mkdir -p "$LINKSDIR"
     chgrp mythtv "$LINKSDIR"
@@ -45,7 +50,7 @@ mount -v $ROAMDIR || true
 sleep 1
 if ! mountpoint $ROAMDIR ; then
     echo WARNING Unable to mount $ROAMDIR
-    exit
+    exit 0
 fi
 
 otherdirs="
