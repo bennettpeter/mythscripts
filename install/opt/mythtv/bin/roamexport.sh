@@ -66,11 +66,11 @@ videos"
 ionice -c3 -p$$
 
 mkdir -p $ROAMDIR/recordings
-rsync -vLdpt --size-only --append --chmod=g+w --delete-before "$LINKSDIR"/roam/ $ROAMDIR/recordings/
+rsync -vLdpt --size-only --chmod=g+w --delete-before "$LINKSDIR"/roam/ $ROAMDIR/recordings/
 
 mkdir -p $ROAMDIR/channels
 # CHANNEL_ICON_DIR example /home/mythtv/.mythtv/channels
-rsync -vdpt --size-only --append  --chmod=g+w --delete-before "$CHANNEL_ICON_DIR"/ $ROAMDIR/channels/
+rsync -vdpt --size-only --chmod=g+w --delete-before "$CHANNEL_ICON_DIR"/ $ROAMDIR/channels/
 
 for subdir in $otherdirs ; do
     mkdir -p $ROAMDIR/$subdir
@@ -82,7 +82,7 @@ for subdir in $otherdirs ; do
                 echo ERROR Duplicate directories $subdir
                 exit 99
             fi
-            rsync -vrpt --size-only --append --chmod=g+w --delete-before "$dirname"/ $ROAMDIR/$subdir/
+            rsync -vrpt --size-only --chmod=g+w --delete-before "$dirname"/ $ROAMDIR/$subdir/
             found=Y
         fi
     done
