@@ -39,7 +39,7 @@ if [[ `arch` == arm* ]] ; then
 else
     gitdiff.sh build > $gitbasedir/../patch/build.patch || rc=$?
 fi
-if [[ "$option" == Peter }} ; then
+if [[ "$option" == Peter ]] ; then
     for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
         if [[ -s "$file" ]] ; then
             echo Apply $file
