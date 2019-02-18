@@ -22,7 +22,9 @@ if [[ "$BUILD_DONE" != "" ]] ; then
     if [[ "$dirty" == 0 ]] ; then
         apkfile=`ls -t *.apk | head -1`
         newname=`echo $apkfile | sed s/-dirty/-clean/`
-        mv -v "$apkfile" "$newname"
+        if [[ "$apkfile" != "$newname" ]] ; then
+            mv -v "$apkfile" "$newname"
+        fi
     fi
 fi
 
