@@ -18,9 +18,10 @@ killall mythfrontend
 killall firefox
 showmenu=N
 
-if [[ "$CEC_ENABLED" != 1 ]] ; then
-    CEC_ENABLED=0
+if [[ "$FE_SCRIPT" == "" ]]; then
+    FE_SCRIPT=mythfrontend
 fi
+
 xset s off         # don't activate screensaver
 xset -dpms         # disable DPMS (Energy Star) features.
 xset s noblank     # don't blank the video device
@@ -41,7 +42,7 @@ EOF
 )
         case $resp in
         MythTV)
-            mythfrontend -O libCECEnabled=$CEC_ENABLED
+            $FE_SCRIPT
             ;;
         ShowMax)
             chromium-browser https://www.showmax.com/eng/
@@ -73,7 +74,7 @@ EOF
         sleep 1
         case $resp in
         MythTV)
-            mythfrontend -O libCECEnabled=$CEC_ENABLED
+            $FE_SCRIPT
             ;;
         ShowMax)
             firefox https://www.showmax.com/eng/
@@ -90,7 +91,7 @@ EOF
         esac
     fi
 else
-    mythfrontend -O libCECEnabled=$CEC_ENABLED
+    $FE_SCRIPT
 fi
 if [[ `arch` == armv* ]] ; then
     sudo $scriptpath/setgovernor.sh normal
