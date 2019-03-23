@@ -375,7 +375,6 @@ if [[ "$preset" != "" ]] ; then
         ARCHIVE)
             Height=480
             audio=mp3
-            ffrate=y
             ;;
         *)
             echo "ERROR invalid preset $preset"

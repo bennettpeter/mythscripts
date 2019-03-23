@@ -1,5 +1,5 @@
 # Doc Martin Letterbox RI PBS
-ENCODER_OPTIONS[0]="-l 480 --crop 124:138:240:248 --ffrate"
+ENCODER_OPTIONS[0]="-l 480 --crop 124:138:240:248"
 SAVE_TRANSCODE[0]=Y
 IMPORT_TRANSCODE[0]=N
 # These options are not subscripted and apply to any transcode

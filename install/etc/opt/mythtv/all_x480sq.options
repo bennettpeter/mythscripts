@@ -1,5 +1,5 @@
 # Joy of painting
-ENCODER_OPTIONS[0]="-l 480 -E lame --morph SQ --ffrate"
+ENCODER_OPTIONS[0]="-l 480 -E lame --morph SQ"
 SAVE_TRANSCODE[0]=Y
 IMPORT_TRANSCODE[0]=N
 # These options are not subscripted and apply to any transcode

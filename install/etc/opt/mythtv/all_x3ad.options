@@ -1,5 +1,5 @@
 # Valerie streaming
-ENCODER_OPTIONS[0]="-l 360 -E lame --ffrate"
+ENCODER_OPTIONS[0]="-l 360 -E lame"
 SAVE_TRANSCODE[0]=Y
 ADD_DESCRIPTION[0]=" Archived 360p."
 IMPORT_TRANSCODE[0]=N
