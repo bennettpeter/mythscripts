@@ -11,6 +11,13 @@ chown mythtv:mythtv $DATADIR/checklogin
 killall mythfrontend
 # systemctl stop mythtv-backend.service
 
+# Disable mouse wakeup
+# first check if mouse wakeup enabled
+# XHC	  S3	*enabled   pci:0000:00:14.0
+if cat /proc/acpi/wakeup|grep "^XHC"$'\t'".*enabled" ; then
+    echo XHC | tee /proc/acpi/wakeup
+fi
+
 # systemctl stop mysql.service
 
 # unmount NFS file systems
