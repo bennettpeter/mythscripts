@@ -18,6 +18,8 @@ if cat /proc/acpi/wakeup|grep "^XHC"$'\t'".*enabled" ; then
     echo XHC | tee /proc/acpi/wakeup
 fi
 
+env -i XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0 dm-tool switch-to-greeter
+
 # systemctl stop mysql.service
 
 # unmount NFS file systems
