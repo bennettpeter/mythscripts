@@ -16,6 +16,14 @@ if [[ `id -nu` != mythtv ]] ; then
     exit 2
 fi
 
+# ROAMDIR example - /srv/mythroam
+mount -v $ROAMDIR || true
+sleep 1
+if ! mountpoint $ROAMDIR ; then
+    echo WARNING Unable to mount $ROAMDIR
+    exit 0
+fi
+
 if [[ ! -d "$LINKSDIR" ]] ; then
     mkdir -p "$LINKSDIR"
     chgrp mythtv "$LINKSDIR"
@@ -44,14 +52,6 @@ while read -r filename ; do
         ln -s $fullfilename "$LINKSDIR"/roam/
     fi
 done < /tmp/files$$.txt
-
-# ROAMDIR example - /srv/mythroam
-mount -v $ROAMDIR || true
-sleep 1
-if ! mountpoint $ROAMDIR ; then
-    echo WARNING Unable to mount $ROAMDIR
-    exit 0
-fi
 
 otherdirs="
 artwork
