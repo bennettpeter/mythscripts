@@ -15,7 +15,6 @@ today=`date "+%a %Y/%m/%d"`
 # . /etc/mythtv/mysql.txt
 . $scriptpath/getconfig.sh
 
-run_roamexport=N
 # Saturday
 if [[ "$today" == Sat* ]]; then
     # check for dbbackup run
@@ -38,8 +37,13 @@ if [[ "$today" == Sat* ]]; then
         echo $today > $DATADIR/dbbackup_date
         # Force a reboot after this is done
         true > $DATADIR/reboot_date
-        # Run roamexport to keep portable drive up to date
-        run_roamexport=Y
+        # Run roamexport to keep portable drive up to date.
+        # This must be run here to ensure consistent with DB backup above
+        $scriptpath/roamexport.sh
+        rc=$?
+        if [[ "$rc" != 0 ]] ; then
+            "$scriptpath/notify.py" "roamexport failed" "roamexport.sh"
+        fi
     fi
 fi
 # check for channelscan run
@@ -115,15 +119,6 @@ if [[ "$prev_transcode" != "$today" ]] ; then
         "$scriptpath/notify.py" "Transcode daily run failed" "tcdaily.sh"
     fi
     echo $today > $DATADIR/transcode_date
-fi
-
-if [[ "$run_roamexport" == Y ]] ; then
-    # Run roamexport to keep portable drive up to date
-    $scriptpath/roamexport.sh
-    rc=$?
-    if [[ "$rc" != 0 ]] ; then
-        "$scriptpath/notify.py" "roamexport failed" "roamexport.sh"
-    fi
 fi
 
 # Check cable box once a day
