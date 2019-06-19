@@ -18,7 +18,10 @@ if cat /proc/acpi/wakeup|grep "^XHC"$'\t'".*enabled" ; then
     echo XHC | tee /proc/acpi/wakeup
 fi
 
-env -i XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0 dm-tool switch-to-greeter
+chassis=`dmidecode --string chassis-type`
+if [[ "$chassis" == "Notebook" ]] ; then
+    env -i XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0 dm-tool switch-to-greeter
+fi
 
 # systemctl stop mysql.service
 
