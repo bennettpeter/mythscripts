@@ -66,7 +66,7 @@ videos"
 ionice -c3 -p$$
 
 # Remove any files on output not owned by mythtv
-find $ROAMDIR -not -path "$ROAMDIR/.*" -not -user mythtv -type f -print0 | xargs -0 rm -f
+find $ROAMDIR -not -path "$ROAMDIR/.*" -not -user mythtv -type f -print0 | xargs -0 rm -fv
 
 mkdir -p $ROAMDIR/recordings
 rsync -vLdpt --size-only --chmod=g+w --delete-before "$LINKSDIR"/roam/ $ROAMDIR/recordings/
