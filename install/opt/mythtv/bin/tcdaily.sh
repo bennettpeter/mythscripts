@@ -15,6 +15,11 @@ if ! echo $PATH|grep /opt/ffmpeg/bin: ; then
   PATH="/opt/ffmpeg/bin/:$PATH"
 fi
 
+# Get DB password
+. $scriptpath/getconfig.sh
+
+mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+
 mustecho=
 mustdelete=Y
 # testing ###
@@ -224,13 +229,18 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                     videoformat=`mediainfo '--Inform=Video;%Format%' "$episode"`
                     extension=${episode/*./}
                     echo "Episode: $episode. Video Format $videoformat"
-                    if [[ "$videoformat" != "MPEG Video" && "$extension" == "ts" ]] ; then
-                        "$scriptpath/notify.py" "tcdaily warning" \
-                            "Episode $episode wrong extension. Format is $videoformat. Continuing anyway."
-                    fi
                     filename=`readlink "$episode"`
                     bname=`basename "$filename"`
-                    if [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
+                    if [[ "$videoformat" != "MPEG Video" && "$extension" == "ts" ]] ; then
+                        "$scriptpath/notify.py" "tcdaily warning" \
+                            "Episode $episode wrong extension. Format is $videoformat. Running user job."
+                        # Find the chanid and starttime for the file
+                        set -- `echo "select chanid, starttime from recorded where basename like '$basename.%';" | \
+                        $mysqlcmd | tail -1`
+                        chanid=$1
+                        starttime="$2 $3"
+                        mythutil --queuejob userjob1 --chanid "$chanid" --starttime "$starttime"
+                    elif if [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
                         echo "$episode - $bname is recorded from VOD, skip"
                     elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed ]] ; then
                         "$scriptpath/notify.py" "Transcode failed" "$episode - $bname"
