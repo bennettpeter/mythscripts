@@ -73,7 +73,7 @@ if [[ -f $DATADIR/mythfilldatabase_date ]] ; then
 fi
 if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     echo $DATE "Running mythfilldatabase."
-    $scriptpath/mythfilldatabase.sh >/dev/null 2>&1
+    $scriptpath/mythfilldatabase.sh  --only-update-guide >/dev/null 2>&1
     rc=$?
     if [[ "$rc" != 0 ]] ; then
         "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
