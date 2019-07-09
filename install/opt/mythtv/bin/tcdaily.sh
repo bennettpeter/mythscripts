@@ -240,7 +240,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                         chanid=$1
                         starttime="$2 $3"
                         mythutil --queuejob userjob1 --chanid "$chanid" --starttime "$starttime"
-                    elif if [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
+                    elif [[ "$TCSKIPCHAN" != "" && "$bname" == ${TCSKIPCHAN}_* ]] ; then
                         echo "$episode - $bname is recorded from VOD, skip"
                     elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/${bname}_failed ]] ; then
                         "$scriptpath/notify.py" "Transcode failed" "$episode - $bname"
