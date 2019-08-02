@@ -138,6 +138,18 @@ if [[ "$USE_MONITOR" == Y ]] ; then
         sudo cp install/etc/init/mythtv-monitor.conf /etc/init/
     fi
 fi
+# Do we need to install vnc (Y or N)
+if [[ "$USE_VNC" == Y ]] ; then
+    if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
+        if ! diff install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service ; then
+            sudo cp install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service
+            daemonrestart=Y
+        fi
+        if ! systemctl is-enabled peter-vnc.service ; then
+            sudo systemctl enable peter-vnc.service 
+        fi
+    fi
+fi
 cd $scriptpath/
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then

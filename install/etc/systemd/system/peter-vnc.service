@@ -1,0 +1,17 @@
+
+[Unit]
+Description=vnc server
+After=multi-user.target lightdm.service
+Requires=dbus.socket
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/x11vnc -usepw -display :0 -forever -auth guess
+Restart=always
+RestartSec=2
+StartLimitInterval=1min
+StartLimitBurst=10
+
+[Install]
+WantedBy=multi-user.target
