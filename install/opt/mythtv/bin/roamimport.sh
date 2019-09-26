@@ -52,3 +52,5 @@ where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
 'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr');
 " | \
 $mysqlcmd
+echo "Check results. Enter to exit."
+read test
