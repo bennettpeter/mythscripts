@@ -30,8 +30,9 @@ sudo mysql
 $MYTHTVDIR/share/mythtv/mythconverg_restore.pl --verbose --filename "$backupfile"
 
 echo "
-update recordedartwork set host = 'raza' where host = 'serenity';
-update storagegroup set hostname = 'raza' where hostname = 'serenity';
+update recordedartwork set host = 'raza';
+update storagegroup set hostname = 'raza';
+update videometadata set host = 'raza';
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
 delete from settings where value = 'MasterServerIP' and hostname is null;
 delete from settings where value = 'BackendServerIP' and hostname = 'raza';
