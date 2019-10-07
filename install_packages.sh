@@ -7,6 +7,9 @@ sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprin
 # raspberry pi
 sudo apt install figlet gdebi-core dos2unix wakeonlan
 
+# raspberry pi proxy
+sudo apt install screen weechat
+
 # raspberry pi dev
 sudo apt install git ansible
 

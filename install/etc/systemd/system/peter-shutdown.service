@@ -1,0 +1,11 @@
+
+[Unit]
+Description=Peter Shutdown daily
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=shutdown -P 01:00
+
+[Install]
+WantedBy=multi-user.target

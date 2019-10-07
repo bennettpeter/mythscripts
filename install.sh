@@ -150,7 +150,19 @@ if [[ "$USE_VNC" == Y ]] ; then
         fi
     fi
 fi
-cd $scriptpath/
+# Do we need to shutdown at 1 AM (Y or N)
+if [[ "$DAILY_SHUTDOWN" == Y ]] ; then
+    if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
+        if ! diff install/etc/systemd/system/peter-shutdown.service /etc/systemd/system/peter-shutdown.service ; then
+            sudo cp install/etc/systemd/system/peter-shutdown.service /etc/systemd/system/peter-shutdown.service
+            daemonrestart=Y
+        fi
+        if ! systemctl is-enabled peter-shutdown.service ; then
+            sudo systemctl enable peter-shutdown.service 
+        fi
+    fi
+fi
+
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! diff install/etc/systemd/system/peter-suspend.service /etc/systemd/system/peter-suspend.service ; then
