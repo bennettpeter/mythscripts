@@ -7,7 +7,7 @@ Requires=dbus.socket
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/x11vnc -usepw -display :0 -forever -auth guess
+ExecStart=/usr/bin/x11vnc -usepw -display :0 -forever -auth guess -repeat
 Restart=always
 RestartSec=2
 StartLimitInterval=1min
