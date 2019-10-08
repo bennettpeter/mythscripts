@@ -151,14 +151,14 @@ if [[ "$USE_VNC" == Y ]] ; then
     fi
 fi
 # Do we need to shutdown at 1 AM (Y or N)
-if [[ "$DAILY_SHUTDOWN" == Y ]] ; then
+if [[ "$USE_PROXY" == Y ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
-        if ! diff install/etc/systemd/system/peter-shutdown.service /etc/systemd/system/peter-shutdown.service ; then
-            sudo cp install/etc/systemd/system/peter-shutdown.service /etc/systemd/system/peter-shutdown.service
+        if ! diff install/etc/systemd/system/peter-proxy.service /etc/systemd/system/peter-proxy.service ; then
+            sudo cp install/etc/systemd/system/peter-proxy.service /etc/systemd/system/peter-proxy.service
             daemonrestart=Y
         fi
-        if ! systemctl is-enabled peter-shutdown.service ; then
-            sudo systemctl enable peter-shutdown.service 
+        if ! systemctl is-enabled peter-proxy.service ; then
+            sudo systemctl enable peter-proxy.service
         fi
     fi
 fi

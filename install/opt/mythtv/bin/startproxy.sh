@@ -1,0 +1,36 @@
+#!/bin/bash
+# Runs at startup of proxy system to check times, ip addresses and set shutdown time
+# Requires system to be on daily power off timer.
+set -e
+. /etc/opt/mythtv/mythtv.conf
+scriptname=`readlink -e "$0"`
+scriptpath=`dirname "$scriptname"`
+scriptname=`basename "$scriptname" .sh`
+exec 1>>$LOGDIR/${scriptname}.log
+exec 2>&1
+date
+
+unset nextshutdown
+if [[ -f $DATADIR/nextshutdown ]] ; then
+    nextshutdown=`cat $DATADIR/nextshutdown`
+fi    
+now=`date +%s`
+if (( nextshutdown < now )) ; then
+  let nextshutdown=now+24*60*60-600
+  nextshutdownstr=`date +%H:%M --date=@$nextshutdown`
+  echo $nextshutdown > $DATADIR/nextshutdown
+fi
+nextshutdownstr=`date +%H:%M --date=@$nextshutdown`
+sudo shutdown -P $nextshutdownstr
+
+# Daily IP address check
+if [[ -f $DATADIR/ipaddress.txt ]] ; then
+    oldipaddress=`cat $DATADIR/ipaddress.txt`
+fi
+
+ipaddress=`curl 'https://api.ipify.org'`
+if [[ "$ipaddress" != "$oldipaddress" ]] ; then
+    "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
+    echo "$ipaddress" > $DATADIR/ipaddress.txt
+fi
+

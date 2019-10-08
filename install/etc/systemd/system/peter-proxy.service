@@ -1,0 +1,14 @@
+
+[Unit]
+Description=Peter Proxy
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=mythtv
+UMask=0002
+ExecStart=/opt/mythtv/bin/startproxy.sh
+
+[Install]
+WantedBy=multi-user.target
