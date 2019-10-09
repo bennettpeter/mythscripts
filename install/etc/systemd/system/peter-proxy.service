@@ -1,8 +1,7 @@
 
 [Unit]
 Description=Peter Proxy
-Wants=network-online.target
-After=network-online.target
+After=time-sync.target
 
 [Service]
 Type=oneshot

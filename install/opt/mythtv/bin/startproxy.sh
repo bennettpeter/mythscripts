@@ -1,6 +1,7 @@
 #!/bin/bash
 # Runs at startup of proxy system to check times, ip addresses and set shutdown time
 # Requires system to be on daily power off timer.
+# run after time-sync.target
 set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -8,6 +9,12 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
+echo startproxy.sh
+# sleep to make sure time has been set.
+until timedatectl show | grep "NTPSynchronized=yes" ; do
+  echo waiting for time sync ...
+  sleep 2
+done
 date
 
 unset nextshutdown
