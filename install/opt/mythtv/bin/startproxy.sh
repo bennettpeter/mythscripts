@@ -10,10 +10,12 @@ scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
 echo startproxy.sh
+date
 # sleep to make sure time has been set.
+echo waiting for time sync
 until timedatectl show | grep "NTPSynchronized=yes" ; do
-  echo waiting for time sync ...
-  sleep 2
+  echo -n .
+  sleep 1
 done
 date
 
