@@ -2,6 +2,7 @@
 # Daily runs that happen at the start of day
 
 . /etc/opt/mythtv/mythtv.conf
+. /etc/opt/mythtv/private.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
@@ -11,6 +12,7 @@ date
 DATE=`date +%F\ %T\.%N`
 DATE=${DATE:0:23}
 today=`date "+%a %Y/%m/%d"`
+numdate=`date "+%Y%m%d"`
 
 # . /etc/mythtv/mysql.txt
 . $scriptpath/getconfig.sh
@@ -82,9 +84,36 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
 
     # Print 1 day's upcoming recordings
     date >> $LOGDIR/mythtv_upcoming_recordings.log
-    "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours 24 \
+    "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours 24 --recordings -1 \
+        --plain_text --text_format "%Y%m%d %H%i%s %eH%ei%es %T - %S\n" \
         >> $LOGDIR/mythtv_upcoming_recordings.log
 
+    # Checks for recordings that will be attempted at 2 am or 3 am and may hit
+    # the reboot of the router.
+    "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours -1 --recordings -1 \
+        --plain_text --text_format "%Y%m%d %H%i%s %eH%ei%es %T - %S\n" \
+        | (
+            message=
+            read title
+            read date start end title
+            while [[ "$date" != "" ]] ; do
+                if (( start < 031000 &&  end > 015000 )) ; then
+                    message="$message"$'\n'"$date $start $end $title"
+                fi
+                read date start end title
+            done
+            if [[ "$message" == "" ]] ; then
+                if [[ "$SUPPRESS_CONFLICT" == Y ]] ; then
+                    "$scriptpath/notify.py" "No More Conflicts" \
+                    "Set timeswitch and unset SUPPRESS_CONFLICT"
+                fi
+            else
+                if [[ "$SUPPRESS_CONFLICT" != Y ]] ; then
+                    "$scriptpath/notify.py" "Warning - Recording Reset Conflict"\
+                    "Recordings at 2 am or 3 am"$'\n'"$message"
+                fi
+            fi
+          )
     # Daily IP address check
     if [[ -f $DATADIR/ipaddress.txt ]] ; then
         oldipaddress=`cat $DATADIR/ipaddress.txt`
