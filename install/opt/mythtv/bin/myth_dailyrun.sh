@@ -97,7 +97,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
             read title
             read date start end title
             while [[ "$date" != "" ]] ; do
-                if (( start < 031000 &&  end > 015000 )) ; then
+                if [[ "$start" < 031000 &&  "$end" > 015000 ]] ; then
                     message="$message"$'\n'"$date $start $end $title"
                 fi
                 read date start end title
