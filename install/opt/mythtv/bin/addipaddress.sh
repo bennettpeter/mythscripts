@@ -25,13 +25,18 @@ fi
 if [[ "$ifacename" == "" || "$action" != up ]] ; then exit 0; fi
 
 hwaddr=`ifconfig $ifacename | grep Ethernet | sed 's/.*\(..:..:..:..:..:..\).*/\1/'`
-set -- `grep "^$hwaddr " /etc/opt/mythtv/ipv6ulas.txt`
-ipadd="$2"
-
-if [[ "$ipadd" != "" ]] ; then
-    shortip=${ipadd%/*}
-    if ifconfig|grep -w "$shortip" ; then exit 0; fi
-    echo "Adding IP Address $ipadd to $ifacename"
-    ip -6 address add $ipadd dev "$ifacename"
-fi
+grep "^$hwaddr " /etc/opt/mythtv/ipv6ulas.txt |
+(
+while true ; do
+    read mac family ipadd comments
+    if [[ "$mac" == "" ]] ; then break ; fi
+    if [[ "$ipadd" != "" ]] ; then
+        shortip=${ipadd%/*}
+        if ! ip add|grep -w "$shortip" ; then
+            echo "Adding IP Address $ipadd to $ifacename"
+            ip $family address add $ipadd dev "$ifacename"
+        fi
+    fi
+done
+)
 exit 0

@@ -1,16 +1,16 @@
 # UUID values and ipv6 link-local addresses
 
-bc:5f:f4:f8:a8:a2 fd3d:63f5:6a89:1::10/64 andromeda eth
-00:23:ae:e7:23:e3 fd3d:63f5:6a89:1::20/64 cougar eth
-b8:27:eb:90:af:52 fd3d:63f5:6a89:1::30/64 eagle1 eth
-b8:27:eb:ed:a0:83 fd3d:63f5:6a89:1::40/64 eagle2 eth
-54:ab:3a:df:d3:c0 fd3d:63f5:6a89:1::50/64 raza eth
-94:e9:79:8b:b3:a9 fd3d:63f5:6a89:1::51/64 raza wifi
-8c:89:a5:64:b3:c7 fd3d:63f5:6a89:1::60/64 serenity eth
-b8:27:eb:77:1e:ed fd3d:63f5:6a89:1::70/64 tardis eth
+bc:5f:f4:f8:a8:a2 -6 fd3d:63f5:6a89:1::10/64 andromeda eth
+00:23:ae:e7:23:e3 -6 fd3d:63f5:6a89:1::20/64 cougar eth
+b8:27:eb:90:af:52 -6 fd3d:63f5:6a89:1::30/64 eagle1 eth
+b8:27:eb:ed:a0:83 -6 fd3d:63f5:6a89:1::40/64 eagle2 eth
+54:ab:3a:df:d3:c0 -6 fd3d:63f5:6a89:1::50/64 raza eth
+54:ab:3a:df:d3:c0 -4 192.168.8.113/24        raza-travel eth
+94:e9:79:8b:b3:a9 -6 fd3d:63f5:6a89:1::51/64 raza wifi
+8c:89:a5:64:b3:c7 -6 fd3d:63f5:6a89:1::60/64 serenity eth
+b8:27:eb:77:1e:ed -6 fd3d:63f5:6a89:1::70/64 tardis eth
+b8:27:eb:f4:ee:f2 -6 fd3d:63f5:6a89:1::80/64 viper eth
+d8:c4:97:be:34:df -4 192.168.8.202/24        firefly-travel eth
 # This is commented because it was assigning an ip
 # address even if not connected
 # b8:27:eb:22:4b:b8 fd3d:63f5:6a89:1::71/64 tardis wifi
-b8:27:eb:f4:ee:f2 fd3d:63f5:6a89:1::80/64 viper eth
-0 fd3d:63f5:6a89:1::90/64 firefly eth
-0 fd3d:63f5:6a89:1::91/64 firefly wifi
