@@ -63,13 +63,17 @@ while (( rc != 0 && retries < 10 )) ; do
     sleep 2
     set +e
     ipaddress=`curl -s -S 'https://api.ipify.org'`; rc=$?
-    ip6address=`curl -s -S 'https://api6.ipify.org'`
     set -e
     let retries=retries+1
 done
-echo IP Addresses $ipaddress $ip6address
+echo IP Address $ipaddress
 if [[ "$ipaddress" != "$oldipaddress" ]] ; then
     "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
     echo "$ipaddress" > $DATADIR/ipaddress.txt
+fi
+rc=0
+ip address show dev eth0 | grep "inet6 2" || rc=$?
+if [[ "$rc" != 0 ]] ; then
+    "$scriptpath/notify.py" "No IPV6 address" "$ipaddress"
 fi
 
