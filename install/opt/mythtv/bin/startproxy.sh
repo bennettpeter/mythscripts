@@ -71,6 +71,7 @@ if [[ "$ipaddress" != "$oldipaddress" ]] ; then
     "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
     echo "$ipaddress" > $DATADIR/ipaddress.txt
 fi
+sleep 600
 rc=0
 ip address show dev eth0 | grep "inet6 2" || rc=$?
 if [[ "$rc" != 0 ]] ; then
