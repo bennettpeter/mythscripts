@@ -9,8 +9,7 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
-echo startproxy.sh
-date
+echo `date` startproxy.sh Starting
 # sleep to make sure time has been set.
 echo waiting for time sync
 count=0
@@ -71,10 +70,14 @@ if [[ "$ipaddress" != "$oldipaddress" ]] ; then
     "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
     echo "$ipaddress" > $DATADIR/ipaddress.txt
 fi
-sleep 600
-rc=0
-ip address show dev eth0 | grep "inet6 2" || rc=$?
-if [[ "$rc" != 0 ]] ; then
-    "$scriptpath/notify.py" "No IPV6 address" "$ipaddress"
-fi
-
+# Loop to monitor ipv6 address
+ipv6addsave=
+while true ; do
+    ipv6add=`ip address show dev eth0 | grep "inet6 2"` || true
+    if [[ "$ipv6add" != "$ipv6addsave" ]] ; then
+        echo `date` IPV6 address change:
+        echo "$ipv6add"
+        ipv6addsave="$ipv6add"
+    fi
+    sleep 600
+done

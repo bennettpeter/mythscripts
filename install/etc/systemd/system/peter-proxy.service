@@ -4,7 +4,7 @@ Description=Peter Proxy
 After=time-sync.target
 
 [Service]
-Type=oneshot
+Type=simple
 User=mythtv
 UMask=0002
 ExecStart=/opt/mythtv/bin/startproxy.sh
