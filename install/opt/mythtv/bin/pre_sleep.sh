@@ -34,6 +34,6 @@ if [[ "$1" != "" ]] ; then
     umount -l -f "$@"
 fi
 
-systemctl stop transmission-daemon.service
+# systemctl stop transmission-daemon.service
 
 exit 0
