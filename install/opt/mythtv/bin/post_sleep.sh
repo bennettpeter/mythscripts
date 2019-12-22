@@ -22,4 +22,6 @@ if [[ "$RESTART_BLUETOOTH" == Y ]] ; then
     fi
 fi
 
+systemctl start transmission-daemon.service
+
 exit 0
