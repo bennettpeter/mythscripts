@@ -3,6 +3,9 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 set -e
 
+branch=`git branch|grep "^\* "|sed  "s/^\* //"`
+echo branch $branch
+
 if [[ -f $HOME/.buildrc ]] ; then
     . $HOME/.buildrc
 fi
@@ -12,19 +15,15 @@ if [[ "$BUILD_PREPARE" != "" ]] ; then
     $BUILD_PREPARE
     popd
 fi
-./mythbuild.sh "$@" release 2>&1 | tee mythbuild.log
+
+if [[ "$branch" == fixes/30 ]] ; then
+    ./mythbuild.sh "$@" release 2>&1 | tee mythbuild.log
+else
+    make apk "$@" |& tee mythbuild.log
+fi
 echo "results in mythbuild.log"
 if [[ "$BUILD_DONE" != "" ]] ; then
     pushd ../../mythtv/mythtv/
     $BUILD_DONE
-    dirty=`git status --porcelain|grep -v "^??"|wc -l`
-    popd
-    if [[ "$dirty" == 0 ]] ; then
-        apkfile=`ls -t *.apk | head -1`
-        newname=`echo $apkfile | sed s/-dirty/-clean/`
-        if [[ "$apkfile" != "$newname" ]] ; then
-            mv -v "$apkfile" "$newname"
-        fi
-    fi
 fi
 

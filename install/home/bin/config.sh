@@ -7,8 +7,13 @@ projname=`basename $PWD`
 
 case $projname in
     android)
-#        rm -vf build64/mythtv/stamp_configure_android
-        ./mythbuild.sh "$@" fresh
+        branch=`git branch|grep "^\* "|sed  "s/^\* //"`
+        echo branch $branch
+        if [[ "$branch" == fixes/30 ]] ; then
+            ./mythbuild.sh "$@" fresh
+        else
+            make clean
+        fi
         ;;
     *)
         "$scriptpath/config.sh" "$@"
