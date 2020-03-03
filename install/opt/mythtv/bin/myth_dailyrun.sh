@@ -97,6 +97,11 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
             read title
             read date start end title
             while [[ "$date" != "" ]] ; do
+                # Special bypass for Major Crimes
+                if [[ "$start" == 010000 && "$end" == 020000 && "$title" == "Major Crimes"* ]] ; then
+                    echo "Bypass Reset check for $date $start $end $title"
+                    continue;
+                fi
                 if [[ "$start" < 031000 &&  "$end" > 015000 ]] ; then
                     message="$message"$'\n'"$date $start $end $title"
                 fi
