@@ -42,9 +42,9 @@ delete from settings where value = 'ListenOnAllIps' and hostname = 'raza';
 delete from settings where value = 'SecurityPin' and hostname = 'raza';
 insert into settings (value,data,hostname) values
   ('DeletedMaxAge','-1',null),
-  ('MasterServerIP','192.168.8.113',null),
-  ('BackendServerIP','192.168.8.113','raza'),
-  ('BackendServerAddr','192.168.8.113','raza'),
+  ('MasterServerIP','$ROAM_IPADDRESS',null),
+  ('BackendServerIP','$ROAM_IPADDRESS','raza'),
+  ('BackendServerAddr','$ROAM_IPADDRESS','raza'),
   ('MasterServerName','raza',null),
   ('ListenOnAllIps','1','raza'),
   ('SecurityPin','0000','raza');
