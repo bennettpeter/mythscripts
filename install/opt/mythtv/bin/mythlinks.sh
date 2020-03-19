@@ -9,6 +9,10 @@ param="$1"
 
 set -e
 
+if [[ "$MYTHTVDIR" == "" ]] ; then
+    MYTHTVDIR=/usr
+fi
+
 # This needed because mythlink.pl fails if you are 
 # logged into the LINKSDIR tree
 cd /tmp
@@ -25,12 +29,12 @@ fi
 if [[ "$param" == airdate ]] ; then
     # By Air Date
     rm -rf "$LINKSDIR"/airdate
-    /usr/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
+    $MYTHTVDIR/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
       --dest "$LINKSDIR/airdate" --format "%U/%T/%y%m%d-%H%i %oy%om%od S%ssE%ep %S"
 else
     # By Title with orig date
     rm -rf "$LINKSDIR"/origdate
-    /usr/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
+    $MYTHTVDIR/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
       --link "$LINKSDIR/origdate" --format "%U/%T/%oy%om%od S%ssE%ep %S"
 fi
 
