@@ -97,7 +97,11 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
             read title
             read date start end title
             while [[ "$date" != "" ]] ; do
-                if [[ "$start" < 031000 &&  "$end" > 015000 ]] ; then
+                # Skip Checking Major Crimes at 1 AM weekly.
+                if [[ "$start" == 010000 && "$end" == 020000 \
+                        && "$title" == "Major Crimes "* ]] ;  then
+                    echo "Skipping Check Of $date $start $end $title"
+                elif [[ "$start" < 031000 && "$end" > 015000 ]] ; then
                     message="$message"$'\n'"$date $start $end $title"
                 fi
                 read date start end title
