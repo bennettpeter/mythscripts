@@ -145,9 +145,10 @@ if [[ "$USE_VNC" == Y ]] ; then
             sudo cp install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service
             daemonrestart=Y
         fi
-        if ! systemctl is-enabled peter-vnc.service ; then
-            sudo systemctl enable peter-vnc.service 
-        fi
+        # Do not enable by default - it may be causing crashes.
+#        if ! systemctl is-enabled peter-vnc.service ; then
+#            sudo systemctl enable peter-vnc.service
+#        fi
     fi
 fi
 # Do we need to shutdown at 1 AM (Y or N)
