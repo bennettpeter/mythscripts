@@ -25,5 +25,6 @@ echo "results in mythbuild.log"
 if [[ "$BUILD_DONE" != "" ]] ; then
     pushd ../../mythtv/mythtv/
     $BUILD_DONE
+    popd
 fi
 
