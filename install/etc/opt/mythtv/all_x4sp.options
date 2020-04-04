@@ -1,0 +1,7 @@
+# Special encoding - 2nd language
+ENCODER_OPTIONS[0]="-l 480 -a 2 -E lame"
+SAVE_TRANSCODE[0]=Y
+ADD_DESCRIPTION[0]=" Archived 480sp."
+IMPORT_TRANSCODE[0]=N
+# These options are not subscripted and apply to any transcode
+NEW_RECGROUP=Default
