@@ -185,7 +185,7 @@ while (( "$#" >= 1 )) ; do
         --handbrake)
             if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for --handbrake." ; error=y 
             else 
-                handbrake="$2"
+                handbrake=`echo "$2"|sed 's/@/ /g'`
                 shift||rc=$?
             fi
            ;;
@@ -310,8 +310,8 @@ if [[ "$error" == y ]] ; then
     echo "  Time to start encoding, or length of encoding. This is relative to start time. Default at end of file"
     echo "--pfr rate"
     echo "  Maximum frame rate"
-    echo "--handbrake ' options'"
-    echo "  Extra options for handbrake. Precede with a space in the quotes"
+    echo "--handbrake  @options"
+    echo "  Extra options for handbrake. Usa @ signs for spaces in options."
     echo "--x264-preset xxx"
     echo "  x264-preset. Default is faster"
     echo "  Valid values ultrafast superfast veryfast faster fast medium slow slower veryslow placebo"
