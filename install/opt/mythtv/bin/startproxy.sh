@@ -43,9 +43,9 @@ nextshutdownstr=`date +%H:%M --date=@$nextshutdown`
 if [[ "$nextshutdownstr" < 01:30 || "$nextshutdownstr" > 03:30 ]] ; then
   echo "Bad shutdown time of $nextshutdownstr, setting it to 01:30"
   nextshutdownstr=01:30
-  nextshutdown=`date --date="01:30"`
+  nextshutdown=`date --date="01:30" +%s`
   if (( nextshutdown < now )) ; then
-    nextshutdown=`date --date="tomorrow 01:30"`
+    nextshutdown=`date --date="tomorrow 01:30" +%s`
   fi
   echo $nextshutdown > $DATADIR/nextshutdown
 fi
