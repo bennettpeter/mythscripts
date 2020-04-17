@@ -49,7 +49,8 @@ if [[ "$nextshutdownstr" < 01:30 || "$nextshutdownstr" > 03:30 ]] ; then
   fi
   echo $nextshutdown > $DATADIR/nextshutdown
 fi
-sudo shutdown -P $nextshutdownstr
+# use -P for poweroff, -r for restart
+sudo shutdown -r $nextshutdownstr
 
 # Daily IP address check
 if [[ -f $DATADIR/ipaddress.txt ]] ; then
