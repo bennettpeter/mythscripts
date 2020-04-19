@@ -24,4 +24,9 @@ fi
 
 systemctl restart transmission-daemon.service
 
+hostname=`cat /etc/hostname`
+if [[ "$hostname" == andromeda ]] ; then
+    pacmd set-default-sink "alsa_output.pci-0000_00_03.0.hdmi-stereo-extra1"
+fi
+
 exit 0
