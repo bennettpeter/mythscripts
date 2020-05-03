@@ -125,6 +125,9 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
         # lastdate=`date --date=${TCDELAY[stage]}' days ago' '+%y%m%d'`
         lastdate=`date --date=$delay' days ago' '+%y%m%d'`
         if [[ "$linksrun" == N ]] ; then
+            # Fix missing originalairdate on first run shows.
+            echo "update recorded set originalairdate = DATE(convert_tz(starttime,'UCT','SYSTEM')) where originalairdate = '0000-00-00' and previouslyshown = 0;" | \
+                $mysqlcmd
             "$scriptpath/mythlinks.sh" airdate
             linksrun=Y
         fi        
