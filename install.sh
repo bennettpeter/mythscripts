@@ -251,6 +251,13 @@ if ! grep "^mythtv:.*$SOFT_USER" /etc/group ; then
     sudo adduser $SOFT_USER mythtv
 fi
 
+myuser=`id -nu`
+mygroup=`id -ng`
+
+if [[ "$mygroup" != catch22 ]] ; then
+	sudo usermod -g catch22 $myuser
+fi	
+
 if [[ $ARCH == arm* ]] ; then
     if ! grep "^video:.*$SOFT_USER" /etc/group ; then
         sudo adduser $SOFT_USER audio 
