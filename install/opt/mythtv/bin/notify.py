@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Send an email and / or text message when a recording fails
 # Input parameters:
 # Subject
@@ -8,7 +8,7 @@
 import os
 import sys
 from datetime import datetime
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import smtplib
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -28,8 +28,8 @@ privConfig.read('/etc/opt/mythtv/private.conf')
 # print config.items(" default ")
 
 if len(sys.argv) < 3 :
-    print "Minimum 2 parameters required"
-    print "1. subject, 2. message"
+    print("Minimum 2 parameters required")
+    print("1. subject, 2. message")
     sys.exit(2)
 
 scriptname = sys.argv[0]
@@ -56,7 +56,7 @@ now = now [:19]
 
 with open(logfilename,"a") as logfile:
     logmsg = now +" Notify: "+ subject + " " + content
-    print logmsg
+    print(logmsg)
     logfile.write( logmsg + "\n")
     destination = list()
     if email1 != "" :

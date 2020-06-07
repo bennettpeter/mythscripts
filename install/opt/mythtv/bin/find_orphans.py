@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/python3
 
 from MythTV import MythDB, MythBE, Recorded, MythError
 from socket import timeout
@@ -23,8 +23,8 @@ class File( str ):
         self.path = path
         self.size = int(size)
     def pprint(self):
-        name = u'%s: %s' % (self.host, os.path.join(self.path, self))
-        print u'  {0:<90}{1:>8}'.format(name, human_size(self.size))
+        name = '%s: %s' % (self.host, os.path.join(self.path, self))
+        print('  {0:<90}{1:>8}'.format(name, human_size(self.size)))
     def delete(self):
         be = MythBE(self.host, db=DB)
         be.deleteFile(self, self.group)
@@ -32,23 +32,23 @@ class File( str ):
 class MyRecorded( Recorded ):
     _table = 'recorded'
     def pprint(self):
-        name = u'{0.hostname}: {0.title}'.format(self)
+        name = '{0.hostname}: {0.title}'.format(self)
         if self.subtitle:
-            name += u' - '+self.subtitle
-        print u'  {0:<70}{1:>28}'.format(name,self.basename)
+            name += ' - '+self.subtitle
+        print('  {0:<70}{1:>28}'.format(name,self.basename))
 
 def printrecs(title, recs):
-    print title
+    print(title)
     for rec in sorted(recs, key=lambda x: x.title):
         rec.pprint()
-    print u'{0:>88}{1:>12}'.format('Count:',len(recs))
+    print('{0:>88}{1:>12}'.format('Count:',len(recs)))
 
 def printfiles(title, files):
-    print title
+    print(title)
     for f in sorted(files, key=lambda x: x.path):
         f.pprint()
     size = sum([f.size for f in files])
-    print u'{0:>88}{1:>12}'.format('Total:',human_size(size))
+    print('{0:>88}{1:>12}'.format('Total:',human_size(size)))
 
 def populate(host=None):
     unfiltered = []
@@ -120,9 +120,9 @@ def populate(host=None):
 
 def delete_recs(recs):
     printrecs('The following recordings will be deleted', recs)
-    print 'Are you sure you want to continue?'
+    print('Are you sure you want to continue?')
     try:
-        res = raw_input('> ')
+        res = input('> ')
         while True:
             if res == 'yes':
                 for rec in recs:
@@ -131,12 +131,12 @@ def delete_recs(recs):
             elif res == 'no':
                 break
             else:
-                res = raw_input("'yes' or 'no' > ")
+                res = input("'yes' or 'no' > ")
     except MythError:
-        name = u'{0.hostname}: {0.title}'.format(rec)
+        name = '{0.hostname}: {0.title}'.format(rec)
         if rec.subtitle:
             name += ' - '+rec.subtitle
-        print "Warning: Failed to delete '" + name + "'"
+        print("Warning: Failed to delete '" + name + "'")
     except KeyboardInterrupt:
         pass
     except EOFError:
@@ -144,9 +144,9 @@ def delete_recs(recs):
 
 def delete_files(files):
     printfiles('The following files will be deleted', files)
-    print 'Are you sure you want to continue?'
+    print('Are you sure you want to continue?')
     try:
-        res = raw_input('> ')
+        res = input('> ')
         while True:
             if res == 'yes':
                 for f in files:
@@ -155,7 +155,7 @@ def delete_files(files):
             elif res == 'no':
                 break
             else:
-                res = raw_input("'yes' or 'no' > ")
+                res = input("'yes' or 'no' > ")
     except KeyboardInterrupt:
         pass
     except EOFError:
@@ -190,21 +190,21 @@ def main(host=None):
         if len(unfiltered):
             opts.append(['Delete other files', delete_files, unfiltered])
         opts.append(['Refresh list', None, None])
-        print 'Please select from the following'
+        print('Please select from the following')
         for i, opt in enumerate(opts):
-            print ' {0}. {1}'.format(i+1, opt[0])
+            print(' {0}. {1}'.format(i+1, opt[0]))
 
         try:
             inner = True
-            res = raw_input('> ')
+            res = input('> ')
             while inner:
                 try:
                     res = int(res)
                 except:
-                    res = raw_input('input number. ctrl-c to exit > ')
+                    res = input('input number. ctrl-c to exit > ')
                     continue
                 if (res <= 0) or (res > len(opts)):
-                    res = raw_input('input number within range > ')
+                    res = input('input number within range > ')
                     continue
                 break
             opt = opts[res-1]
