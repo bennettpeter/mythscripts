@@ -131,7 +131,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
 #                $mysqlcmd
             "$scriptpath/mythlinks.sh" airdate
             linksrun=Y
-        fi
+#        fi
         rm -rf "$exportdir"
         mkdir -p "$exportdir"/done
         cd "$LINKSDIR"/airdate
