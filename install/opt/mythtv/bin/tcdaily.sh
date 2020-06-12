@@ -129,9 +129,9 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
 #            # Fix missing originalairdate on first run shows.
 #            echo "update recorded set originalairdate = DATE(convert_tz(starttime,'UCT','SYSTEM')) where originalairdate = '0000-00-00' and previouslyshown = 0;" | \
 #                $mysqlcmd
-#            "$scriptpath/mythlinks.sh" airdate
-#            linksrun=Y
-#        fi
+            "$scriptpath/mythlinks.sh" airdate
+            linksrun=Y
+        fi
         rm -rf "$exportdir"
         mkdir -p "$exportdir"/done
         cd "$LINKSDIR"/airdate
