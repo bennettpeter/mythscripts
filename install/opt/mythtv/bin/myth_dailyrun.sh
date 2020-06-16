@@ -88,6 +88,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
         --plain_text --text_format "%Y%m%d %H%i%s %eH%ei%es %T - %S\n" \
         >> $LOGDIR/mythtv_upcoming_recordings.log
 
+	if [[ "$RCONFLICTCHECK" == Y ]] ; then
     # Checks for recordings that will be attempted at 2 am or 3 am and may hit
     # the reboot of the router.
     "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours -1 --recordings -1 \
@@ -118,6 +119,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
                 fi
             fi
           )
+    fi
     # Daily IP address check
     if [[ -f $DATADIR/ipaddress.txt ]] ; then
         oldipaddress=`cat $DATADIR/ipaddress.txt`
