@@ -33,7 +33,9 @@ pcm.softvol {
     # not covering that here.
 
     ## Use Card 0 Device 0 instead of dmix
-    pcm "hw:0,0"
+    # pcm "hw:0,0"
+    ## Use Card 1 Device 0 instead of dmix
+    pcm "hw:1,0"
     ## Use Card 2 Device 0 instead of dmix
     # pcm "hw:2,0"
   }
@@ -51,7 +53,7 @@ pcm.softvol {
 
   # Maximum DB when slider is at 100%
   # 40 is too much
-  max_dB 10.0
+  max_dB 15.0
 
   # How many levels the slider should go through
   # i.e. how granular do you want your control to be
