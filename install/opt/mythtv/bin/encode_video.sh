@@ -323,7 +323,11 @@ if [[ "$error" == y ]] ; then
 fi
 
 inputext=${input/*./}
-bname=`basename "$input" .$inputext`
+if [[ "$inputext" == "$input" ]] ; then
+	bname=${input%/}
+else
+	bname=`basename "$input" .$inputext`
+fi
 
 extension=$format
 if [[ "$encoder" == xvid* ]] ; then
@@ -659,6 +663,7 @@ else
         $chapter_parm $handbrake $extra_handbrake ; rc=$?
     echo HandBrakeCLI Return Code $rc
     if [[ "$rc" != 0 ]] ; then exit $rc ; fi
+	if [[ "$isDVD" == Y ]] ; then exit $rc ; fi
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     cc=0
