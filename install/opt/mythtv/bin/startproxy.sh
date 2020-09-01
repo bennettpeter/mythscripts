@@ -71,6 +71,19 @@ if [[ "$ipaddress" != "$oldipaddress" ]] ; then
     "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
     echo "$ipaddress" > $DATADIR/ipaddress.txt
 fi
+
+#Start Transmission
+mount /home/storage
+while ! mountpoint /home/storage ; do
+	if [[ "$msgsent" == "" ]] ; then
+	    "$scriptpath/notify.py" "storage mount failed" "Turn on the disk"
+		msgsent=Y
+	fi
+	sleep 60
+	mount /home/storage
+done
+sudo systemctl start transmission-daemon.service
+
 # Loop to monitor ipv6 address
 ipv6addsave=
 while true ; do
