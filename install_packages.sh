@@ -17,7 +17,7 @@ sudo apt install git ansible
 sudo apt install fswebcam
 
 # These are for backend
-sudo apt install xmltv apache2 php php-mysql
+sudo apt install xmltv apache2 php php-mysql mysql-server
 
 if [[ `arch` == x86_64 ]] ; then
     wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
