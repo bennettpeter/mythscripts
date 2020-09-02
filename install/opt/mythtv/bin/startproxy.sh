@@ -73,14 +73,14 @@ if [[ "$ipaddress" != "$oldipaddress" ]] ; then
 fi
 
 #Start Transmission
-mount /home/storage
+mount /home/storage || echo mount failed
 while ! mountpoint /home/storage ; do
 	if [[ "$msgsent" == "" ]] ; then
 	    "$scriptpath/notify.py" "storage mount failed" "Turn on the disk"
 		msgsent=Y
 	fi
 	sleep 60
-	mount /home/storage
+	mount /home/storage || echo mount failed
 done
 sudo systemctl start transmission-daemon.service
 
