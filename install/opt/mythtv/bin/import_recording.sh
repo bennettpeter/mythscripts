@@ -181,6 +181,8 @@ fi
 
 if [[ "$action" == U ]] ; then
     durationmilli=`mediainfo '--Inform=Video;%Duration%' "$filename"`
+    # Remove part after decimal
+    durationmilli="${durationmilli%.*}"
     let duration=durationmilli/1000
     time=`date -u "--date=$starttime" +%s`
     let end_time=time+duration
