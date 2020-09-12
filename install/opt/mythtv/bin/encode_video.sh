@@ -29,6 +29,7 @@ audiorate=48000
 Quality=
 extra_handbrake=
 handbrake=
+crop=0:0:0:0
 
 while (( "$#" >= 1 )) ; do
     case $1 in
@@ -142,6 +143,9 @@ while (( "$#" >= 1 )) ; do
             if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for --crop." ; error=y 
             else 
                 crop="$2"
+                if [[ "$crop" == "AUTO" ]] ; then
+                    crop=
+                fi
                 shift||rc=$?
             fi
            ;;
@@ -298,7 +302,7 @@ if [[ "$error" == y ]] ; then
     echo "-q quality - override quality level"
     echo "  Default is 21, 22 or 23 for x264, 4 for xvidm or mpeg4. Lower is better"
     echo "-R audio sample rate for lame - default 48000"
-    echo "--crop T:B:L:R Crop parameter, or AUTO. Defaults to AUTO. For no crop use 0:0:0:0"
+    echo "--crop T:B:L:R Crop parameter, or AUTO. Defaults to 0:0:0:0."
     echo "  Only for use with x264 and ffmpeg (i.e. HandBrake)"
     echo "--ffrate Fixed frame rate of < 30 fps"
     echo "  Ignored if -r is specified"
@@ -324,9 +328,9 @@ fi
 
 inputext=${input/*./}
 if [[ "$inputext" == "$input" ]] ; then
-	bname=${input%/}
+    bname=${input%/}
 else
-	bname=`basename "$input" .$inputext`
+    bname=`basename "$input" .$inputext`
 fi
 
 extension=$format
@@ -663,7 +667,7 @@ else
         $chapter_parm $handbrake $extra_handbrake ; rc=$?
     echo HandBrakeCLI Return Code $rc
     if [[ "$rc" != 0 ]] ; then exit $rc ; fi
-	if [[ "$isDVD" == Y ]] ; then exit $rc ; fi
+    if [[ "$isDVD" == Y ]] ; then exit $rc ; fi
     numinsub=`mediainfo "$input" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     numoutsub=`mediainfo "$output" '--Inform=Text;%StreamCount%'$'\t'|cut -f1`
     cc=0
