@@ -34,7 +34,12 @@ set -- `findmnt -n -t fuse.encfs -o TARGET`
 if [[ "$1" != "" ]] ; then
     umount -l -f "$@"
 fi
-
+# test code to see if I can get past suspend kernel oops in nvidia driver
+hostname=`cat /etc/hostname`
+if [[ "$hostname" == rocinante ]] ; then
+	chvt 1
+	sleep 1
+fi
 # systemctl stop transmission-daemon.service
 
 exit 0
