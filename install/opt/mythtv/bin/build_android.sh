@@ -10,6 +10,9 @@ if [[ -f $HOME/.buildrc ]] ; then
     . $HOME/.buildrc
 fi
 
+echo ndk version: > mythbuild.log
+ls -l $HOME/Android/android-ndk >> mythbuild.log
+
 if [[ "$BUILD_PREPARE" != "" ]] ; then
     pushd ../../mythtv/mythtv/
     $BUILD_PREPARE
@@ -17,9 +20,9 @@ if [[ "$BUILD_PREPARE" != "" ]] ; then
 fi
 
 if [[ "$branch" == fixes/30 ]] ; then
-    ./mythbuild.sh "$@" release 2>&1 | tee mythbuild.log
+    ./mythbuild.sh "$@" release 2>&1 | tee -a mythbuild.log
 else
-    make apk "$@" |& tee mythbuild.log
+    make apk "$@" |& tee -a mythbuild.log
 fi
 echo "results in mythbuild.log"
 if [[ "$BUILD_DONE" != "" ]] ; then
