@@ -36,10 +36,22 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
 #            fi
 #        fi
         echo "Suspending"
+        if [[ "$X11_DISABLE" != "" ]] ; then
+            for mon in $X11_DISABLE ; do 
+                xrandr  --output $mon --off
+            done
+            sleep 1
+        fi
         if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
             sudo systemctl suspend
         else
             sudo /usr/sbin/pm-suspend
+        fi
+        if [[ "$X11_DISABLE" != "" ]] ; then
+            sleep 5
+            for mon in $X11_DISABLE ; do 
+                xrandr  --output $mon --auto
+            done
         fi
     fi
 else
