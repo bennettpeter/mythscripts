@@ -72,17 +72,19 @@ if [[ "$ipaddress" != "$oldipaddress" ]] ; then
     echo "$ipaddress" > $DATADIR/ipaddress.txt
 fi
 
-#Start Transmission
-mount /home/storage || echo mount failed
-while ! mountpoint /home/storage ; do
-	if [[ "$msgsent" == "" ]] ; then
-	    "$scriptpath/notify.py" "storage mount failed" "Turn on the disk"
-		msgsent=Y
-	fi
-	sleep 60
-	mount /home/storage || echo mount failed
-done
-sudo systemctl start transmission-daemon.service
+if [[ "$TRANSMISSION" == Y ]] ; then
+    #Start Transmission
+    mount /home/storage || echo mount failed
+    while ! mountpoint /home/storage ; do
+        if [[ "$msgsent" == "" ]] ; then
+            "$scriptpath/notify.py" "storage mount failed" "Turn on the disk"
+            msgsent=Y
+        fi
+        sleep 60
+        mount /home/storage || echo mount failed
+    done
+    sudo systemctl start transmission-daemon.service
+fi
 
 # Loop to monitor ipv6 address
 ipv6addsave=
