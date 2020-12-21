@@ -92,7 +92,7 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
 #    fi
     # Check if multi_encode.sh script is running
     # if there are other encoders add them here
-    encoders='HandBrakeCLI|ffmpeg|avidemux3_cli'
+    encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder'
     if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
         echo $DATE "multi_encode is running, don't shut down for 5 min."
         rc=1
