@@ -39,10 +39,13 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DB
 
 tmf='+%Y-%m-%d %H:%M:%S'
 dtf='+%Y-%m-%d'
-originalairdate=`date -u --date="$originalairdate" "$dtf"`
+fixdate=`date -u --date="$originalairdate" "$dtf"` || echo rc = $rc
+if [[ "$fixdate" == "" ]] ; then
+    fixdate="$originalairdate"
+fi
 
 # see if this episode is already there
-set -- `echo "select chanid, starttime, basename, originalairdate from recorded 
+set -- `echo "set sql_mode = ''; select chanid, starttime, basename, originalairdate from recorded
   where title = \"$title\" and subtitle = \"$subtitle\" and originalairdate = \"$originalairdate\"
   order by starttime asc limit 1;" | \
   $mysqlcmd | tail -1`
