@@ -30,6 +30,7 @@ Quality=
 extra_handbrake=
 handbrake=
 crop=0:0:0:0
+detelecine=
 
 while (( "$#" >= 1 )) ; do
     case $1 in
@@ -179,6 +180,9 @@ while (( "$#" >= 1 )) ; do
         --toavi)
             toavi=y
            ;;
+        --detelecine
+            detelecine=y
+           ;;
         --x264-preset)
             if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for --x264-preset." ; error=y 
             else 
@@ -314,6 +318,8 @@ if [[ "$error" == y ]] ; then
     echo "  Time to start encoding, or length of encoding. This is relative to start time. Default at end of file"
     echo "--pfr rate"
     echo "  Maximum frame rate"
+    echo "--detelecine"
+    echo "  Use HandBrake detelecine"
     echo "--handbrake  @options"
     echo "  Extra options for handbrake. Usa @ signs for spaces in options."
     echo "--x264-preset xxx"
@@ -650,7 +656,11 @@ else
     fi
     if (( maxWidth > 0 )) ; then
         maxWidthParm="-X $maxWidth"
-    fi 
+    fi
+    detele_parm=
+    if [[ "$detelecine" == y ]]; then
+        detele_parm="--detelecine"
+    fi
     case $format in
     mkv)
         format=av_mkv
@@ -664,7 +674,7 @@ else
         -q $Quality $framerate_parm -E $audio $audio_opts \
         --audio-fallback ac3 $crop_parm $widthParm -l $Height $maxWidthParm \
         --decomb $startpos_parm $length_parm $subtitle_parm $titlenum_parm \
-        $chapter_parm $handbrake $extra_handbrake ; rc=$?
+        $chapter_parm $detele_parm $handbrake $extra_handbrake ; rc=$?
     echo HandBrakeCLI Return Code $rc
     if [[ "$rc" != 0 ]] ; then exit $rc ; fi
     if [[ "$isDVD" == Y ]] ; then exit $rc ; fi
