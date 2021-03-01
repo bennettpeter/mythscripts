@@ -180,7 +180,7 @@ while (( "$#" >= 1 )) ; do
         --toavi)
             toavi=y
            ;;
-        --detelecine
+        --detelecine)
             detelecine=y
            ;;
         --x264-preset)
