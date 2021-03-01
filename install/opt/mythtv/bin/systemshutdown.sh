@@ -19,22 +19,12 @@ priorreboot=`cat $DATADIR/reboot_date`
 echo "Last reboot was $priorreboot"
 vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
-if [[ "$CAN_SUSPEND" == Y ]] ; then
+if [[ "$CAN_SUSPEND" == Y || "$ALWAYS_ON" == Y ]] ; then
     if [[ ( "$priorreboot" == "$s7daysago" || "$priorreboot" < "$s7daysago" ) && "$vbox" == "" ]] ; then
         date +%F > $DATADIR/reboot_date
         echo "Restarting"
         sudo /sbin/shutdown -r now
-    else
-#        if [[ "$REBOOT_BEFORE_SUSPEND" == Y ]] ; then
-#            who -b
-#            set -- `who -b`
-#            lastboot="$3 $4"
-#            if [[ "$lastboot" < `date --date="15 minutes ago" "+%F %H:%M"` ]] ; then
-#                echo "Booted more than 15 minutes ago - Restart now"
-#                sudo /sbin/shutdown -r now
-#                exit
-#            fi
-#        fi
+    elif [[ "$CAN_SUSPEND" == Y ]] ; then
         echo "Suspending"
         if [[ "$X11_DISABLE" != "" ]] ; then
             for mon in $X11_DISABLE ; do 

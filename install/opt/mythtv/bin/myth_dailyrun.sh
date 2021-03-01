@@ -37,8 +37,6 @@ if [[ "$today" == Sat* ]]; then
             "$scriptpath/notify.py" "Database Backup failed" "mythtv_dbbackup.sh"
         fi
         echo $today > $DATADIR/dbbackup_date
-        # Force a reboot after this is done
-        true > $DATADIR/reboot_date
         # Run roamexport to keep portable drive up to date.
         # This must be run here to ensure consistent with DB backup above
         $scriptpath/roamexport.sh
