@@ -340,17 +340,8 @@ if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
 fi
 
 if [[ "$ALWAYS_ON" == Y ]] ; then
-    if [[ "$rc" == 0 ]] ; then
-        # Force a reboot weekly
-        s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
-        priorreboot=`cat $DATADIR/reboot_date`
-        if [[ "$priorreboot" = "$s7daysago" || "$priorreboot" < "$s7daysago" ]] ; then
-            echo "$DATE weekly reboot"
-        else
-            echo "$DATE ALWAYS_ON is set - don't shut down"
-            rc=1
-        fi
-    fi
+    echo "$DATE ALWAYS_ON is set - don't shut down"
+    rc=1
 fi
 
 echo $rc > $DATADIR/mythshutdown_rc
