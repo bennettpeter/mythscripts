@@ -195,7 +195,7 @@ for (( counter=0 ; counter<10 ; counter++ )) ; do
                         oldfile="${oldfile}_0"
                     fi
                     if [[ "$followlinks" == Y ]] ; then
-                        mv -fv "$realfile" "$storagedir/"
+                        ln "$realfile" "$storagedir/"
                     else
                         cp -fvL "$realfile" "$storagedir/"
                     fi
