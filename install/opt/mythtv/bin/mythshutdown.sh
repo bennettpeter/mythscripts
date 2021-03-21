@@ -77,6 +77,8 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
 
 fi
 
+# if there are other encoders add them here
+encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder'
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
     # Do not shut down if hold is set
 #    mkdir -p  "$TCSTORAGEDIR/$TCSUBDIR/"
@@ -91,8 +93,6 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
 #        fi
 #    fi
     # Check if multi_encode.sh script is running
-    # if there are other encoders add them here
-    encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder'
     if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
         echo $DATE "multi_encode is running, don't shut down for 5 min."
         rc=1
@@ -106,6 +106,11 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
     fi
     # Experimental command for checking if HandBrake is in a loop
     ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
+else
+    if ps -ef|egrep "$encoders"|egrep -v "grep " ; then
+        echo $DATE "encoders are running, don't shut down for 5 min."
+        rc=1
+    fi
 fi
 # Check for generic hostlock
 #for file in "$LOCALSTORE/keepalive"/* $KEEPALIVE_HOSTS ; do
