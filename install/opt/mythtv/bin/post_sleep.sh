@@ -15,6 +15,10 @@
 #    systemctl restart nfs-client.target
 #fi
 
+if [[ "$IS_BACKEND" == true ]] && pidof mythbackend ; then
+    sudo -u mythtv mythutil --resched
+fi
+
 # restart bluetooth when needed
 if [[ "$RESTART_BLUETOOTH" == Y ]] ; then
     if systemctl is-enabled bluetooth.service ; then
@@ -22,9 +26,9 @@ if [[ "$RESTART_BLUETOOTH" == Y ]] ; then
     fi
 fi
 
-systemctl restart transmission-daemon.service
+# systemctl restart transmission-daemon.service
 
-hostname=`cat /etc/hostname`
+# hostname=`cat /etc/hostname`
 #if [[ "$hostname" == andromeda ]] ; then
 #    pacmd set-default-sink "alsa_output.pci-0000_00_03.0.hdmi-stereo-extra1"
 #fi
