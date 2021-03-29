@@ -73,7 +73,7 @@ if  "$IS_BACKEND"  ; then
 else
     # For non backend
     while true ; do
-        sleep 300
+        sleep 60
         if  $scriptpath/mythshutdown.sh ; then
             setsid $scriptpath/systemshutdown.sh || true
         fi
