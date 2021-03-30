@@ -73,12 +73,15 @@ if [[ -f $DATADIR/mythfilldatabase_date ]] ; then
 fi
 if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     echo $DATE "Running mythfilldatabase."
-    $scriptpath/mythfilldatabase.sh  --only-update-guide >/dev/null 2>&1
-    rc=$?
-    if [[ "$rc" != 0 ]] ; then
-        "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
-    fi
-    echo $today > $DATADIR/mythfilldatabase_date
+    # run asynchronously - in error cases it can run 2 hours and hold up other stuff.
+    (
+        $scriptpath/mythfilldatabase.sh  --only-update-guide >/dev/null 2>&1
+        rc=$?
+        if [[ "$rc" != 0 ]] ; then
+            "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
+        fi
+        echo $today > $DATADIR/mythfilldatabase_date
+    ) &
 
     # Print 1 day's upcoming recordings
     date >> $LOGDIR/mythtv_upcoming_recordings.log
@@ -86,7 +89,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
         --plain_text --text_format "%Y%m%d %H%i%s %eH%ei%es %T - %S\n" \
         >> $LOGDIR/mythtv_upcoming_recordings.log
 
-	if [[ "$RCONFLICTCHECK" == Y ]] ; then
+    if [[ "$RCONFLICTCHECK" == Y ]] ; then
     # Checks for recordings that will be attempted at 2 am or 3 am and may hit
     # the reboot of the router.
     "$scriptpath/myth_upcoming_recordings.pl" --plain_text --hours -1 --recordings -1 \
@@ -133,7 +136,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     # Note here eval gets rid of the inverted commas around the ip address
     # eval ipaddress=`jq .IP ipaddress.json`
     # popd
-    ipaddress=`curl 'https://api.ipify.org'`
+    ipaddress=`curl -m 30 'https://api.ipify.org'`
     if [[ "$ipaddress" != "$oldipaddress" ]] ; then
         "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
         echo "$ipaddress" > $DATADIR/ipaddress.txt
@@ -157,3 +160,7 @@ fi
 # Check cable box once a day
 # $scriptpath/stb_poweron.sh
 
+# wait for mythfilldatabase and any other child process
+wait
+date
+echo myth_dailyrun ended.
