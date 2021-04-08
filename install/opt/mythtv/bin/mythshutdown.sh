@@ -8,6 +8,7 @@ reason=$1
 # Frequency of checks in minutes
 CHECK_MINUTES=1
 X_IDLE_MINUTES=10
+FS_REPORT_PERCENTAGE=90
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -37,6 +38,28 @@ today=`date "+%a %Y/%m/%d"`
 rc=0
 
 . $scriptpath/getconfig.sh
+
+
+# Check for full file systems
+prev_fscheck=
+if [[ -f $DATADIR/fscheck_date ]]; then
+    fscheck_date=`cat $DATADIR/fscheck_date`
+fi
+if [[ "$fscheck_date" != "$today" ]] ; then
+    df --output=pcent,target | \
+    (
+        while true ; do
+            read perc path
+            if [[ "$perc" == "" ]] ; then break; fi
+            usage=${perc%\%}
+            if (( usage > FS_REPORT_PERCENTAGE )) ; then
+                "$scriptpath/notify.py" "$LocalHostName Disk $perc full" \
+                    "File system at $path is $perc full."
+            fi
+        done
+    )
+    echo $today > $DATADIR/fscheck_date
+fi
 
 # These checks only run on the machine that is specified in the mythtv.conf as
 # the MAINHOST
