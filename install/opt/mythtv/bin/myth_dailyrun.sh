@@ -72,6 +72,8 @@ if [[ -f $DATADIR/mythfilldatabase_date ]] ; then
     prev_mythfilldatabase=`cat $DATADIR/mythfilldatabase_date`
 fi
 if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
+    DATE=`date +%F\ %T\.%N`
+    DATE=${DATE:0:23}
     echo $DATE "Running mythfilldatabase."
     # run asynchronously - in error cases it can run 2 hours and hold up other stuff.
     (
@@ -148,6 +150,8 @@ if [[ -f $DATADIR/transcode_date ]] ; then
 fi
 if [[ "$prev_transcode" != "$today" ]] ; then
     # Start daily transcode run
+    DATE=`date +%F\ %T\.%N`
+    DATE=${DATE:0:23}
     echo $DATE "Running tcdaily."
     nice ionice -c3 $scriptpath/tcdaily.sh >/dev/null 2>&1
     rc=$?
