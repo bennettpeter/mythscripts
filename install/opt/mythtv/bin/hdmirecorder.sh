@@ -29,9 +29,9 @@ date=${date:0:23}
 awk '/^\[default\]$/ { def = 1; next }
 /^\[/ { def = 0; next }
 def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
-> /tmp/${recname}_$$.conf
-
-. /tmp/${recname}_$$.conf
+> $DATADIR/etc_${recname}.conf
+. $DATADIR/etc_${recname}.conf
+. $DATADIR/${recname}.conf
 
 rc=0
 if [[ ! -e $VIDEO_IN ]] ; then
