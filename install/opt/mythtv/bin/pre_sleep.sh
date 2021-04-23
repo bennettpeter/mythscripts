@@ -14,8 +14,11 @@ killall mythfrontend
 # Disable mouse wakeup
 # first check if mouse wakeup enabled
 # XHC	  S3	*enabled   pci:0000:00:14.0
+# XHC on laptop, XHCI on office desktop
 if cat /proc/acpi/wakeup|grep "^XHC"$'\t'".*enabled" ; then
     echo XHC | tee /proc/acpi/wakeup
+elif cat /proc/acpi/wakeup|grep "^XHCI"$'\t'".*enabled" ; then
+    echo XHCI | tee /proc/acpi/wakeup
 fi
 
 # Uncomment to force lock
