@@ -19,14 +19,17 @@ sudo apt install fswebcam
 # These are for backend
 sudo apt install xmltv apache2 php php-mysql mysql-server
 
+# For firetv recorder on backend
+sudo apt install gocr adb imagemagick
+
 if [[ `arch` == x86_64 ]] ; then
-    wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
+#    wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
     # Add this to /etc/apt/sources.list.d/mkvtoolnix.download.list:
 #deb https://mkvtoolnix.download/ubuntu/ bionic main
 #deb-src https://mkvtoolnix.download/ubuntu/ bionic main
-    sudo add-apt-repository ppa:stebbins/handbrake-releases
+#    sudo add-apt-repository ppa:stebbins/handbrake-releases
 
-    sudo apt update
+#    sudo apt update
     sudo apt install mkvtoolnix handbrake-cli ffmpeg
 fi
 

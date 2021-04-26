@@ -30,12 +30,39 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
 
-echo $date Start ffmpeg >>$logfile
+tunefile=$DATADIR/${recname}_tune.stat
+if [[ ! -f $tunefile ]] ; then
+    echo $date $tunefile not found, aborting >>$logfile
+    exit 2
+fi
 
+. $tunefile
+
+now=$(date +%s)
+if [[ "$tunestatus" != success ]] ; then
+    echo $date Tune status is $tunestatus, aborting >>$logfile
+    exit 2
+fi
+if (( tunetime < now-300 )) ; then
+    echo $date Tuned more than 5 minutes ago, aborting >>$logfile
+    exit 2
+fi
+
+# Channel is selected - start playback
+adb connect $ANDROID_DEVICE
+$scriptpath/adb-sendkey.sh DPAD_CENTER
+adb disconnect $ANDROID_DEVICE
+
+echo $date Start ffmpeg, channel $tunechan >>$logfile
+
+
+if [[ "$AUDIO_OFFSET" == "" ]] ; then
+    AUDIO_OFFSET=0.000
+fi
 exec ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format $INPUT_FORMAT \
   -framerate $FRAMERATE -video_size $RESOLUTION \
   -use_wallclock_as_timestamps 1 \
   -i $VIDEO_IN -f pulse -ac 2 -ar 48000 -thread_queue_size 1024 \
-  -itsoffset 0.000 -i "$AUDIO_IN" \
+  -itsoffset $AUDIO_OFFSET -i $AUDIO_IN \
   -c:v libx264 -vf format=yuv420p -preset faster -crf 23 -c:a aac \
   -f mpegts - 2>>$logfile

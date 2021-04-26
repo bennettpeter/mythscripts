@@ -11,9 +11,8 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 logfile=$LOGDIR/${scriptname}.log
-##UNCOMMENT
-# exec 1>>$LOGDIR/${scriptname}.log
-# exec 2>&1
+exec 1>>$LOGDIR/${scriptname}.log
+exec 2>&1
 
 # Get a date/time stamp to add to log output
 date=`date +%F\ %T\.%N`
@@ -21,6 +20,7 @@ date=${date:0:23}
 
 # First set all tuners to HOME
 for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
+    if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
     recname=$(basename $conffile .conf)
 
     # Select the [default] section of conf and put it in a file
@@ -41,6 +41,7 @@ done
 
 # Invoke app and check where the result is
 for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
+    if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
     recname=$(basename $conffile .conf)
     rm -f $DATADIR/${recname}.conf
 
@@ -67,6 +68,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
         for (( x=0; x<20; x=x+2 )) ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
+            rm -f $DATADIR/video${x}_capture.jpg
             ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.jpg
             convert $DATADIR/video${x}_capture.jpg -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.jpg
             gocr -l 160 $DATADIR/video${x}_heading.jpg > $DATADIR/video${x}_heading.txt

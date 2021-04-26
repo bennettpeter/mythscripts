@@ -32,5 +32,5 @@ export ANDROID_DEVICE
 adb connect $ANDROID_DEVICE
 
 # Exit from application
-$scriptpath/adb-sendkey.sh HOME HOME
+$scriptpath/adb-sendkey.sh HOME
 adb disconnect $ANDROID_DEVICE
