@@ -190,7 +190,7 @@ for (( xx=0; xx<5; xx++ )) ; do
         if [[ $prior_direction != N && $prior_direction != $direction ]] ; then
             # Moving up and down indicates channel is not in the list
             echo "ERROR channel: $channum not found in favorites, using: ${onscreen[@]}"
-            continue 2
+            break 2
         fi
         $scriptpath/adb-sendkey.sh $direction
     done
@@ -198,16 +198,19 @@ for (( xx=0; xx<5; xx++ )) ; do
     break
 done
 
-adb disconnect $ANDROID_DEVICE
 date=`date +%F\ %T\.%N`
 date=${date:0:23}
 if [[ "$tuned" == Y ]] ; then
+    # Start playback of channel
+    $scriptpath/adb-sendkey.sh DPAD_CENTER
     echo "tunetime=$(date +%s)" >> $tunefile
     echo "tunestatus=success" >> $tunefile
     echo "$date Complete tuning channel: $channum on recorder: $recname"
-    exit 0
+    rc=0
 else
     echo "tunestatus=fail" >> $tunefile
     echo "$date Unable to tune channel: $channum on recorder: $recname"
-    exit 2
+    rc=2
 fi
+adb disconnect $ANDROID_DEVICE
+exit $rc

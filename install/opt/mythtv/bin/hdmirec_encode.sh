@@ -48,13 +48,13 @@ if (( tunetime < now-300 )) ; then
     exit 2
 fi
 
-# Channel is selected - start playback
-adb connect $ANDROID_DEVICE
-$scriptpath/adb-sendkey.sh DPAD_CENTER
-adb disconnect $ANDROID_DEVICE
+# Channel is selected - start playback. This is done in tune script now.
+# export ANDROID_DEVICE
+# adb connect $ANDROID_DEVICE
+# $scriptpath/adb-sendkey.sh DPAD_CENTER
+# adb disconnect $ANDROID_DEVICE
 
 echo $date Start ffmpeg, channel $tunechan >>$logfile
-
 
 if [[ "$AUDIO_OFFSET" == "" ]] ; then
     AUDIO_OFFSET=0.000

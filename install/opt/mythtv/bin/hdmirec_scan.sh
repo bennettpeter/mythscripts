@@ -18,6 +18,7 @@ exec 2>&1
 date=`date +%F\ %T\.%N`
 date=${date:0:23}
 
+export ANDROID_DEVICE
 # First set all tuners to HOME
 for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
@@ -33,7 +34,6 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
 
     echo "$date Reset recorder: $recname"
 
-    export ANDROID_DEVICE
     adb connect $ANDROID_DEVICE
     $scriptpath/adb-sendkey.sh HOME
     adb disconnect $ANDROID_DEVICE
@@ -55,7 +55,6 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
 
     echo "$date Reset recorder: $recname"
 
-    export ANDROID_DEVICE
     adb connect $ANDROID_DEVICE
 
     # This expects xfinity to be the first application in the list
