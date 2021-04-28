@@ -29,9 +29,10 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 
 echo $date New Episode Recording on recorder $recname
 
-export ANDROID_DEVICE
-adb connect $ANDROID_DEVICE
+# This causes playback to stop - don't do it!
+# export ANDROID_DEVICE
+# adb connect $ANDROID_DEVICE
 
 # Let Android know we are still here
-$scriptpath/adb-sendkey.sh DPAD_CENTER
-adb disconnect $ANDROID_DEVICE
+# $scriptpath/adb-sendkey.sh DPAD_CENTER
+# adb disconnect $ANDROID_DEVICE
