@@ -39,7 +39,7 @@ fi
 . $tunefile
 
 now=$(date +%s)
-if [[ "$tunestatus" != success ]] ; then
+if [[ "$tunestatus" != playing ]] ; then
     echo $date Tune status is $tunestatus, aborting >>$logfile
     exit 2
 fi

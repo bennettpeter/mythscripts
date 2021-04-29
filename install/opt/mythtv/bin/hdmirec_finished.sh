@@ -26,11 +26,22 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
 
+tunefile=$DATADIR/${recname}_tune.stat
+if [[ ! -f $tunefile ]] ; then
+    echo $date $tunefile not found. >>$logfile
+else
+    . $tunefile
+fi
+
 echo $date Finished Recording on recorder $recname
 
-export ANDROID_DEVICE
-adb connect $ANDROID_DEVICE
+if [[ "$tunestatus" == playing ]] ; then
+    export ANDROID_DEVICE
+    adb connect $ANDROID_DEVICE
 
-# Exit from application
-$scriptpath/adb-sendkey.sh HOME
-adb disconnect $ANDROID_DEVICE
+    # Exit from playback
+    $scriptpath/adb-sendkey.sh BACK
+    adb disconnect $ANDROID_DEVICE
+    echo "tunetime=$(date +%s)" >> $tunefile
+    echo "tunestatus=stopped" >> $tunefile
+fi

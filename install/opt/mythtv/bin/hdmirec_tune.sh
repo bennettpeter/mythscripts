@@ -27,8 +27,31 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 > $DATADIR/etc_${recname}.conf
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
+export ANDROID_DEVICE
 
 tunefile=$DATADIR/${recname}_tune.stat
+partialtune=N
+if [[ -f $tunefile ]] ; then
+    for (( xx=0; xx<6; xx++ )) ; do
+    . $tunefile
+        if [[ "$tunestatus" == playing ]] ; then
+            sleep 0.5
+        else
+            break
+        fi
+    done
+    if [[ "$tunestatus" == playing ]] ; then
+        echo "$date Tuner still playing, should have stopped"
+    fi
+    if [[ "$tunestatus" == stopped ]] ; then
+        now=$(date +%s)
+        if (( tunetime > now-600 )) ; then
+            echo "$date Tuner was recording recently, status $tunestatus, try partial tune"
+            partialtune=Y
+        fi
+    fi
+fi
+
 echo "tunetime=$(date +%s)" > $tunefile
 echo "tunechan=$channum" >> $tunefile
 if (( channum == 1 )); then
@@ -37,6 +60,7 @@ if (( channum == 1 )); then
     exit 0
 fi
 echo "tunestatus=start" >> $tunefile
+tunestatus=start
 
 function trapfunc {
     echo "Process killed"
@@ -47,6 +71,19 @@ function trapfunc {
 
 trap trapfunc 1 2 3 4 5 6 15
 
+function getpagename {
+    if [[ "$1" == "" ]] ; then
+        crop="240x64+62+0"
+    else
+        crop="$1"
+    fi
+    rm -f $DATADIR/${recname}_capture.jpg $DATADIR/${recname}_heading.txt
+    ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
+    convert $DATADIR/${recname}_capture.jpg -crop "$crop" -negate $DATADIR/${recname}_heading.jpg
+    gocr -l 160 $DATADIR/${recname}_heading.jpg > $DATADIR/${recname}_heading.txt
+    pagename=$(head -1 $DATADIR/${recname}_heading.txt)
+}
+
 echo "$date Start tuning channel: $channum on recorder: $recname"
 
 if (( channum <= 0 )) ; then
@@ -54,73 +91,84 @@ if (( channum <= 0 )) ; then
     exit 2
 fi
 
-export ANDROID_DEVICE
-
-tuned=N
-for (( xx=0; xx<5; xx++ )) ; do
-    adb connect $ANDROID_DEVICE
-
-    # This expects xfinity to be the first application in the list
-    $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
-
-    # This also starts it but returns to a prior screen, not the start screen
-    # So different logic will be needed
-    # $scriptpath/adb-sendkey.sh HOME
-    # adb shell monkey -p com.xfinity.cloudtvr.tenfoot -c android.intent.category.LAUNCHER 1
-
+# Partially tuned from prior recording?
+if [[ "$partialtune" == Y ]] ; then
     match=N
-    pagename=
-    for (( x=0; x<20; x++ )) ; do
-        ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
-        convert $DATADIR/${recname}_capture.jpg -crop 240x64+62+0 -negate $DATADIR/${recname}_heading.jpg
-        gocr -l 160 $DATADIR/${recname}_heading.jpg > $DATADIR/${recname}_heading.txt
-        pagename=$(head -1 $DATADIR/${recname}_heading.txt)
-        if [[ "$pagename" == For*You ]] ; then
-            match=Y
-            break
-        fi
-        sleep 0.5
-    done
-    if [[ $match != Y ]] ; then
-        echo "Failed to start XFinity For You - found $pagename - see $DATADIR/${recname}_capture.jpg"
-        continue
-    fi
-
-    $scriptpath/adb-sendkey.sh MENU
-    match=N
-    for (( x=0; x<20; x++ )) ; do
-        ffmpeg -hide_banner -loglevel error -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
-        convert $DATADIR/${recname}_capture.jpg -crop 240x64+62+10 -negate $DATADIR/${recname}_heading.jpg
-        gocr -l 160 $DATADIR/${recname}_heading.jpg > $DATADIR/${recname}_heading.txt
-        pagename=$(head -1 $DATADIR/${recname}_heading.txt)
-        if [[ "$pagename" == Search ]] ; then
-            match=Y
-            break
-        fi
-        sleep 0.5
-    done
-    if [[ $match != Y ]] ; then
-        echo "Failed to launch XFinity Menu - found $pagename - see $DATADIR/${recname}_capture.jpg"
-        continue
-    fi
-
-    $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
-    match=N
-    for (( x=0; x<20; x++ )) ; do
-        ffmpeg -hide_banner -loglevel error -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
-        convert $DATADIR/${recname}_capture.jpg -crop 240x64+62+0 -negate $DATADIR/${recname}_heading.jpg
-        gocr -l 160 $DATADIR/${recname}_heading.jpg > $DATADIR/${recname}_heading.txt
-        pagename=$(head -1 $DATADIR/${recname}_heading.txt)
+    for (( x=0; x<6; x++ )) ; do
+        getpagename
         if [[ "$pagename" == Favorite*Channels ]] ; then
             match=Y
             break
         fi
         sleep 0.5
     done
-    if [[ $match != Y ]] ; then
-        echo "Expected Favorite Channels but got $pagename - try again"
-        continue
+    if [[ "$match" == N ]] ; then
+        partialtune=N
     fi
+fi
+
+
+tuned=N
+for (( xx=0; xx<5; xx++ )) ; do
+    adb connect $ANDROID_DEVICE
+
+    if [[ "$partialtune" == N ]] ; then
+        # This expects xfinity to be the first application in the list
+        $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+
+        # This also starts it but returns to a prior screen, not the start screen
+        # So different logic will be needed
+        # $scriptpath/adb-sendkey.sh HOME
+        # adb shell monkey -p com.xfinity.cloudtvr.tenfoot -c android.intent.category.LAUNCHER 1
+
+        match=N
+        pagename=
+        for (( x=0; x<20; x++ )) ; do
+            getpagename
+            if [[ "$pagename" == For*You ]] ; then
+                match=Y
+                break
+            fi
+            sleep 0.5
+        done
+        if [[ $match != Y ]] ; then
+            echo "Failed to start XFinity For You - found $pagename - see $DATADIR/${recname}_capture.jpg"
+            continue
+        fi
+
+        $scriptpath/adb-sendkey.sh MENU
+        match=N
+        for (( x=0; x<20; x++ )) ; do
+            getpagename "240x64+62+10"
+            if [[ "$pagename" == Search ]] ; then
+                match=Y
+                break
+            fi
+            sleep 0.5
+        done
+        if [[ $match != Y ]] ; then
+            echo "Failed to launch XFinity Menu - found $pagename - see $DATADIR/${recname}_capture.jpg"
+            continue
+        fi
+
+        $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
+        match=N
+        for (( x=0; x<20; x++ )) ; do
+            getpagename
+            if [[ "$pagename" == Favorite*Channels ]] ; then
+                match=Y
+                break
+            fi
+            sleep 0.5
+        done
+        if [[ $match != Y ]] ; then
+            echo "Expected Favorite Channels but got $pagename - try again"
+            continue
+        fi
+    fi
+
+    # Reset partialtune for next round in case this fails
+    partialtune=N
 
     ##favorites - channel numbers##
     currchan=0
@@ -204,7 +252,7 @@ if [[ "$tuned" == Y ]] ; then
     # Start playback of channel
     $scriptpath/adb-sendkey.sh DPAD_CENTER
     echo "tunetime=$(date +%s)" >> $tunefile
-    echo "tunestatus=success" >> $tunefile
+    echo "tunestatus=playing" >> $tunefile
     echo "$date Complete tuning channel: $channum on recorder: $recname"
     rc=0
 else
