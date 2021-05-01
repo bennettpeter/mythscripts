@@ -14,6 +14,23 @@ DATE=${DATE:0:23}
 today=`date "+%a %Y/%m/%d"`
 numdate=`date "+%Y%m%d"`
 
+# Wait up to 10 min for network to be available
+
+network=DOWN
+for (( x=0 ; x<600 ; x++ )) ; do
+    # Dummy wakeonlan fails if network is down
+    if wakeonlan "00:00:00:00:00:00" ; then
+        network=UP
+        break
+    fi
+    sleep 1
+done
+
+if [[ "$network" != UP ]] ; then
+    echo $DATE Network is down - aborting
+    exit 2
+fi
+
 # . /etc/mythtv/mysql.txt
 . $scriptpath/getconfig.sh
 
