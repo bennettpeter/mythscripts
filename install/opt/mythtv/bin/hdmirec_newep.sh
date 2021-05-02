@@ -29,10 +29,24 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 
 echo $date New Episode Recording on recorder $recname
 
-# Some button presses to ensure the playback does not stop with
-# "Are you still there"
-export ANDROID_DEVICE
-adb connect $ANDROID_DEVICE
-# Let Android know we are still here - pause and play
-$scriptpath/adb-sendkey.sh MEDIA_PLAY_PAUSE MEDIA_PLAY_PAUSE
-adb disconnect $ANDROID_DEVICE
+tunefile=$DATADIR/${recname}_tune.stat
+partialtune=N
+if [[ -f $tunefile ]] ; then
+    . $tunefile
+    if [[ "$tunestatus" == playing ]] ; then
+        now=$(date +%s)
+        # 10200 seconds = 2hr 50 mins
+        if (( tunetime < now-10200 )) ; then
+            echo "$date Tuner was recording more than 2 hr 50 min, pause and resume"
+            # Some button presses to ensure the playback does not stop with
+            # "Are you still there"
+            export ANDROID_DEVICE
+            adb connect $ANDROID_DEVICE
+            # Let Android know we are still here - pause and play
+            $scriptpath/adb-sendkey.sh MEDIA_PLAY_PAUSE MEDIA_PLAY_PAUSE
+            adb disconnect $ANDROID_DEVICE
+            echo "tunetime=$(date +%s)" >> $tunefile
+        fi
+    fi
+fi
+exit 0
