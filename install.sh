@@ -181,16 +181,16 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
 #        sudo systemctl enable peter-resume.service
 #    fi
 
-    os=`cat /etc/issue|sed "s/ .*//"`
-    if [[ "$os" == Raspbian ]] ; then
-        if ! diff install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service ; then
-            sudo cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
-            daemonrestart=Y
-        fi
-        if ! systemctl is-enabled peter-addips.service ; then
-            sudo systemctl enable peter-addips.service
-        fi
-    fi
+#    os=`cat /etc/issue|sed "s/ .*//"`
+#    if [[ "$os" == Raspbian ]] ; then
+#        if ! diff install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service ; then
+#            sudo cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
+#            daemonrestart=Y
+#        fi
+#        if ! systemctl is-enabled peter-addips.service ; then
+#            sudo systemctl enable peter-addips.service
+#        fi
+#    fi
 
     if [[ "$WEBCAM" == Y ]] ; then
         if ! diff install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service ; then
@@ -228,8 +228,8 @@ sudo cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 #netmanager
 sudo rm -f /etc/network/if-up.d/010addipaddress
-sudo ln -fs /opt/mythtv/bin/addipaddress.sh \
-  /etc/network/if-up.d/010addipaddress
+# sudo ln -fs /opt/mythtv/bin/addipaddress.sh \
+#   /etc/network/if-up.d/010addipaddress
 # sudo chown root:root /opt/mythtv/bin/10addipaddress.sh
 # sudo chmod g-w /opt/mythtv/bin/10addipaddress.sh
 
