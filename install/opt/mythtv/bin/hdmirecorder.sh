@@ -39,7 +39,8 @@ if [[ ! -e $VIDEO_IN ]] ; then
     rc=2
 fi
 
-if ! pacmd list-sources|grep -q "$AUDIO_IN" ; then
+srch=$(echo $AUDIO_IN | sed 's/hw:/card /;s/,/.*device /')
+if ! arecord -l|grep -q "$srch" ; then
     echo "$date" ERROR $AUDIO_IN does not exist >>$logfile
     rc=2
 fi

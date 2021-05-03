@@ -62,7 +62,7 @@ fi
 exec ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format $INPUT_FORMAT \
   -framerate $FRAMERATE -video_size $RESOLUTION \
   -use_wallclock_as_timestamps 1 \
-  -i $VIDEO_IN -f pulse -ac 2 -ar 48000 -thread_queue_size 1024 \
+  -i $VIDEO_IN -f alsa -ac 2 -ar 48000 -thread_queue_size 1024 \
   -itsoffset $AUDIO_OFFSET -i $AUDIO_IN \
   -c:v libx264 -vf format=yuv420p -preset faster -crf 23 -c:a aac \
   -f mpegts - 2>>$logfile

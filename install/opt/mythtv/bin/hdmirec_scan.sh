@@ -91,25 +91,17 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     $scriptpath/adb-sendkey.sh HOME
     adb disconnect $ANDROID_DEVICE
 
+    # vid_path is a string like pci-0000:00:14.0-usb-0:2.2:1.0
     vid_path=$(udevadm info --query=all --name=$VIDEO_IN|grep "ID_PATH="|sed s/^.*ID_PATH=//)
     len=${#vid_path}
     AUDIO_IN=
     vid_path=${vid_path:0:len-1}
-    results=($(pacmd list-sources | egrep "alsa_input|bus_path = \"$vid_path"))
-    for (( ix=0; ix < ${#results}; ix++ )) ; do
-        if [[ "${results[ix]}" == "device.bus_path" ]] ; then
-            AUDIO_IN="${results[ix-1]}"
-            break
-        fi
-    done
-
-    if [[ "$AUDIO_IN" == "" ]] ; then
-        echo "Failed to find audio device for $VIDEO_IN"
+    audiodev=$(readlink /dev/snd/by-path/${vid_path}?)
+    if [[ "$audiodev" != ../controlC* ]] ; then
+        echo "ERROR Failed to find audio device for $VIDEO_IN"
         continue
     fi
-    # remove angle brackets
-    AUDIO_IN=${AUDIO_IN#<}
-    AUDIO_IN=${AUDIO_IN%>}
+    AUDIO_IN="hw:"${audiodev#../controlC},0
 
     echo "VIDEO_IN=$VIDEO_IN" > $DATADIR/${recname}.conf
     echo "AUDIO_IN=$AUDIO_IN" >> $DATADIR/${recname}.conf
