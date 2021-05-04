@@ -223,6 +223,10 @@ else
     fi    
 fi
 
+#udev
+sudo cp install/etc/udev/rules.d/89-pulseaudio-usb.rules \
+  /etc/udev/rules.d/89-pulseaudio-usb.rules
+
 #syslog
 sudo cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
@@ -250,13 +254,17 @@ fi
 if ! grep "^mythtv:.*$SOFT_USER" /etc/group ; then
     sudo adduser $SOFT_USER mythtv
 fi
+if ! grep "^video:.*mythtv" /etc/group ; then
+    sudo adduser mythtv audio
+    sudo adduser mythtv video
+fi
 
 myuser=`id -nu`
 mygroup=`id -ng`
 
 if [[ "$mygroup" != catch22 ]] ; then
-	sudo usermod -g catch22 $myuser
-fi	
+    sudo usermod -g catch22 $myuser
+fi
 
 if [[ $ARCH == arm* ]] ; then
     if ! grep "^video:.*$SOFT_USER" /etc/group ; then
