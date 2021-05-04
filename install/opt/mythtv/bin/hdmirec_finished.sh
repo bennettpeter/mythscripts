@@ -38,8 +38,10 @@ echo $date Finished Recording on recorder $recname
 if [[ "$tunestatus" == playing ]] ; then
     # In case another version of adb is running
     adb kill-server
+    sleep 0.5
     export ANDROID_DEVICE
     adb connect $ANDROID_DEVICE
+    sleep 0.5
 
     # Exit from playback
     $scriptpath/adb-sendkey.sh BACK

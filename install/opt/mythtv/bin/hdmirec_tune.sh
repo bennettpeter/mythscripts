@@ -112,9 +112,11 @@ tuned=N
 
 # In case another version of adb is running
 adb kill-server
+sleep 0.5
 
 for (( xx=0; xx<5; xx++ )) ; do
     adb connect $ANDROID_DEVICE
+    sleep 0.5
 
     if [[ "$partialtune" == N ]] ; then
         # This expects xfinity to be the first application in the list

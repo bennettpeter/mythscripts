@@ -20,6 +20,7 @@ date=${date:0:23}
 
 # In case another version of adb is running
 adb kill-server
+sleep 0.5
 
 export ANDROID_DEVICE
 # First set all tuners to HOME
@@ -38,6 +39,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     echo "$date Reset recorder: $recname"
 
     adb connect $ANDROID_DEVICE
+    sleep 0.5
     $scriptpath/adb-sendkey.sh HOME
     adb disconnect $ANDROID_DEVICE
 done
@@ -59,6 +61,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     echo "$date Reset recorder: $recname"
 
     adb connect $ANDROID_DEVICE
+    sleep 0.5
 
     # This expects xfinity to be the first application in the list
     $scriptpath/adb-sendkey.sh HOME

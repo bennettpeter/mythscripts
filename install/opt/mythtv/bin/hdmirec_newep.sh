@@ -40,10 +40,12 @@ if [[ -f $tunefile ]] ; then
             echo "$date Tuner was recording more than 2 hr 50 min, pause and resume"
             # In case another version of adb is running
             adb kill-server
+            sleep 0.5
             # Some button presses to ensure the playback does not stop with
             # "Are you still there"
             export ANDROID_DEVICE
             adb connect $ANDROID_DEVICE
+            sleep 0.5
             # Let Android know we are still here - pause and play
             $scriptpath/adb-sendkey.sh MEDIA_PLAY_PAUSE MEDIA_PLAY_PAUSE
             adb disconnect $ANDROID_DEVICE
