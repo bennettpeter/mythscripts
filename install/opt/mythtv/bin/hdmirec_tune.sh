@@ -29,6 +29,10 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 . $DATADIR/${recname}.conf
 export ANDROID_DEVICE
 
+# In case another version of adb is running
+adb kill-server
+sleep 0.5
+
 tunefile=$DATADIR/${recname}_tune.stat
 partialtune=N
 if [[ -f $tunefile ]] ; then
@@ -107,12 +111,7 @@ if [[ "$partialtune" == Y ]] ; then
     fi
 fi
 
-
 tuned=N
-
-# In case another version of adb is running
-adb kill-server
-sleep 0.5
 
 for (( xx=0; xx<5; xx++ )) ; do
     adb connect $ANDROID_DEVICE
