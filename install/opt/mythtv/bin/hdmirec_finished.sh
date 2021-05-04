@@ -36,6 +36,8 @@ fi
 echo $date Finished Recording on recorder $recname
 
 if [[ "$tunestatus" == playing ]] ; then
+    # In case another version of adb is running
+    adb kill-server
     export ANDROID_DEVICE
     adb connect $ANDROID_DEVICE
 

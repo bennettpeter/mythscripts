@@ -38,6 +38,8 @@ if [[ -f $tunefile ]] ; then
         # 10200 seconds = 2hr 50 mins
         if (( tunetime < now-10200 )) ; then
             echo "$date Tuner was recording more than 2 hr 50 min, pause and resume"
+            # In case another version of adb is running
+            adb kill-server
             # Some button presses to ensure the playback does not stop with
             # "Are you still there"
             export ANDROID_DEVICE

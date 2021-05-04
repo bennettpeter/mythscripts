@@ -18,6 +18,9 @@ exec 2>&1
 date=`date +%F\ %T\.%N`
 date=${date:0:23}
 
+# In case another version of adb is running
+adb kill-server
+
 export ANDROID_DEVICE
 # First set all tuners to HOME
 for conffile in /etc/opt/mythtv/hdmirec*.conf ; do

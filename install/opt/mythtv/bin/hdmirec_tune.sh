@@ -109,6 +109,10 @@ fi
 
 
 tuned=N
+
+# In case another version of adb is running
+adb kill-server
+
 for (( xx=0; xx<5; xx++ )) ; do
     adb connect $ANDROID_DEVICE
 
