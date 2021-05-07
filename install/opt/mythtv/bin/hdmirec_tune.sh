@@ -11,13 +11,54 @@ channum=$2
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-logfile=$LOGDIR/${scriptname}.log
-exec 1>>$LOGDIR/${scriptname}.log
+logfile=$LOGDIR/${scriptname}_${recname}.log
+exec 1>>$logfile
 exec 2>&1
 
 # Get a date/time stamp to add to log output
 date=`date +%F\ %T\.%N`
 date=${date:0:23}
+
+this_pid=$$
+echo "$date request to tune channel $channum pid $this_pid"
+tunefile=$DATADIR/${recname}_tune.stat
+
+function trapfunc {
+    echo "Process killed"
+    echo "tunestatus=kill" >> $tunefile
+    adb disconnect $ANDROID_DEVICE
+    exit 2
+}
+
+trap trapfunc 1 2 3 4 5 6 15
+
+rc=99
+# Check for two copies of tuning running at the same time for the
+# same recorder.
+retry_count=0
+for (( retry_count = 0; retry_count < 120 ; retry_count++ )) ; do
+    ps -ef | grep "hdmirec_tune.*\.sh $recname" | \
+    while read user pid parent rest ; do
+#        if [[ "$this_pid" != "$pid" && "$this_pid" != "$parent" ]] ; then
+        # only wait for processes started earlier than this one.
+        if (( this_pid > pid )) ; then
+            echo "Warning tuner is already running, pid $pid, waiting"
+            exit 1
+            break
+        fi
+    done
+    rc=$?
+    if (( rc == 0 )) ; then break ; fi
+    sleep 1
+done
+date=`date +%F\ %T\.%N`
+date=${date:0:23}
+if (( rc != 0 )) ; then
+    echo "$date ERROR waited more than 120 seconds for other tuner to end, giving up"
+    echo "tunestatus=fail" >> $tunefile
+    exit 2
+fi
+
 
 # Select the [default] section of conf and put it in a file
 # to source it
@@ -33,8 +74,8 @@ export ANDROID_DEVICE
 adb kill-server
 sleep 0.5
 
-tunefile=$DATADIR/${recname}_tune.stat
 partialtune=N
+tuned=N
 if [[ -f $tunefile ]] ; then
     for (( xx=0; xx<6; xx++ )) ; do
     . $tunefile
@@ -44,8 +85,14 @@ if [[ -f $tunefile ]] ; then
             break
         fi
     done
-    if [[ "$tunestatus" == playing ]] ; then
-        echo "$date Tuner still playing, should have stopped"
+    date=`date +%F\ %T\.%N`
+    date=${date:0:23}
+    now=$(date +%s)
+    if (( tunetime > now-120 )) ; then
+        if [[ "$tunestatus" == playing  && "$tunechan" == "$channum" ]] ; then
+            echo "$date Tuner already tuned, all ok"
+            exit 0
+        fi
     fi
     if [[ "$tunestatus" == stopped ]] ; then
         now=$(date +%s)
@@ -66,29 +113,18 @@ fi
 echo "tunestatus=start" >> $tunefile
 tunestatus=start
 
-function trapfunc {
-    echo "Process killed"
-    echo "tunestatus=kill" >> $tunefile
-    adb disconnect $ANDROID_DEVICE
-    exit 2
-}
-
-trap trapfunc 1 2 3 4 5 6 15
-
 function getpagename {
     if [[ "$1" == "" ]] ; then
         crop="240x64+62+0"
     else
         crop="$1"
     fi
-    rm -f $DATADIR/${recname}_capture.jpg $DATADIR/${recname}_heading.txt
-    ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
-    convert $DATADIR/${recname}_capture.jpg -crop "$crop" -negate $DATADIR/${recname}_heading.jpg
-    gocr -l 160 $DATADIR/${recname}_heading.jpg > $DATADIR/${recname}_heading.txt
+    rm -f $DATADIR/${recname}_capture.$IMAGES $DATADIR/${recname}_heading.txt
+    ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.$IMAGES
+    convert $DATADIR/${recname}_capture.$IMAGES -crop "$crop" -negate $DATADIR/${recname}_heading.$IMAGES
+    gocr -l $GRAYLEVEL $DATADIR/${recname}_heading.$IMAGES > $DATADIR/${recname}_heading.txt 2>/dev/null
     pagename=$(head -1 $DATADIR/${recname}_heading.txt)
 }
-
-echo "$date Start tuning channel: $channum on recorder: $recname"
 
 if (( channum <= 0 )) ; then
     echo "ERROR Invalid channel number: $channum"
@@ -111,9 +147,9 @@ if [[ "$partialtune" == Y ]] ; then
     fi
 fi
 
-tuned=N
 
 for (( xx=0; xx<5; xx++ )) ; do
+    if [[ "$tuned" == Y ]] ; then  break; fi
     adb connect $ANDROID_DEVICE
     sleep 0.5
 
@@ -122,7 +158,7 @@ for (( xx=0; xx<5; xx++ )) ; do
         $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
 
         # This also starts it but returns to a prior screen, not the start screen
-        # So different logic will be needed
+        # So different logic would be needed
         # $scriptpath/adb-sendkey.sh HOME
         # adb shell monkey -p com.xfinity.cloudtvr.tenfoot -c android.intent.category.LAUNCHER 1
 
@@ -137,7 +173,7 @@ for (( xx=0; xx<5; xx++ )) ; do
             sleep 0.5
         done
         if [[ $match != Y ]] ; then
-            echo "Failed to start XFinity For You - found $pagename - see $DATADIR/${recname}_capture.jpg"
+            echo "Failed to start XFinity For You - found $pagename - see $DATADIR/${recname}_capture.$IMAGES"
             continue
         fi
 
@@ -152,7 +188,7 @@ for (( xx=0; xx<5; xx++ )) ; do
             sleep 0.5
         done
         if [[ $match != Y ]] ; then
-            echo "Failed to launch XFinity Menu - found $pagename - see $DATADIR/${recname}_capture.jpg"
+            echo "Failed to launch XFinity Menu - found $pagename - see $DATADIR/${recname}_capture.$IMAGES"
             continue
         fi
 
@@ -180,9 +216,9 @@ for (( xx=0; xx<5; xx++ )) ; do
     direction=N
     while (( currchan != channum )) ; do
         for (( x=0; x<20; x++ )) ; do
-            ffmpeg -hide_banner -loglevel error -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.jpg
-            convert $DATADIR/${recname}_capture.jpg -crop 86x600+208+120 -negate $DATADIR/${recname}_channels.jpg
-            gocr -C 0-9 -l 160 $DATADIR/${recname}_channels.jpg > $DATADIR/${recname}_channels.txt
+            ffmpeg -hide_banner -loglevel error -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.$IMAGES
+            convert $DATADIR/${recname}_capture.$IMAGES -crop 86x600+208+120 -negate $DATADIR/${recname}_channels.$IMAGES
+            gocr -C 0-9 -l $GRAYLEVEL $DATADIR/${recname}_channels.$IMAGES > $DATADIR/${recname}_channels.txt 2>/dev/null
             onscreen=($(sed s/_//g $DATADIR/${recname}_channels.txt))
             echo "Found ${onscreen[@]}"
             arrsize=${#onscreen[@]}

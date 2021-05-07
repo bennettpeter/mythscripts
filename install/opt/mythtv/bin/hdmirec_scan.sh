@@ -11,8 +11,6 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 logfile=$LOGDIR/${scriptname}.log
-exec 1>>$LOGDIR/${scriptname}.log
-exec 2>&1
 
 # Get a date/time stamp to add to log output
 date=`date +%F\ %T\.%N`
@@ -73,10 +71,10 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
         for (( x=0; x<20; x=x+2 )) ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
-            rm -f $DATADIR/video${x}_capture.jpg
-            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.jpg
-            convert $DATADIR/video${x}_capture.jpg -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.jpg
-            gocr -l 160 $DATADIR/video${x}_heading.jpg > $DATADIR/video${x}_heading.txt
+            rm -f $DATADIR/video${x}_capture.$IMAGES
+            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.$IMAGES
+            convert $DATADIR/video${x}_capture.$IMAGES -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.$IMAGES
+            gocr -l $GRAYLEVEL $DATADIR/video${x}_heading.$IMAGES > $DATADIR/video${x}_heading.txt 2>/dev/null
             if [[ `head -1 $DATADIR/video${x}_heading.txt` == For*You ]] ; then
                 match=Y
                 break
@@ -88,7 +86,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     done
 
     if [[ $match != Y ]] ; then
-        echo "Failed to start XFinity on ${recname} - see $DATADIR/video*_capture.jpg"
+        echo "Failed to start XFinity on ${recname} - see $DATADIR/video*_capture.$IMAGES"
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
         continue
