@@ -70,10 +70,6 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 . $DATADIR/${recname}.conf
 export ANDROID_DEVICE
 
-# In case another version of adb is running
-adb kill-server
-sleep 0.5
-
 partialtune=N
 tuned=N
 if [[ -f $tunefile ]] ; then
