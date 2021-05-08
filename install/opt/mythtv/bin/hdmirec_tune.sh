@@ -39,14 +39,14 @@ retry_count=0
 for (( retry_count = 0; retry_count < 120 ; retry_count++ )) ; do
     ps -ef | grep "hdmirec_tune.*\.sh $recname" | \
     while read user pid parent rest ; do
-#        if [[ "$this_pid" != "$pid" && "$this_pid" != "$parent" ]] ; then
         # only wait for processes started earlier than this one.
         if (( this_pid > pid )) ; then
             echo "Warning tuner is already running, pid $pid, waiting"
+            # This only exits from the while not from the script
             exit 1
-            break
         fi
     done
+    # This gets the exit code from above if applicable
     rc=$?
     if (( rc == 0 )) ; then break ; fi
     sleep 1
