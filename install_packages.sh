@@ -20,7 +20,7 @@ sudo apt install fswebcam
 sudo apt install xmltv apache2 php php-mysql mysql-server
 
 # For firetv recorder on backend
-sudo apt install gocr adb imagemagick
+sudo apt install gocr adb imagemagick vlc
 
 if [[ `arch` == x86_64 ]] ; then
 #    wget -q -O - https://www.bunkus.org/gpg-pub-moritzbunkus.txt | sudo apt-key add -
