@@ -82,6 +82,9 @@ if [[ "$USE_CETON" == true ]] ; then
     fi
 fi
 
+# Initialize HDMI recorders.
+/opt/mythtv/bin/hdmirec_scan.sh
+
 # set live tv start channel to a valid HD channel number
 # This avoids the problem of failing to open jump file buffer during live TV
 # fesetup=

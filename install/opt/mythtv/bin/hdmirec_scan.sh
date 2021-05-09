@@ -16,6 +16,13 @@ logfile=$LOGDIR/${scriptname}.log
 date=`date +%F\ %T\.%N`
 date=${date:0:23}
 
+echo $date Start scans
+
+if ! ls /etc/opt/mythtv/hdmirec*.conf ; then
+    echo No HDMI recorders, exiting
+    exit 2
+fi
+
 # In case another version of adb is running
 adb kill-server
 sleep 0.5
