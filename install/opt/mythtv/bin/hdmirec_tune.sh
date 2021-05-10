@@ -68,6 +68,11 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 > $DATADIR/etc_${recname}.conf
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
+if ping -c 1 $ANDROID_MAIN ; then
+    ANDROID_DEVICE=$ANDROID_MAIN
+else
+    ANDROID_DEVICE=$ANDROID_FALLBACK
+fi
 export ANDROID_DEVICE
 
 partialtune=N

@@ -25,6 +25,12 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 > $DATADIR/etc_${recname}.conf
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
+if ping -c 1 $ANDROID_MAIN ; then
+    ANDROID_DEVICE=$ANDROID_MAIN
+else
+    ANDROID_DEVICE=$ANDROID_FALLBACK
+fi
+export ANDROID_DEVICE
 
 tunefile=$DATADIR/${recname}_tune.stat
 if [[ ! -f $tunefile ]] ; then
@@ -36,7 +42,6 @@ fi
 echo $date Finished Recording on recorder $recname
 
 if [[ "$tunestatus" == playing ]] ; then
-    export ANDROID_DEVICE
     adb connect $ANDROID_DEVICE
     sleep 0.5
     # Exit from playback

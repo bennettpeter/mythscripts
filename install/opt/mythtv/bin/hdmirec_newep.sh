@@ -26,6 +26,12 @@ def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
 > $DATADIR/etc_${recname}.conf
 . $DATADIR/etc_${recname}.conf
 . $DATADIR/${recname}.conf
+if ping -c 1 $ANDROID_MAIN ; then
+    ANDROID_DEVICE=$ANDROID_MAIN
+else
+    ANDROID_DEVICE=$ANDROID_FALLBACK
+fi
+export ANDROID_DEVICE
 
 echo $date New Episode Recording on recorder $recname
 
@@ -41,7 +47,6 @@ if [[ -f $tunefile ]] ; then
             # In case another version of adb is running
             # Some button presses to ensure the playback does not stop with
             # "Are you still there"
-            export ANDROID_DEVICE
             adb connect $ANDROID_DEVICE
             sleep 0.5
             # Let Android know we are still here - pause and play

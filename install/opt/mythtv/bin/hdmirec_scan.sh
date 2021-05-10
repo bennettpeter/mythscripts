@@ -40,6 +40,11 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
     > $DATADIR/etc_${recname}.conf
     . $DATADIR/etc_${recname}.conf
+    if ping -c 1 $ANDROID_MAIN ; then
+        ANDROID_DEVICE=$ANDROID_MAIN
+    else
+        ANDROID_DEVICE=$ANDROID_FALLBACK
+    fi
 
     echo "$date Reset recorder: $recname"
 
@@ -62,6 +67,11 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
     > $DATADIR/etc_${recname}.conf
     . $DATADIR/etc_${recname}.conf
+    if ping -c 1 $ANDROID_MAIN ; then
+        ANDROID_DEVICE=$ANDROID_MAIN
+    else
+        ANDROID_DEVICE=$ANDROID_FALLBACK
+    fi
 
     echo "$date Reset recorder: $recname"
 
