@@ -319,7 +319,7 @@ while true ; do
     fi
     keycode=`eval echo "$"KEYCODE_$keyname`
     if [[ "$keycode" == "" ]]; then echo ERROR INVALID CODE $keyname ; exit 2 ; fi
-    echo $keyname $keycode
+    echo "$keyname ($keycode)"
     option=
     if echo $keyname | grep LONGPRESS ; then
         option="--longpress"

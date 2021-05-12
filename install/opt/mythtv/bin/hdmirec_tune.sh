@@ -48,6 +48,7 @@ for (( retry_count = 0; retry_count < 120 ; retry_count++ )) ; do
     done
     # This gets the exit code from above if applicable
     rc=$?
+    # No other tune script running, leave the check loop
     if (( rc == 0 )) ; then break ; fi
     sleep 1
 done
@@ -83,6 +84,7 @@ if [[ -f $tunefile ]] ; then
         if [[ "$tunestatus" == playing ]] ; then
             sleep 0.5
         else
+            # Not playing - leave the wait for end play loop
             break
         fi
     done
@@ -148,7 +150,7 @@ if [[ "$partialtune" == Y ]] ; then
     fi
 fi
 
-
+# Loop to retry entire process up to 5 times in case of temporary failure
 for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
     adb connect $ANDROID_DEVICE
@@ -215,48 +217,110 @@ for (( xx=0; xx<5; xx++ )) ; do
     ##favorites - channel numbers##
     currchan=0
     direction=N
+    errorpassed=0
     while (( currchan != channum )) ; do
-        for (( x=0; x<20; x++ )) ; do
-            ffmpeg -hide_banner -loglevel error -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.$IMAGES
+        for (( x=0; x<5; x++ )) ; do
+            error=0
+            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.$IMAGES
             convert $DATADIR/${recname}_capture.$IMAGES -crop 86x600+208+120 -negate $DATADIR/${recname}_channels.$IMAGES
             gocr -C 0-9 -l $GRAYLEVEL $DATADIR/${recname}_channels.$IMAGES > $DATADIR/${recname}_channels.txt 2>/dev/null
-            onscreen=($(sed s/_//g $DATADIR/${recname}_channels.txt))
-            echo "Found ${onscreen[@]}"
-            arrsize=${#onscreen[@]}
+            onscreen=$(cat $DATADIR/${recname}_channels.txt)
+            channels=($onscreen)
+            arrsize=${#channels[@]}
+            echo "channels: ${channels[@]}"
+            if [[ "${channels[@]}" == *_* ]] ; then
+                gocr -C 0-9 -l $GRAYLEVEL2 $DATADIR/${recname}_channels.$IMAGES > $DATADIR/${recname}_channels.txt 2>/dev/null
+                onscreen=$(cat $DATADIR/${recname}_channels.txt)
+                channels2=($onscreen)
+                echo "channels2: ${channels2[@]}"
+                channels3=()
+                if [[ "${channels2[@]}" == *_* ]] ; then
+                    gocr -C 0-9 -l $GRAYLEVEL3 $DATADIR/${recname}_channels.$IMAGES > $DATADIR/${recname}_channels.txt 2>/dev/null
+                    onscreen=$(cat $DATADIR/${recname}_channels.txt)
+                    channels3=($onscreen)
+                    echo "channels3: ${channels3[@]}"
+                    if [[ "${channels3[@]}" != *_* ]] ; then
+                        channels=(${channels3[@]})
+                    fi
+                else
+                    channels=(${channels2[@]})
+                fi
+                if [[ "${channels[@]}" == *_* ]] ; then
+                    for (( ix=0; ix<arrsize; ix++ )) ; do
+                        if [[ "${channels[ix]}" == *_* ]] ; then
+                            if [[ "${channels2[ix]}" == *_* ]] ; then
+                                channels[ix]="${channels2[ix]}"
+                            else
+                                channels[ix]="${channels3[ix]}"
+                            fi
+                        fi
+                    done
+                fi
+                echo "corrected channels: ${channels[@]}"
+            fi
+            arrsize=${#channels[@]}
+            if [[ "${channels[@]}" == *_* ]] ; then
+                echo ERROR in channels.
+                error=1
+            elif (( arrsize != 5 )) ; then
+                echo ERROR incorrect number of entries $arrsize, should be 5
+                error=1
+            else
+                # Get each channel on a new line in a file
+                echo "${channels[@]}" | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
+                if ! sort -nc $DATADIR/${recname}_channels.txt ; then
+                    echo ERROR channels out of sequence
+                    error=1
+                fi
+            fi
 
-            ## Find channel separated by 2 newlines
-            ## This applies only if using tesseract
-            #currchan=$(awk '{ num++; if ($1 != "" && num > 2) { if (chan == "") chan = $1
-            #  else { print chan; exit 0; } }
-            #  if ($1 != "") num = 0 }' $DATADIR/${recname}_channels.txt)
-
-            topchan=${onscreen[0]}
-            if (( topchan > 0 )) ; then
+            topchan=${channels[0]}
+            if (( error == 0 && topchan > 0 )) ; then
+                # Found channels - leave retry loop
                 break
             fi
             sleep 0.5
         done
+        if (( error )) ; then
+            if (( errorpassed || currchan > 0 )) ; then
+                echo "ERROR Bad channels - cannot fix"
+                continue 2
+            fi
+            if (( currchan == 0 )) ; then
+                echo "Warning bad channels - assume we are at end - go up and try again"
+                $scriptpath/adb-sendkey.sh DOWN DOWN DOWN
+                currchan=-1
+            fi
+            $scriptpath/adb-sendkey.sh UP
+            continue
+        fi
+        if  (( currchan == -1 )) ; then
+            errorpassed=1
+        fi
         prior_currchan=$currchan
         if (( currchan == 0 )) ; then
             $scriptpath/adb-sendkey.sh DOWN DOWN DOWN
-            currchan=${onscreen[1]}
+        fi
+        if (( currchan <= 0 )) ; then
+            currchan=${channels[1]}
         else
             currsel=0
             while (( currsel < 10 )) ; do
-                if (( currchan == onscreen[currsel] )) ; then
+                if (( currchan == channels[currsel] )) ; then
                     if [[ $direction == DOWN ]] ; then
                         if (( currsel < arrsize-1 )) ; then
-                            currchan=${onscreen[currsel+1]}
+                            currchan=${channels[currsel+1]}
                         else
                             currchan=0
                         fi
                     elif [[ $direction == UP ]] ; then
                         if (( currsel > 0 )) ; then
-                            currchan=${onscreen[currsel-1]}
+                            currchan=${channels[currsel-1]}
                         else
                             currchan=0
                         fi
                     fi
+                    # Found match - leave the loop
                     break;
                 else
                     let currsel++
@@ -265,7 +329,7 @@ for (( xx=0; xx<5; xx++ )) ; do
         fi
         echo "Current channel: $currchan"
         if (( currchan == prior_currchan || currchan == 0 )); then
-            echo "ERROR failed to select channel: $channum, using: ${onscreen[@]}"
+            echo "ERROR failed to select channel: $channum, using: ${channels[@]}"
             continue 2
         fi
         prior_direction=$direction
@@ -275,17 +339,17 @@ for (( xx=0; xx<5; xx++ )) ; do
             direction=UP
         else
             direction=N
-            break;
+            tuned=Y
+            # Selected the correct channel - leave the cursor up/down loop
+            break
         fi
         if [[ $prior_direction != N && $prior_direction != $direction ]] ; then
             # Moving up and down indicates channel is not in the list
-            echo "ERROR channel: $channum not found in favorites, using: ${onscreen[@]}"
-            break 2
+            echo "ERROR channel: $channum not found in favorites, using: ${channels[@]}"
+            continue 2
         fi
         $scriptpath/adb-sendkey.sh $direction
     done
-    tuned=Y
-    break
 done
 
 date=`date +%F\ %T\.%N`
