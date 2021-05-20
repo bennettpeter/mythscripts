@@ -4,8 +4,8 @@
 # Parameter 1 - recorder name
 
 # In mythtv setup, create a capture card type EXTERNAL. Enter command path
-# as /opt/mythtv/bin/hdmirecroder.sh hdmirec1
-# assuming this is installed in that path and you call the tuner hdmirec1
+# as /opt/mythtv/bin/hdmirecorder.sh hdmirec1
+# (fill in correct path and tuner id)
 # setup /etc/opt/mythtv/hdmirec1.conf
 
 # This script must write nothing to stdout or stderr, also it must not

@@ -64,26 +64,26 @@ date
 #     done
 # ) < $DATADIR/mythstartup_cardlist.txt
 
-if [[ "$USE_CETON" == true ]] ; then
-    echo "Checking Ceton $CETON_IP"
-    if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
-        echo "Ceton Problem: $CETON_IP $msg, try restarting network"
-        sudo nmcli connection down "Wired connection 1" \
-            || echo nmcli connection down failed
-        sleep 3
-        sudo nmcli connection up "Wired connection 1" \
-            || echo nmcli connection up failed
-        sleep 3
-        if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
-            "$scriptpath/notify.py" "Startup Problem" \
-                "Ceton Problem: $CETON_IP $msg" || echo notify failed
-            echo "Ceton Problem: $CETON_IP $msg"
-        fi
-    fi
-fi
+# if [[ "$USE_CETON" == true ]] ; then
+#     echo "Checking Ceton $CETON_IP"
+#     if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
+#         echo "Ceton Problem: $CETON_IP $msg, try restarting network"
+#         sudo nmcli connection down "Wired connection 1" \
+#             || echo nmcli connection down failed
+#         sleep 3
+#         sudo nmcli connection up "Wired connection 1" \
+#             || echo nmcli connection up failed
+#         sleep 3
+#         if ! msg=`nc -z -v "$CETON_IP" 80 2>&1` ; then
+#             "$scriptpath/notify.py" "Startup Problem" \
+#                 "Ceton Problem: $CETON_IP $msg" || echo notify failed
+#             echo "Ceton Problem: $CETON_IP $msg"
+#         fi
+#     fi
+# fi
 
 # Initialize HDMI recorders.
-/opt/mythtv/bin/hdmirec_scan.sh
+# /opt/mythtv/bin/hdmirec_scan.sh
 
 # set live tv start channel to a valid HD channel number
 # This avoids the problem of failing to open jump file buffer during live TV
