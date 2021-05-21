@@ -32,7 +32,7 @@ export ANDROID_DEVICE
 for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
     recname=$(basename $conffile .conf)
-
+    ANDROID_MAIN=
     # Select the [default] section of conf and put it in a file
     # to source it
     awk '/^\[default\]$/ { def = 1; next }
@@ -40,6 +40,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
     > $DATADIR/etc_${recname}.conf
     . $DATADIR/etc_${recname}.conf
+    if [[ "$ANDROID_MAIN" == "" ]] ; then continue ; fi
     if ping -c 1 $ANDROID_MAIN ; then
         ANDROID_DEVICE=$ANDROID_MAIN
     else
@@ -59,7 +60,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
     recname=$(basename $conffile .conf)
     rm -f $DATADIR/${recname}.conf
-
+    ANDROID_MAIN=
     # Select the [default] section of conf and put it in a file
     # to source it
     awk '/^\[default\]$/ { def = 1; next }
@@ -67,6 +68,7 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
     > $DATADIR/etc_${recname}.conf
     . $DATADIR/etc_${recname}.conf
+    if [[ "$ANDROID_MAIN" == "" ]] ; then continue ; fi
     if ping -c 1 $ANDROID_MAIN ; then
         ANDROID_DEVICE=$ANDROID_MAIN
     else
