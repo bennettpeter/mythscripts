@@ -39,7 +39,6 @@ rc=0
 
 . $scriptpath/getconfig.sh
 
-
 # Check for full file systems
 prev_fscheck=
 if [[ -f $DATADIR/fscheck_date ]]; then
@@ -111,6 +110,7 @@ if [[ "$CAN_TRANSCODE" == Y ]] ; then
 else
     if ps -ef|egrep "$encoders"|egrep -v "grep " ; then
         echo $DATE "encoders are running, don't shut down for $CHECK_MINUTES min."
+        echo $DATE > $DATADIR/checklogin
         rc=1
     fi
 fi
