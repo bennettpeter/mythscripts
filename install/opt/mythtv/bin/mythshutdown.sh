@@ -91,7 +91,7 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
 fi
 
 # if there are other encoders add them here
-encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder'
+encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder|hdmixdvr\.sh'
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
     # Check if multi_encode.sh script is running
     if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
