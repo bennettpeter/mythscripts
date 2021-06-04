@@ -1,11 +1,16 @@
 #!/bin/bash
 # Record from fire stick
 
+# Set to 1 to allow wifi fallback
+ALLOW_WIFI=0
 VID_RECDIR=/home/storage/Video/recordings
-# Maximum time for 1 recording.
-MAXTIME=100
-let maxduration=MAXTIME*60
-#LOGDIR=/var/log/mythtv_scripts
+
+responses="$1"
+minutes="$2"
+recname="$3"
+if [[ "$recname" == "" ]] ; then
+    recname=hdmirec1
+fi
 
 . /etc/opt/mythtv/mythtv.conf
 
@@ -43,20 +48,14 @@ else
     echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Ethernet failure"
     # Remove this exit if you want to be able to use the
     # fallback wifi device
-    exit 2
+    if (( ! ALLOW_WIFI )) ; then
+        exit 2
+    fi
     ANDROID_DEVICE=$ANDROID_FALLBACK
 fi
 export ANDROID_DEVICE
 
 ffmpeg_pid=
-
-responses="$1"
-minutes="$2"
-recname="$3"
-
-if [[ "$recname" == "" ]] ; then
-    recname=hdmirec1
-fi
 
 let responses=responses
 let minutes=minutes
@@ -101,6 +100,7 @@ trap trapfunc EXIT
 
 # Kill vlc
 wmctrl -c vlc
+wmctrl -c obs
 sleep 2
 
 echo `date "+%Y-%m-%d_%H-%M-%S"` "Starting recording of ${logdate}"

@@ -4,6 +4,9 @@
 # Parameter 1 - recorder name
 # Parameter 2 - channel number
 
+## Use this for digits with tesseract
+## tesseract 'file.png'  - -c tessedit_char_whitelist=0123456789 2>/dev/null
+
 recname=$1
 channum=$2
 

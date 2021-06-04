@@ -114,6 +114,7 @@ trap trapfunc EXIT
 
 # Kill vlc
 wmctrl -c vlc
+wmctrl -c obs
 
 # Get to recordings list
 

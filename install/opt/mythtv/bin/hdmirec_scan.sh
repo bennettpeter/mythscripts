@@ -12,15 +12,16 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 logfile=$LOGDIR/${scriptname}.log
 
-# Get a date/time stamp to add to log output
-date=`date +%F\ %T\.%N`
-date=${date:0:23}
-
-echo $date Start scans
+echo `date "+%Y-%m-%d_%H-%M-%S"` Start scans
 
 if ! ls /etc/opt/mythtv/hdmirec*.conf ; then
     echo No HDMI recorders, exiting
     exit 2
+fi
+
+reqname="$1"
+if [[ "$reqname" == "" ]] ; then
+    reqname=hdmirec*
 fi
 
 # In case another version of adb is running
@@ -28,9 +29,13 @@ adb kill-server
 sleep 0.5
 
 export ANDROID_DEVICE
-# First set all tuners to HOME
-for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
-    if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
+# First renoot and set all tuners to HOME
+for conffile in /etc/opt/mythtv/$reqname.conf ; do
+    echo $conffile
+    if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "Warning - No hdmi recorder found"
+        exit
+    fi
     recname=$(basename $conffile .conf)
     ANDROID_MAIN=
     # Select the [default] section of conf and put it in a file
@@ -40,24 +45,44 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
     > $DATADIR/etc_${recname}.conf
     . $DATADIR/etc_${recname}.conf
-    if [[ "$ANDROID_MAIN" == "" ]] ; then continue ; fi
+    if [[ "$ANDROID_MAIN" == "" ]] ; then
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: $recname not set up - skipping"
+        continue
+    fi
     if ping -c 1 $ANDROID_MAIN ; then
         ANDROID_DEVICE=$ANDROID_MAIN
     else
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Ethernet failure on $recname - using wifi"
         ANDROID_DEVICE=$ANDROID_FALLBACK
     fi
-
-    echo "$date Reset recorder: $recname"
-
     adb connect $ANDROID_DEVICE
     sleep 0.5
+    res=(`adb devices|grep $ANDROID_DEVICE`)
+    status=${res[1]}
+    if [[ "$status" != device ]] ; then
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Device offline: $recname, skipping"
+        adb disconnect $ANDROID_DEVICE
+        continue
+    fi
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "reboot: $recname"
+    adb -s $ANDROID_DEVICE shell reboot
+    status=
+    while [[ "$status" != device ]] ; do
+        sleep 5
+        res=(`adb devices|grep $ANDROID_DEVICE`)
+        status=${res[1]}
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "status: $status"
+    done
     $scriptpath/adb-sendkey.sh HOME
+    sleep 75
+    # Get rid of message that remote is not detected
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "Dismiss stupid message"
+    $scriptpath/adb-sendkey.sh DPAD_CENTER
     adb disconnect $ANDROID_DEVICE
 done
 
 # Invoke app and check where the result is
-for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
-    if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then break ; fi
+for conffile in /etc/opt/mythtv/$reqname.conf ; do
     recname=$(basename $conffile .conf)
     rm -f $DATADIR/${recname}.conf
     ANDROID_MAIN=
@@ -72,13 +97,22 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     if ping -c 1 $ANDROID_MAIN ; then
         ANDROID_DEVICE=$ANDROID_MAIN
     else
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Ethernet failure on $recname - using wifi"
         ANDROID_DEVICE=$ANDROID_FALLBACK
     fi
 
-    echo "$date Reset recorder: $recname"
-
     adb connect $ANDROID_DEVICE
     sleep 0.5
+
+    res=(`adb devices|grep $ANDROID_DEVICE`)
+    status=${res[1]}
+    if [[ "$status" != device ]] ; then
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Device offline: $recname, skipping"
+        adb disconnect $ANDROID_DEVICE
+        continue
+    fi
+
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reset recorder: $recname"
 
     # This expects xfinity to be the first application in the list
     $scriptpath/adb-sendkey.sh HOME
@@ -100,12 +134,12 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
             fi
         done
         if [[ $match == Y ]] ; then break ; fi
-        echo "Failed to read screen on ${recname}, trying again"
-        sleep 0.5
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to read screen on ${recname}, trying again"
+        sleep 1
     done
 
     if [[ $match != Y ]] ; then
-        echo "Failed to start XFinity on ${recname} - see $DATADIR/video*_capture.$IMAGES"
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to start XFinity on ${recname} - see $DATADIR/video*_capture.$IMAGES"
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
         continue
@@ -121,14 +155,14 @@ for conffile in /etc/opt/mythtv/hdmirec*.conf ; do
     vid_path=${vid_path:0:len-1}
     audiodev=$(readlink /dev/snd/by-path/${vid_path}?)
     if [[ "$audiodev" != ../controlC* ]] ; then
-        echo "ERROR Failed to find audio device for $VIDEO_IN"
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR Failed to find audio device for $VIDEO_IN"
         continue
     fi
     AUDIO_IN="hw:"${audiodev#../controlC},0
 
     echo "VIDEO_IN=$VIDEO_IN" > $DATADIR/${recname}.conf
     echo "AUDIO_IN=$AUDIO_IN" >> $DATADIR/${recname}.conf
-    echo Successfully created parameters in $DATADIR/${recname}.conf.
+    echo `date "+%Y-%m-%d_%H-%M-%S"` Successfully created parameters in $DATADIR/${recname}.conf.
     
 done
 
