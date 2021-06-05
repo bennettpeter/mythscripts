@@ -12,6 +12,63 @@ if [[ "$recname" == "" ]] ; then
     recname=hdmirec1
 fi
 
+echo "*** $0 ***"
+echo "Input parameters:"
+echo "Number of responses (default 0)"
+echo "Maximum Number of minutes [default 300*(responses+1)]"
+echo "Recorder id (default hdmirec1)"
+
+function capturepage {
+    pagename=
+    sleep 1
+    true > $DATADIR/${recname}_capture_crop.png
+    true > $DATADIR/${recname}_capture_crop.txt
+    adb exec-out screencap -p > $DATADIR/${recname}_capture.png
+    if [[ `stat -c %s $DATADIR/${recname}_capture.png` == 0 ]] ; then
+        if [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ; then
+            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
+        fi
+    fi
+    if [[ `stat -c %s $DATADIR/${recname}_capture.png` != 0 ]] ; then
+        convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
+    fi
+    if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
+        cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
+        tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
+        if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
+            echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
+        else
+            echo "*****" `date "+%Y-%m-%d_%H-%M-%S"`
+            cat $DATADIR/${recname}_capture_crop.txt
+            echo "*****"
+        fi
+        pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
+    fi
+}
+
+function trapfunc {
+    # Note in the trap function all signals are ignored, only kill -KILL works
+    rc=$?
+    echo "Exiting..."
+    sleep 2
+    if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
+        kill $ffmpeg_pid
+    fi
+    capturepage
+    if (( isrecording )) ; then
+        $scriptpath/adb-sendkey.sh HOME
+    fi
+    adb disconnect $ANDROID_DEVICE
+    # TODO Check $rc and notify if not zero
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "Exit"
+    if [[ "$tail_pid" != "" ]] && ps -q $tail_pid >/dev/null ; then
+        kill $tail_pid
+    fi
+}
+
+isrecording=0
+trap trapfunc EXIT
+
 . /etc/opt/mythtv/mythtv.conf
 
 scriptname=`readlink -e "$0"`
@@ -22,16 +79,6 @@ if [[ -t 1 ]] ; then
 else
     isterminal=N
 fi
-exec 1>>$LOGDIR/${scriptname}.log
-exec 2>&1
-#scriptpath=/opt/mythtv/bin
-tail_pid=
-if [[ $isterminal == Y ]] ; then
-    tail -f $LOGDIR/${scriptname}.log >/dev/tty &
-    tail_pid=$!
-fi
-logdate=`date "+%Y-%m-%d_%H-%M-%S"`
-echo `date "+%Y-%m-%d_%H-%M-%S"` "Start of run"
 
 # Select the [default] section of conf and put it in a file
 # to source it
@@ -63,10 +110,6 @@ let minutes=minutes
 if (( $minutes == 0 )) ; then
     let minutes=300*\(responses+1\)
 fi
-echo "Input parameters:"
-echo "Number of responses (default 0)"
-echo "Maximum Number of minutes [default 300*(responses+1)]"
-echo "Recorder id (default hdmirec1)"
 echo
 let seconds=minutes*60
 echo Record for $minutes minutes and respond $responses times.
@@ -74,40 +117,36 @@ echo This script will press the DPAD_CENTER to start. Do not press it.
 echo Type Y to start
 read -e resp
 if [[ "$resp" != Y ]] ; then exit 2 ; fi
+
+exec 1>>$LOGDIR/${scriptname}.log
+exec 2>&1
+tail_pid=
+if [[ $isterminal == Y ]] ; then
+    tail -f $LOGDIR/${scriptname}.log >/dev/tty &
+    tail_pid=$!
+fi
+echo `date "+%Y-%m-%d_%H-%M-%S"` "Start of run"
+echo "echo Record for $minutes minutes and respond $responses times."
+
 adb disconnect $ANDROID_DEVICE 2>/dev/null || true
 adb connect $ANDROID_DEVICE
 if ! adb devices | grep $ANDROID_DEVICE ; then
     echo "ERROR: Unable to connect to $ANDROID_DEVICE"
     exit 2
 fi
-adb disconnect $ANDROID_DEVICE 2>/dev/null || true
-
-function trapfunc {
-    rc=$?
-    $scriptpath/adb-sendkey.sh HOME
-    if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
-        kill $ffmpeg_pid
-    fi
-    if [[ "$tail_pid" != "" ]] && ps -q $tail_pid >/dev/null ; then
-        kill $tail_pid
-    fi
-    adb disconnect $ANDROID_DEVICE
-    # Check $rc and notify if not zero
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Exit"
-}
-
-trap trapfunc EXIT
 
 # Kill vlc
 wmctrl -c vlc
 wmctrl -c obs
 sleep 2
 
+capturepage
+logdate=`date "+%Y-%m-%d_%H-%M-%S"`
 echo `date "+%Y-%m-%d_%H-%M-%S"` "Starting recording of ${logdate}"
-
+isrecording=1
 adb-sendkey.sh DPAD_CENTER
 
-ffmpeg \
+ffmpeg -hide_banner -loglevel error \
 -f v4l2 \
 -thread_queue_size 256 \
 -input_format $INPUT_FORMAT \
@@ -133,11 +172,11 @@ $VID_RECDIR/${logdate}.mkv &
 # -i "alsa_input.usb-MACROSILICON_2109-02.analog-stereo" \
 
 ffmpeg_pid=$!
-echo "#!/bin/bash" > $VID_RECDIR/${logdate}_kill.sh
-echo "kill $ffmpeg_pid" >> $VID_RECDIR/${logdate}_kill.sh
-echo "echo Wait 1 minute" >> $VID_RECDIR/${logdate}_kill.sh
-sleep 0.5
-chmod +x $VID_RECDIR/${logdate}_kill.sh
+#echo "#!/bin/bash" > $VID_RECDIR/${logdate}_kill.sh
+#echo "kill $ffmpeg_pid" >> $VID_RECDIR/${logdate}_kill.sh
+#echo "echo Wait 1 minute" >> $VID_RECDIR/${logdate}_kill.sh
+#sleep 0.5
+#chmod +x $VID_RECDIR/${logdate}_kill.sh
 starttime=`date +%s`
 let endtime=starttime+seconds
 filesize=0
@@ -172,19 +211,11 @@ for (( xx = 0 ; xx < loops ; xx++ )) ; do
             lowcount=0
         fi
     done
+    sleep 1
+    capturepage
     echo `date "+%Y-%m-%d_%H-%M-%S"` "Sending enter to start next episode"
-    adb disconnect $ANDROID_DEVICE 2>/dev/null || true
-    adb connect $ANDROID_DEVICE
     sleep 1
     adb-sendkey.sh DPAD_CENTER
     sleep 1
-    adb disconnect $ANDROID_DEVICE
 done
-sleep 1
-adb disconnect $ANDROID_DEVICE 2>/dev/null || true
-adb connect $ANDROID_DEVICE
-adb-sendkey.sh HOME
-sleep 1
-adb disconnect $ANDROID_DEVICE
-sleep 5
 echo `date "+%Y-%m-%d_%H-%M-%S"` "Playback finished"
