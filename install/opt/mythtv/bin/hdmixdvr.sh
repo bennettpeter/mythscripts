@@ -58,6 +58,7 @@ ffmpeg_pid=
 function capturepage {
     pagename=
     sleep 1
+    cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
     true > $DATADIR/${recname}_capture_crop.png
     true > $DATADIR/${recname}_capture_crop.txt
     adb exec-out screencap -p > $DATADIR/${recname}_capture.png
@@ -70,7 +71,6 @@ function capturepage {
         convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
     fi
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
         tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
         if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
             echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
@@ -131,7 +131,9 @@ while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
     sleep 0.5
     capturepage
 done
-if [[ "$pagename" != Recordings ]] ; then
+if [[ "$pagename" == Recordings ]] ; then
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reached Recordings Page"
+else
     echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR - Cannot get to Recordings Page"
     exit 2
 fi
@@ -146,10 +148,18 @@ while  true ; do
     elif [[ "$title" == "You have no completed recordings"* ]] ; then
         break;
     fi
+    # Possible forms of title
+    # Two and a Half Men (13) © Recording Now 12:00 - 12:30p
+    # Two and a Half Men (13)
+    # Two and a Half Men
+    # Two and a Half Men © Recording Now 12:00 - 12:30p
     numepisodes=1
+    title=${title% ? Recording Now *}
     if [[ "$title" =~ ^.*\([0-9]*\) ]] ; then
-        numepisodes=$(echo "$title" | sed "s/^.*(\([0-9]*\))$/\\1/")
-        title="${title%(*)}"
+#        numepisodes=$(echo "$title" | sed "s/^.*(\([0-9]*\))$/\\1/")
+        numepisodes=$(echo "$title" | grep -o "([0-9]*)")
+        let numepisodes=numepisodes
+        title="${title%(*}"
         title=${title% *}
         echo `date "+%Y-%m-%d_%H-%M-%S"` "There are $numepisodes episodes of $title."
     fi
@@ -162,10 +172,10 @@ while  true ; do
         $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER
     fi
     capturepage
-    season_episode=`grep "^[S$][^ ]* | Ep[^ ]*$" $DATADIR/${recname}_capture_crop.txt | tail -1`
+    season_episode=`grep "^[S$][^ ]* *| *Ep[^ ]*$" $DATADIR/${recname}_capture_crop.txt | tail -1`
     season_episode=$(echo $season_episode | sed "s/|//;s/ *Ep/E/;s/\\$/S/")
     # Lowercase l should be 1
-    season_episode=$(echo $season_episode | sed "s/l/1/g")
+    season_episode=$(echo $season_episode | sed "s/l/1/g;s/St/S11/;s/Et/E1/;s/s/8/g")
     if [[ "$season_episode" == "" ]] ; then
         season_episode=`date "+%Y%m%d_%H%M%S"`
         echo `date "+%Y-%m-%d_%H-%M-%S"` "Bad episode number, using $season_episode instead."
@@ -276,10 +286,12 @@ while  true ; do
                     ques=$(grep -n "Are you sure you want to delete " $DATADIR/${recname}_capture_crop.txt)
                     lno=${ques%:*}
                     subtitle=${ques#*:Are you sure you want to delete }
-                    subtitle2=$(head -n 5 $DATADIR/${recname}_capture_crop.txt | tail -1)
-                    if [[ "$subtitle2" != "Keep Delete Now" ]] ; then
-                        subtitle="$subtitle $subtitle2"
+                    let lno++
+                    subtitle2=$(head -n $lno $DATADIR/${recname}_capture_crop.txt | tail -1)
+                    if [[ "$subtitle2" =~ \?$ ]] ; then
+                        subtitle=`echo $subtitle $subtitle2`
                     fi
+                    subtitle=$(echo $subtitle|sed "s/ *?$//;s/- /-/;s/|/ I /g;s/  / /g")
                     # Confirm delete
                     echo `date "+%Y-%m-%d_%H-%M-%S"` "Confirm Delete"
                     $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER

@@ -21,6 +21,7 @@ echo "Recorder id (default hdmirec1)"
 function capturepage {
     pagename=
     sleep 1
+    cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
     true > $DATADIR/${recname}_capture_crop.png
     true > $DATADIR/${recname}_capture_crop.txt
     adb exec-out screencap -p > $DATADIR/${recname}_capture.png
@@ -33,7 +34,6 @@ function capturepage {
         convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
     fi
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
         tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
         if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
             echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again

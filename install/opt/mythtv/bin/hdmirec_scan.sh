@@ -12,6 +12,34 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 logfile=$LOGDIR/${scriptname}.log
 
+function capturepage {
+    pagename=
+    sleep 1
+    cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
+    true > $DATADIR/${recname}_capture_crop.png
+    true > $DATADIR/${recname}_capture_crop.txt
+    adb exec-out screencap -p > $DATADIR/${recname}_capture.png
+    if [[ `stat -c %s $DATADIR/${recname}_capture.png` == 0 ]] ; then
+        if [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ; then
+            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
+        fi
+    fi
+    if [[ `stat -c %s $DATADIR/${recname}_capture.png` != 0 ]] ; then
+        convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
+    fi
+    if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
+        tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
+        if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
+            echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
+        else
+            echo "*****" `date "+%Y-%m-%d_%H-%M-%S"`
+            cat $DATADIR/${recname}_capture_crop.txt
+            echo "*****"
+        fi
+        pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
+    fi
+}
+
 echo `date "+%Y-%m-%d_%H-%M-%S"` Start scans
 
 if ! ls /etc/opt/mythtv/hdmirec*.conf ; then
@@ -29,7 +57,7 @@ adb kill-server
 sleep 0.5
 
 export ANDROID_DEVICE
-# First renoot and set all tuners to HOME
+# First reboot and set all tuners to HOME
 for conffile in /etc/opt/mythtv/$reqname.conf ; do
     echo $conffile
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then
@@ -75,6 +103,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     done
     $scriptpath/adb-sendkey.sh HOME
     sleep 75
+    capturepage
     # Get rid of message that remote is not detected
     echo `date "+%Y-%m-%d_%H-%M-%S"` "Dismiss stupid message"
     $scriptpath/adb-sendkey.sh DPAD_CENTER
@@ -124,11 +153,13 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
         for (( x=0; x<20; x=x+2 )) ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
-            rm -f $DATADIR/video${x}_capture.$IMAGES
-            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.$IMAGES
-            convert $DATADIR/video${x}_capture.$IMAGES -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.$IMAGES
-            gocr -l $GRAYLEVEL $DATADIR/video${x}_heading.$IMAGES > $DATADIR/video${x}_heading.txt 2>/dev/null
-            if [[ `head -1 $DATADIR/video${x}_heading.txt` == For*You ]] ; then
+#            rm -f $DATADIR/video${x}_capture.png
+#            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.png
+#            convert $DATADIR/video${x}_capture.png -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.png
+#            gocr -l $GRAYLEVEL $DATADIR/video${x}_heading.png > $DATADIR/video${x}_heading.txt 2>/dev/null
+#            if [[ `head -1 $DATADIR/video${x}_heading.txt` == For*You ]] ; then
+             capturepage
+             if [[ "$pagename" == "For You" ]] ; then
                 match=Y
                 break
             fi
@@ -139,7 +170,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     done
 
     if [[ $match != Y ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to start XFinity on ${recname} - see $DATADIR/video*_capture.$IMAGES"
+        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to start XFinity on ${recname} - see $DATADIR/${recname}_capture.png"
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
         continue
