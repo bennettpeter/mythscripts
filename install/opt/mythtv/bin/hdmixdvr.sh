@@ -1,116 +1,32 @@
 #!/bin/bash
+# This will take all xfinity cloud recordings
+# and record them to local files.
 
 recname=$1
 
 #DATADIR=/var/opt/mythtv
+#LOGDIR=/var/log/mythtv_scripts
+VID_RECDIR=/home/storage/Video/recordings
 if [[ "$recname" == "" ]] ; then
     recname=hdmirec1
 fi
-VID_RECDIR=/home/storage/Video/recordings
 # Maximum time for 1 recording.
 MAXTIME=100
 let maxduration=MAXTIME*60
-#LOGDIR=/var/log/mythtv_scripts
 
 . /etc/opt/mythtv/mythtv.conf
 
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-if [[ -t 1 ]] ; then
-    isterminal=Y
-else
-    isterminal=N
-fi
-exec 1>>$LOGDIR/${scriptname}.log
-exec 2>&1
-#scriptpath=/opt/mythtv/bin
-tail_pid=
-if [[ $isterminal == Y ]] ; then
-    tail -f $LOGDIR/${scriptname}.log >/dev/tty &
-    tail_pid=$!
-fi
-logdate=`date "+%Y-%m-%d_%H-%M-%S"`
-echo `date "+%Y-%m-%d_%H-%M-%S"` "Start of run"
 
-# Select the [default] section of conf and put it in a file
-# to source it
-awk '/^\[default\]$/ { def = 1; next }
-/^\[/ { def = 0; next }
-def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
-> $DATADIR/etc_${recname}.conf
-. $DATADIR/etc_${recname}.conf
-# This sets VIDEO_IN and AUDIO_IN
-. $DATADIR/${recname}.conf
-if ping -c 1 $ANDROID_MAIN ; then
-    ANDROID_DEVICE=$ANDROID_MAIN
-else
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Ethernet failure"
-    # Remove this exit if you want to be able to use the
-    # fallback wifi device
-    exit 2
-    ANDROID_DEVICE=$ANDROID_FALLBACK
-fi
-export ANDROID_DEVICE
+source $scriptpath/hdmifuncs.sh
+ADB_ENDKEY=HOME
+initialize
+
+getparms 1
 
 ffmpeg_pid=
-
-function capturepage {
-    pagename=
-    sleep 1
-    cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
-    true > $DATADIR/${recname}_capture_crop.png
-    true > $DATADIR/${recname}_capture_crop.txt
-    adb exec-out screencap -p > $DATADIR/${recname}_capture.png
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` == 0 ]] ; then
-        if [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ; then
-            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
-        fi
-    fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` != 0 ]] ; then
-        convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
-    fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
-        if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
-        else
-            echo "*****" `date "+%Y-%m-%d_%H-%M-%S"`
-            cat $DATADIR/${recname}_capture_crop.txt
-            echo "*****"
-        fi
-        pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
-    fi
-}
-
-function waitforpage {
-    wanted="$1"
-    xx=0
-    while [[ "$pagename" != "$wanted" ]] && (( xx++ < 90 )) ; do
-        capturepage
-    done
-    if [[ "$pagename" != "$wanted" ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR - Cannot get to $wanted Page"
-        exit 2
-    fi
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reached $wanted page"
-}
-
-function trapfunc {
-    rc=$?
-    $scriptpath/adb-sendkey.sh HOME
-    if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
-        kill $ffmpeg_pid
-    fi
-    if [[ "$tail_pid" != "" ]] && ps -q $tail_pid >/dev/null ; then
-        kill $tail_pid
-    fi
-    adb disconnect $ANDROID_DEVICE
-    # Check $rc and notify if not zero
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Exit"
-}
-
-trap trapfunc EXIT
 
 # Kill vlc
 wmctrl -c vlc
@@ -156,7 +72,6 @@ while  true ; do
     numepisodes=1
     title=${title% ? Recording Now *}
     if [[ "$title" =~ ^.*\([0-9]*\) ]] ; then
-#        numepisodes=$(echo "$title" | sed "s/^.*(\([0-9]*\))$/\\1/")
         numepisodes=$(echo "$title" | grep -o "([0-9]*)")
         let numepisodes=numepisodes
         title="${title%(*}"
@@ -174,7 +89,7 @@ while  true ; do
     capturepage
     season_episode=`grep "^[S$][^ ]* *| *Ep[^ ]*$" $DATADIR/${recname}_capture_crop.txt | tail -1`
     season_episode=$(echo $season_episode | sed "s/|//;s/ *Ep/E/;s/\\$/S/")
-    # Lowercase l should be 1
+    # Lowercase l should be 1 and other fixes
     season_episode=$(echo $season_episode | sed "s/l/1/g;s/St/S11/;s/Et/E1/;s/s/8/g")
     if [[ "$season_episode" == "" ]] ; then
         season_episode=`date "+%Y%m%d_%H%M%S"`
@@ -291,6 +206,7 @@ while  true ; do
                     if [[ "$subtitle2" =~ \?$ ]] ; then
                         subtitle=`echo $subtitle $subtitle2`
                     fi
+                    # Repair subtitle
                     subtitle=$(echo $subtitle|sed "s/ *?$//;s/- /-/;s/|/ I /g;s/  / /g")
                     # Confirm delete
                     echo `date "+%Y-%m-%d_%H-%M-%S"` "Confirm Delete"
@@ -308,11 +224,11 @@ while  true ; do
                     echo `date "+%Y-%m-%d_%H-%M-%S"` "Recording Complete of $title/$season_episode $subtitle"
                     break
                 else
-                    echo `date "+%Y-%m-%d_%H-%M-%S"` "Playback seems to be stuck, exiting"
+                    echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Playback seems to be stuck, exiting"
                     exit 2
                 fi
             else
-                echo `date "+%Y-%m-%d_%H-%M-%S"` "Cannot capture screen at end of playback, exiting"
+                echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Cannot capture screen at end of playback, exiting"
                 exit 2
             fi
         fi
