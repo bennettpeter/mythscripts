@@ -2,7 +2,7 @@
 
 # Scan External Recorder Tuners and setup devices
 # Tuners must be set up with files called /etc/opt/mythtv/hdmirec*.conf
-# This will set up files /var/opt/mythtv/hdmirec*.conf
+# This will create files /var/opt/mythtv/hdmirec*.conf
 # with VIDEO_IN and AUDIO_IN settings
 # 
 
@@ -10,37 +10,11 @@
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-logfile=$LOGDIR/${scriptname}.log
 
-function capturepage {
-    pagename=
-    sleep 1
-    cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
-    true > $DATADIR/${recname}_capture_crop.png
-    true > $DATADIR/${recname}_capture_crop.txt
-    adb exec-out screencap -p > $DATADIR/${recname}_capture.png
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` == 0 ]] ; then
-        if [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ; then
-            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
-        fi
-    fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` != 0 ]] ; then
-        convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
-    fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
-        if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
-        else
-            echo "*****" `date "+%Y-%m-%d_%H-%M-%S"`
-            cat $DATADIR/${recname}_capture_crop.txt
-            echo "*****"
-        fi
-        pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
-    fi
-}
+source $scriptpath/hdmifuncs.sh
 
-echo `date "+%Y-%m-%d_%H-%M-%S"` Start scans
+ADB_ENDKEY=
+initialize
 
 if ! ls /etc/opt/mythtv/hdmirec*.conf ; then
     echo No HDMI recorders, exiting
@@ -59,29 +33,15 @@ sleep 0.5
 export ANDROID_DEVICE
 # First reboot and set all tuners to HOME
 for conffile in /etc/opt/mythtv/$reqname.conf ; do
-    echo $conffile
+    echo $conffile found
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then
         echo `date "+%Y-%m-%d_%H-%M-%S"` "Warning - No hdmi recorder found"
         exit
     fi
     recname=$(basename $conffile .conf)
-    ANDROID_MAIN=
-    # Select the [default] section of conf and put it in a file
-    # to source it
-    awk '/^\[default\]$/ { def = 1; next }
-    /^\[/ { def = 0; next }
-    def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
-    > $DATADIR/etc_${recname}.conf
-    . $DATADIR/etc_${recname}.conf
-    if [[ "$ANDROID_MAIN" == "" ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: $recname not set up - skipping"
+    getparms
+    if [[ "$ANDROID_DEVICE" == "" ]] ; then
         continue
-    fi
-    if ping -c 1 $ANDROID_MAIN ; then
-        ANDROID_DEVICE=$ANDROID_MAIN
-    else
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Ethernet failure on $recname - using wifi"
-        ANDROID_DEVICE=$ANDROID_FALLBACK
     fi
     adb connect $ANDROID_DEVICE
     sleep 0.5
@@ -97,12 +57,16 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     status=
     while [[ "$status" != device ]] ; do
         sleep 5
+        adb connect $ANDROID_DEVICE
+        sleep 0.5
         res=(`adb devices|grep $ANDROID_DEVICE`)
         status=${res[1]}
         echo `date "+%Y-%m-%d_%H-%M-%S"` "status: $status"
     done
     $scriptpath/adb-sendkey.sh HOME
+    echo `date "+%Y-%m-%d_%H-%M-%S"` "Sleep for 75 seconds to wait for stupid message..."
     sleep 75
+    VIDEO_IN=
     capturepage
     # Get rid of message that remote is not detected
     echo `date "+%Y-%m-%d_%H-%M-%S"` "Dismiss stupid message"
@@ -113,23 +77,11 @@ done
 # Invoke app and check where the result is
 for conffile in /etc/opt/mythtv/$reqname.conf ; do
     recname=$(basename $conffile .conf)
-    rm -f $DATADIR/${recname}.conf
-    ANDROID_MAIN=
-    # Select the [default] section of conf and put it in a file
-    # to source it
-    awk '/^\[default\]$/ { def = 1; next }
-    /^\[/ { def = 0; next }
-    def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
-    > $DATADIR/etc_${recname}.conf
-    . $DATADIR/etc_${recname}.conf
-    if [[ "$ANDROID_MAIN" == "" ]] ; then continue ; fi
-    if ping -c 1 $ANDROID_MAIN ; then
-        ANDROID_DEVICE=$ANDROID_MAIN
-    else
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Ethernet failure on $recname - using wifi"
-        ANDROID_DEVICE=$ANDROID_FALLBACK
+    true > $DATADIR/${recname}.conf
+    getparms
+    if [[ "$ANDROID_DEVICE" == "" ]] ; then
+        continue
     fi
-
     adb connect $ANDROID_DEVICE
     sleep 0.5
 
@@ -153,13 +105,9 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
         for (( x=0; x<20; x=x+2 )) ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
-#            rm -f $DATADIR/video${x}_capture.png
-#            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s 1280x720 -i $VIDEO_IN -frames 1 $DATADIR/video${x}_capture.png
-#            convert $DATADIR/video${x}_capture.png -crop 240x64+62+0 -negate $DATADIR/video${x}_heading.png
-#            gocr -l $GRAYLEVEL $DATADIR/video${x}_heading.png > $DATADIR/video${x}_heading.txt 2>/dev/null
-#            if [[ `head -1 $DATADIR/video${x}_heading.txt` == For*You ]] ; then
-             capturepage
-             if [[ "$pagename" == "For You" ]] ; then
+            echo `date "+%Y-%m-%d_%H-%M-%S"` "Trying: $VIDEO_IN"
+            capturepage 1
+            if [[ "$pagename" == "For You" ]] ; then
                 match=Y
                 break
             fi
