@@ -1,9 +1,12 @@
+#!/usr/bin/echo This file is not executable
 # Common functions used by hdmi record scripts
 # This file should not be marked executable
 
+LOGDATE='date +%Y-%m-%d_%H-%M-%S'
+
 function exitfunc {
     rc=$?
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Exit"
+    echo `$LOGDATE` "Exit"
     if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" ]] ; then
         $scriptpath/adb-sendkey.sh $ADB_ENDKEY
     fi
@@ -32,8 +35,7 @@ function initialize {
         tail -f $LOGDIR/${scriptname}.log >/dev/tty &
         tail_pid=$!
     fi
-    logdate=`date "+%Y-%m-%d_%H-%M-%S"`
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Start of run"
+    echo `$LOGDATE` "Start of run"
     trap exitfunc EXIT
     true > $DATADIR/${recname}_capture_crop.txt
 }
@@ -54,7 +56,7 @@ function getparms {
     # This sets VIDEO_IN and AUDIO_IN
     . $DATADIR/${recname}.conf
         if [[ "$ANDROID_MAIN" == "" ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: $recname not set up"
+        echo `$LOGDATE` "WARNING: $recname not set up"
         return
     fi
 
@@ -62,10 +64,10 @@ function getparms {
         ANDROID_DEVICE=$ANDROID_MAIN
     else
         if [[ "$ANDROID_FALLBACK" == "" ]] ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Primary network failure and no fallback"
+            echo `$LOGDATE` "ERROR: Primary network failure and no fallback"
             exit 2
         elif (( eth_reqd )) ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Primary network failure"
+            echo `$LOGDATE` "ERROR: Primary network failure"
             exit 2
         else
             ANDROID_DEVICE=$ANDROID_FALLBACK
@@ -77,6 +79,7 @@ function getparms {
 # Parameter 1 - set to 1 to only allow capture from /dev/video, otherwise
 # it prefers adb capture.
 # VIDEO_IN - set to blank will prevent capture from /dev/video
+# TESSPARM - set to "-c tessedit_char_whitelist=0123456789" to restrict to numerics
 function capturepage {
     pagename=
     local video_reqd=$1
@@ -97,11 +100,11 @@ function capturepage {
         convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
     fi
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        tesseract $DATADIR/${recname}_capture_crop.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
+        tesseract $DATADIR/${recname}_capture_crop.png  - $TESSPARM 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
         if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` Same Again
+            echo `$LOGDATE` Same Again
         else
-            echo "*****" `date "+%Y-%m-%d_%H-%M-%S"`
+            echo "*****" `$LOGDATE`
             cat $DATADIR/${recname}_capture_crop.txt
             echo "*****"
         fi
@@ -116,8 +119,8 @@ function waitforpage {
         capturepage
     done
     if [[ "$pagename" != "$wanted" ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR - Cannot get to $wanted Page"
+        echo `$LOGDATE` "ERROR - Cannot get to $wanted Page"
         exit 2
     fi
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reached $wanted page"
+    echo `$LOGDATE` "Reached $wanted page"
 }

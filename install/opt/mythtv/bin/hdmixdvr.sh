@@ -48,9 +48,9 @@ while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
     capturepage
 done
 if [[ "$pagename" == Recordings ]] ; then
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reached Recordings Page"
+    echo `$LOGDATE` "Reached Recordings Page"
 else
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR - Cannot get to Recordings Page"
+    echo `$LOGDATE` "ERROR - Cannot get to Recordings Page"
     exit 2
 fi
 sleep 5
@@ -76,7 +76,7 @@ while  true ; do
         let numepisodes=numepisodes
         title="${title%(*}"
         title=${title% *}
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "There are $numepisodes episodes of $title."
+        echo `$LOGDATE` "There are $numepisodes episodes of $title."
     fi
     $scriptpath/adb-sendkey.sh DPAD_CENTER
     waitforpage "$title"
@@ -93,13 +93,13 @@ while  true ; do
     season_episode=$(echo $season_episode | sed "s/l/1/g;s/St/S11/;s/Et/E1/;s/s/8/g")
     if [[ "$season_episode" == "" ]] ; then
         season_episode=`date "+%Y%m%d_%H%M%S"`
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Bad episode number, using $season_episode instead."
+        echo `$LOGDATE` "Bad episode number, using $season_episode instead."
     fi
     mkdir -p "$VID_RECDIR/$title"
     recfile="$VID_RECDIR/$title/$season_episode.mkv"
     convert $DATADIR/${recname}_capture.png -gravity East -crop 25%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_details.png
     tesseract $DATADIR/${recname}_capture_details.png  - 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_details.txt
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Episode Details:"
+    echo `$LOGDATE` "Episode Details:"
     echo "*****"
     cat $DATADIR/${recname}_details.txt
     echo "*****"
@@ -110,19 +110,19 @@ while  true ; do
     if [[ "$duration" =~ ^[0-9]*min$ ]] ; then
         duration=${duration%min}
         let duration=duration*60
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Duration: $duration"
+        echo `$LOGDATE` "Duration: $duration"
     else
         duration=0
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Warning: Cannot determine duration."
+        echo `$LOGDATE` "Warning: Cannot determine duration."
     fi
     xx=
     while [[ -f "$recfile" ]] ; do
         let xx++
         recfile="$VID_RECDIR/$title/${season_episode}_$xx.mkv"
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Duplicate recording file, appending _$xx"
+        echo `$LOGDATE` "Duplicate recording file, appending _$xx"
     done
     
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Starting recording of $title/$season_episode"
+    echo `$LOGDATE` "Starting recording of $title/$season_episode"
 
     # Start Recording
    
@@ -156,7 +156,7 @@ while  true ; do
     # Get past resume prompt and start over
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
         if  grep "^Start Over" $DATADIR/${recname}_capture_crop.txt ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "Selecting Start Over from Resume Prompt"
+            echo `$LOGDATE` "Selecting Start Over from Resume Prompt"
             $scriptpath/adb-sendkey.sh DOWN DPAD_CENTER
             starttime=`date +%s`
         fi
@@ -173,11 +173,11 @@ while  true ; do
     while true ; do
         now=`date +%s`
         if (( now > maxendtime )) ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "Recording for too long, kill it"
+            echo `$LOGDATE` "Recording for too long, kill it"
             exit 2
         fi
         if ! ps -q $ffmpeg_pid >/dev/null ; then
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "ffmpeg is gone, exit"
+            echo `$LOGDATE` "ffmpeg is gone, exit"
             exit 2
         fi
         if (( lowcount > 0 && now > endtime )) || (( lowcount > 2 )) ; then
@@ -187,13 +187,13 @@ while  true ; do
             # Handle "Delete Recording" at end
             if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
                 if grep "Delete Recording" $DATADIR/${recname}_capture_crop.txt ; then
-                    echo `date "+%Y-%m-%d_%H-%M-%S"` "End of Recording - Delete"
+                    echo `$LOGDATE` "End of Recording - Delete"
                     $scriptpath/adb-sendkey.sh DPAD_CENTER
                     capturepage
                     xx=0
                     while ! grep "Delete Now"  $DATADIR/${recname}_capture_crop.txt ; do
                         if (( ++xx > 30 )) ; then
-                            echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR Cannot get to Delete Now page"
+                            echo `$LOGDATE` "ERROR Cannot get to Delete Now page"
                             exit 2
                         fi
                         capturepage
@@ -209,26 +209,26 @@ while  true ; do
                     # Repair subtitle
                     subtitle=$(echo $subtitle|sed "s/ *?$//;s/- /-/;s/|/ I /g;s/  / /g")
                     # Confirm delete
-                    echo `date "+%Y-%m-%d_%H-%M-%S"` "Confirm Delete"
+                    echo `$LOGDATE` "Confirm Delete"
                     $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER
                     if [[ "$subtitle" != "" ]] ; then
-                        echo `date "+%Y-%m-%d_%H-%M-%S"` "Rename recording file with subtitle"
+                        echo `$LOGDATE` "Rename recording file with subtitle"
                         newrecfile="$VID_RECDIR/$title/$season_episode $subtitle.mkv"
                         while [[ -f "$newrecfile" ]] ; do
                             let xx++
                             newrecfile="$VID_RECDIR/$title/${season_episode}  ${subtitle}_$xx.mkv"
-                            echo `date "+%Y-%m-%d_%H-%M-%S"` "Duplicate recording file, appending _$xx"
+                            echo `$LOGDATE` "Duplicate recording file, appending _$xx"
                         done
                         mv -n "$recfile" "$newrecfile"
                     fi
-                    echo `date "+%Y-%m-%d_%H-%M-%S"` "Recording Complete of $title/$season_episode $subtitle"
+                    echo `$LOGDATE` "Recording Complete of $title/$season_episode $subtitle"
                     break
                 else
-                    echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Playback seems to be stuck, exiting"
+                    echo `$LOGDATE` "ERROR: Playback seems to be stuck, exiting"
                     exit 2
                 fi
             else
-                echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR: Cannot capture screen at end of playback, exiting"
+                echo `$LOGDATE` "ERROR: Cannot capture screen at end of playback, exiting"
                 exit 2
             fi
         fi
@@ -236,11 +236,11 @@ while  true ; do
         newsize=`stat -c %s "$recfile"`
         let diff=newsize-filesize
         filesize=$newsize
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "size: $filesize  Incr: $diff" >> $VID_RECDIR/${logdate}_size.log
+        echo `$LOGDATE` "size: $filesize  Incr: $diff" >> $VID_RECDIR/${recfile}_size.log
         if (( diff < 5000000 )) ; then
             let lowcount++
-            echo "*** Less than 5 MB *** lowcount=$lowcount" >> $VID_RECDIR/${logdate}_size.log
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "Less than 5 MB, lowcount=$lowcount"
+            echo "*** Less than 5 MB *** lowcount=$lowcount" >> $VID_RECDIR/${recfile}_size.log
+            echo `$LOGDATE` "Less than 5 MB, lowcount=$lowcount"
         else
             lowcount=0
         fi
@@ -254,5 +254,5 @@ while  true ; do
     sleep 5
     capturepage
 done
-echo `date "+%Y-%m-%d_%H-%M-%S"` "Complete - No more Recordings"
+echo `$LOGDATE` "Complete - No more Recordings"
 

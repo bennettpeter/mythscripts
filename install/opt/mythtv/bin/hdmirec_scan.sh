@@ -30,12 +30,11 @@ fi
 adb kill-server
 sleep 0.5
 
-export ANDROID_DEVICE
-# First reboot and set all tuners to HOME
+# First set all tuners to HOME
 for conffile in /etc/opt/mythtv/$reqname.conf ; do
     echo $conffile found
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Warning - No hdmi recorder found"
+        echo `$LOGDATE` "Warning - No hdmi recorder found"
         exit
     fi
     recname=$(basename $conffile .conf)
@@ -48,29 +47,11 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     res=(`adb devices|grep $ANDROID_DEVICE`)
     status=${res[1]}
     if [[ "$status" != device ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Device offline: $recname, skipping"
+        echo `$LOGDATE` "WARNING: Device offline: $recname, skipping"
         adb disconnect $ANDROID_DEVICE
         continue
     fi
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "reboot: $recname"
-    adb -s $ANDROID_DEVICE shell reboot
-    status=
-    while [[ "$status" != device ]] ; do
-        sleep 5
-        adb connect $ANDROID_DEVICE
-        sleep 0.5
-        res=(`adb devices|grep $ANDROID_DEVICE`)
-        status=${res[1]}
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "status: $status"
-    done
     $scriptpath/adb-sendkey.sh HOME
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Sleep for 75 seconds to wait for stupid message..."
-    sleep 75
-    VIDEO_IN=
-    capturepage
-    # Get rid of message that remote is not detected
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Dismiss stupid message"
-    $scriptpath/adb-sendkey.sh DPAD_CENTER
     adb disconnect $ANDROID_DEVICE
 done
 
@@ -88,12 +69,12 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     res=(`adb devices|grep $ANDROID_DEVICE`)
     status=${res[1]}
     if [[ "$status" != device ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "WARNING: Device offline: $recname, skipping"
+        echo `$LOGDATE` "WARNING: Device offline: $recname, skipping"
         adb disconnect $ANDROID_DEVICE
         continue
     fi
 
-    echo `date "+%Y-%m-%d_%H-%M-%S"` "Reset recorder: $recname"
+    echo `$LOGDATE` "Reset recorder: $recname"
 
     # This expects xfinity to be the first application in the list
     $scriptpath/adb-sendkey.sh HOME
@@ -105,7 +86,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
         for (( x=0; x<20; x=x+2 )) ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
-            echo `date "+%Y-%m-%d_%H-%M-%S"` "Trying: $VIDEO_IN"
+            echo `$LOGDATE` "Trying: $VIDEO_IN"
             capturepage 1
             if [[ "$pagename" == "For You" ]] ; then
                 match=Y
@@ -113,12 +94,12 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
             fi
         done
         if [[ $match == Y ]] ; then break ; fi
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to read screen on ${recname}, trying again"
+        echo `$LOGDATE` "Failed to read screen on ${recname}, trying again"
         sleep 1
     done
 
     if [[ $match != Y ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "Failed to start XFinity on ${recname} - see $DATADIR/${recname}_capture.png"
+        echo `$LOGDATE` "Failed to start XFinity on ${recname} - see $DATADIR/${recname}_capture.png"
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
         continue
@@ -134,14 +115,14 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     vid_path=${vid_path:0:len-1}
     audiodev=$(readlink /dev/snd/by-path/${vid_path}?)
     if [[ "$audiodev" != ../controlC* ]] ; then
-        echo `date "+%Y-%m-%d_%H-%M-%S"` "ERROR Failed to find audio device for $VIDEO_IN"
+        echo `$LOGDATE` "ERROR Failed to find audio device for $VIDEO_IN"
         continue
     fi
     AUDIO_IN="hw:"${audiodev#../controlC},0
 
     echo "VIDEO_IN=$VIDEO_IN" > $DATADIR/${recname}.conf
     echo "AUDIO_IN=$AUDIO_IN" >> $DATADIR/${recname}.conf
-    echo `date "+%Y-%m-%d_%H-%M-%S"` Successfully created parameters in $DATADIR/${recname}.conf.
+    echo `$LOGDATE` Successfully created parameters in $DATADIR/${recname}.conf.
     
 done
 
