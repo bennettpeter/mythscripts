@@ -43,12 +43,26 @@ initialize
 getparms 1
 ffmpeg_pid=
 
-echo "echo Record for $minutes minutes and respond $responses times."
+# Tuner kept locked through entire recording
+lockdir=$DATADIR/lock_$recname
+if ! mkdir $lockdir ; then
+    echo `$LOGDATE` "ERROR Encoder $recname is locked."
+    exit 2
+fi
+LOCKDIR=$lockdir
+gettunestatus
+
+if [[ "$tunestatus" != idle ]] ; then
+    echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
+    exit 2
+fi
+
+echo `$LOGDATE` "Record for $minutes minutes and respond $responses times."
 
 adb disconnect $ANDROID_DEVICE 2>/dev/null || true
 adb connect $ANDROID_DEVICE
 if ! adb devices | grep $ANDROID_DEVICE ; then
-    echo "ERROR: Unable to connect to $ANDROID_DEVICE"
+    echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
     exit 2
 fi
 
@@ -89,11 +103,6 @@ $VID_RECDIR/${recfile}.mkv &
 # -i "alsa_input.usb-MACROSILICON_2109-02.analog-stereo" \
 
 ffmpeg_pid=$!
-#echo "#!/bin/bash" > $VID_RECDIR/${recfile}_kill.sh
-#echo "kill $ffmpeg_pid" >> $VID_RECDIR/${recfile}_kill.sh
-#echo "echo Wait 1 minute" >> $VID_RECDIR/${recfile}_kill.sh
-#sleep 0.5
-#chmod +x $VID_RECDIR/${recfile}_kill.sh
 starttime=`date +%s`
 let endtime=starttime+seconds
 filesize=0
@@ -116,11 +125,10 @@ for (( xx = 0 ; xx < loops ; xx++ )) ; do
             if (( xx < responses )) ; then break ; fi
             break 2
         fi
-        nowdate=`$LOGDATE`
         newsize=`stat -c %s $VID_RECDIR/${recfile}.mkv`
         let diff=newsize-filesize
         filesize=$newsize
-        echo "$nowdate size: $filesize  Incr: $diff" >> $VID_RECDIR/${recfile}_size.log
+        echo `$LOGDATE` "size: $filesize  Incr: $diff" >> $VID_RECDIR/${recfile}_size.log
         if (( diff < 5000000 )) ; then 
             let lowcount=lowcount+1
             echo "*** Less than 5 MB *** lowcount=$lowcount" >> $VID_RECDIR/${recfile}_size.log
@@ -129,7 +137,7 @@ for (( xx = 0 ; xx < loops ; xx++ )) ; do
         fi
     done
     sleep 1
-    capturepage
+    capturepage adb
     echo `$LOGDATE` "Sending enter to start next episode"
     sleep 1
     $scriptpath/adb-sendkey.sh DPAD_CENTER

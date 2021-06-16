@@ -38,6 +38,12 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
         exit
     fi
     recname=$(basename $conffile .conf)
+
+    tunefile=$DATADIR/${recname}_tune.stat
+    # Clear status and locks
+    true > $tunefile
+    rm -rf $DATADIR/lock_$recname
+
     getparms
     if [[ "$ANDROID_DEVICE" == "" ]] ; then
         continue
@@ -87,7 +93,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
             VIDEO_IN=/dev/video${x}
             if [[ ! -e $VIDEO_IN ]] ; then continue ; fi
             echo `$LOGDATE` "Trying: $VIDEO_IN"
-            capturepage 1
+            capturepage video
             if [[ "$pagename" == "For You" ]] ; then
                 match=Y
                 break

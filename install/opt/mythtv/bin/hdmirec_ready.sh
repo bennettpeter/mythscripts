@@ -10,6 +10,7 @@ scriptname=`basename "$scriptname" .sh`
 
 source $scriptpath/hdmifuncs.sh
 
+SLEEPTIME=300
 ADB_ENDKEY=
 initialize
 
@@ -19,36 +20,39 @@ if [[ "$recname" == "" ]] ; then
 fi
 
 getparms
-adb connect $ANDROID_DEVICE
-sleep 0.5
-res=(`adb devices|grep $ANDROID_DEVICE`)
-status=${res[1]}
-if [[ "$status" != device ]] ; then
-    echo `$LOGDATE` "ERROR: Device offline: $recname"
-    exit 2
-fi
-echo `$LOGDATE` "reboot: $recname"
-adb -s $ANDROID_DEVICE shell reboot
-status=
-found=0
-for (( count=0 ; count < 20 && found < 3 ; count++ )) ; do
-    sleep 5
-    adb connect $ANDROID_DEVICE
-    sleep 0.5
-    res=(`adb devices|grep $ANDROID_DEVICE`)
-    status=${res[1]}
-    echo `$LOGDATE` "status: $status"
-    if [[ "$status" == device ]] ; then let found++ ; fi
+tunefile=$DATADIR/${recname}_tune.stat
+# Clear status and locks
+true > $tunefile
+rm -rf $DATADIR/lock_$recname
+
+# tunestatus values
+# idle
+# tuned
+# playing
+
+while true ; do
+    lockdir=$DATADIR/lock_$recname
+    if ! mkdir $lockdir ; then
+        echo `$LOGDATE` "Encoder $recname is locked, waiting"
+        sleep $SLEEPTIME
+        continue
+    fi
+    LOCKDIR=$lockdir
+    gettunestatus
+    if [[ "$tunestatus" == idle ]] ; then
+        adb connect $ANDROID_DEVICE
+        #~ if (( ! reset_done )) ; then
+            # This fails on old version of adb.
+            #~ echo force stop
+            #~ adb shell am force-stop com.xfinity.cloudtvr.tenfoot
+            #~ reset_done=1
+        #~ fi
+        getfavorites
+        adb disconnect $ANDROID_DEVICE
+    else
+        echo `$LOGDATE` "Encoder $recname is tuned, waiting"
+    fi
+    rmdir $LOCKDIR
+    LOCKDIR=
+    sleep $SLEEPTIME
 done
-if (( found < 2 )) ; then
-    echo `$LOGDATE` "ERROR Lost contact with $ANDROID_DEVICE"
-    exit 2
-fi
-$scriptpath/adb-sendkey.sh HOME
-echo `$LOGDATE` "Sleep for 75 seconds to wait for stupid message..."
-sleep 75
-VIDEO_IN=
-capturepage
-# Get rid of message that remote is not detected
-echo `$LOGDATE` "Dismiss stupid message"
-$scriptpath/adb-sendkey.sh DPAD_CENTER

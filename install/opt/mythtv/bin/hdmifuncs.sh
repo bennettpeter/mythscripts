@@ -3,11 +3,12 @@
 # This file should not be marked executable
 
 LOGDATE='date +%Y-%m-%d_%H-%M-%S'
+OCR_RESOLUTION=1280x720
 
 function exitfunc {
     rc=$?
     echo `$LOGDATE` "Exit"
-    if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" ]] ; then
+    if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && "$LOCKDIR" != "" ]] ; then
         $scriptpath/adb-sendkey.sh $ADB_ENDKEY
     fi
     if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
@@ -16,8 +17,11 @@ function exitfunc {
     if [[ "$tail_pid" != "" ]] && ps -q $tail_pid >/dev/null ; then
         kill $tail_pid
     fi
-    if [[ "$ANDROID_DEVICE" != "" ]] ; then
-        adb disconnect $ANDROID_DEVICE
+    if [[ "$LOCKDIR" != "" ]] ; then
+        if [[ "$ANDROID_DEVICE" != "" ]] ; then
+            adb disconnect $ANDROID_DEVICE
+        fi
+        rmdir $LOCKDIR
     fi
     # TODO: Check $rc and notify if not zero
 }
@@ -35,7 +39,7 @@ function initialize {
         tail -f $LOGDIR/${scriptname}.log >/dev/tty &
         tail_pid=$!
     fi
-    echo `$LOGDATE` "Start of run"
+    echo `$LOGDATE` "Start of run ***********************"
     trap exitfunc EXIT
     true > $DATADIR/${recname}_capture_crop.txt
 }
@@ -76,40 +80,65 @@ function getparms {
     export ANDROID_DEVICE
 }
 
-# Parameter 1 - set to 1 to only allow capture from /dev/video, otherwise
-# it prefers adb capture.
+# Parameter 1 - set to video to only allow capture from /dev/video.
+# Set to adb to only allow adb. Blank to try video first then adb
 # VIDEO_IN - set to blank will prevent capture from /dev/video
 # TESSPARM - set to "-c tessedit_char_whitelist=0123456789" to restrict to numerics
+# CROP - crop parameter (default -gravity East -crop 95%x100%)
 function capturepage {
     pagename=
-    local video_reqd=$1
+    local source_req=$1
     sleep 1
+    if [[ "$CROP" == "" ]] ; then
+        CROP="-gravity East -crop 95%x100%"
+    fi
+    #~ if [[ "$TESSPARM" == "" ]] ; then
+        #~ TESSPARM="-c tessedit_char_whitelist=0123456789QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm "
+    #~ fi
     cp -f $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt
     true > $DATADIR/${recname}_capture.png
     true > $DATADIR/${recname}_capture_crop.png
     true > $DATADIR/${recname}_capture_crop.txt
-    if (( ! video_reqd )) ; then
-        adb exec-out screencap -p > $DATADIR/${recname}_capture.png
+    cap_source=
+    if ( [[ "$source_req" == "" || "$source_req" == video  ]] ) \
+      && ( [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ) \
+      && [[ "$VIDEO_IN" != "" ]] ; then
+        ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $OCR_RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
+        cap_source=ffmpeg
     fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` == 0 && "$VIDEO_IN" != "" ]] ; then
-        if [[ "$ffmpeg_pid" == "" ]] || ! ps -q $ffmpeg_pid >/dev/null ; then
-            ffmpeg -hide_banner -loglevel error  -y -f v4l2 -s $RESOLUTION -i $VIDEO_IN -frames 1 $DATADIR/${recname}_capture.png
+    imagesize=$(stat -c %s $DATADIR/${recname}_capture.png)
+    if (( imagesize == 0 )) ; then
+        if [[ "$source_req" == "" || "$source_req" == adb  ]] ; then
+            adb exec-out screencap -p > $DATADIR/${recname}_capture.png
+            cap_source=adb
+            imagesize=$(stat -c %s $DATADIR/${recname}_capture.png)
         fi
     fi
-    if [[ `stat -c %s $DATADIR/${recname}_capture.png` != 0 ]] ; then
-        convert $DATADIR/${recname}_capture.png -gravity East -crop 95%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
+    if (( imagesize > 0 )) ; then
+        resolution=$(identify -format %wx%h $DATADIR/${recname}_capture.png)
+        if [[ "$resolution" != "$OCR_RESOLUTION" ]] ; then
+            echo `$LOGDATE` "WARNING Incorrect resolution $resolution"
+            convert $DATADIR/${recname}_capture.png -resize "$OCR_RESOLUTION" $DATADIR/${recname}_capturex.png
+            cp -f $DATADIR/${recname}_capturex.png $DATADIR/${recname}_capture.png
+            imagesize=$(stat -c %s $DATADIR/${recname}_capture.png)
+        fi
+    fi
+    if (( imagesize > 0 )) ; then
+        convert $DATADIR/${recname}_capture.png $CROP -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_crop.png
     fi
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
-        tesseract $DATADIR/${recname}_capture_crop.png  - $TESSPARM 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
+        tesseract -c page_separator="" $DATADIR/${recname}_capture_crop.png  - $TESSPARM 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
         if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
-            echo `$LOGDATE` Same Again
+            echo `$LOGDATE` Same Screen Again
         else
-            echo "*****" `$LOGDATE`
+            echo "*****" `$LOGDATE` Screen from $cap_source
             cat $DATADIR/${recname}_capture_crop.txt
             echo "*****"
         fi
         pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
     fi
+    TESSPARM=
+    CROP=
 }
 
 function waitforpage {
@@ -123,4 +152,50 @@ function waitforpage {
         exit 2
     fi
     echo `$LOGDATE` "Reached $wanted page"
+}
+
+function gettunestatus {
+    tunefile=$DATADIR/${recname}_tune.stat
+    touch $tunefile
+    # Default tunestatus
+    tunestatus=idle
+    tunetime=0
+    source $tunefile
+    now=$(date +%s)
+
+    # Tuned more than 5 minutes ago and not playing - reset tuner
+    if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
+        echo `$LOGDATE` Tuner $recname expired, resetting
+        tunestatus=idle
+        true > $tunefile
+    fi
+}
+
+# Navigate to the favorite channels
+function getfavorites {
+    sleep 0.5
+    # use MENU MENU to keep awake
+    $scriptpath/adb-sendkey.sh MENU MENU
+    for (( xx=0 ; xx < 20 ; xx++ )) ; do
+        sleep 1
+        capturepage
+        # If blank the only thing that works is HOME
+        if [[ "$pagename" == "" ]] ; then
+            $scriptpath/adb-sendkey.sh HOME HOME
+        elif [[ "$pagename" == "We can't detect your remote" ]] ; then
+            $scriptpath/adb-sendkey.sh DPAD_CENTER
+        elif [[ "$pagename" == "For You" ]] ; then
+            $scriptpath/adb-sendkey.sh MENU
+        elif [[ "$pagename" == "Search" ]] ; then
+            $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
+        elif [[ "$pagename" == "Favorite Channels" ]] ; then
+            break
+        else
+            # This expects xfinity to be the first application in the list
+            $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+        fi
+    done
+    if [[ "$pagename" != "Favorite Channels" ]] ; then
+        echo `$LOGDATE` "ERROR: Unable to reach Favorite Channels: $recname."
+    fi
 }

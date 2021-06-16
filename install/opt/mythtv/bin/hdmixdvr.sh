@@ -23,47 +23,77 @@ scriptname=`basename "$scriptname" .sh`
 source $scriptpath/hdmifuncs.sh
 ADB_ENDKEY=HOME
 initialize
-
 getparms 1
-
 ffmpeg_pid=
+
+function getrecordings {
+    pagename=
+    xx=0
+    while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
+        sleep 0.5
+        $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+        waitforpage "For You"
+        $scriptpath/adb-sendkey.sh MENU
+        waitforpage "Search"
+        $scriptpath/adb-sendkey.sh DOWN DPAD_CENTER
+        sleep 0.5
+        capturepage
+    done
+    if [[ "$pagename" == Recordings ]] ; then
+        echo `$LOGDATE` "Reached Recordings Page"
+    else
+        echo `$LOGDATE` "ERROR - Cannot get to Recordings Page"
+        exit 2
+    fi
+    sleep 3
+    capturepage
+}
 
 # Kill vlc
 wmctrl -c vlc
 wmctrl -c obs
 
-# Get to recordings list
-
-adb connect $ANDROID_DEVICE
-pagename=
-xx=0
-while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
-    sleep 0.5
-    $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
-    waitforpage "For You"
-    $scriptpath/adb-sendkey.sh MENU
-    waitforpage "Search"
-    $scriptpath/adb-sendkey.sh DOWN DPAD_CENTER
-    sleep 0.5
-    capturepage
-done
-if [[ "$pagename" == Recordings ]] ; then
-    echo `$LOGDATE` "Reached Recordings Page"
-else
-    echo `$LOGDATE` "ERROR - Cannot get to Recordings Page"
+# Tuner kept locked through entire recording
+lockdir=$DATADIR/lock_$recname
+if ! mkdir $lockdir ; then
+    echo `$LOGDATE` "ERROR Encoder $recname is locked."
     exit 2
 fi
-sleep 5
-capturepage
+LOCKDIR=$lockdir
+gettunestatus
+
+if [[ "$tunestatus" != idle ]] ; then
+    echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
+    exit 2
+fi
+
+# Get to recordings list
+adb connect $ANDROID_DEVICE
+getrecordings
+
 # See if there are any recordings
+retries=0
 while  true ; do
     # Select First Recording
     title=$(head -3 $DATADIR/${recname}_capture_crop.txt  | tail -1)
     if [[ "$title" == "Deleted Recordings" ]] ; then
         break;
     elif [[ "$title" == "You have no completed recordings"* ]] ; then
-        break;
+        if grep "% Full [0-9]* Recordings" $DATADIR/${recname}_capture_crop.txt ; then
+            if (( retries > 2 )) ; then
+                echo `$LOGDATE` "ERROR: Inconsistent recordings page"
+                exit 2
+            fi
+            adb shell am force-stop com.xfinity.cloudtvr.tenfoot
+            let retries++
+            sleep 2
+            getrecordings
+            continue
+        else
+            break
+        fi
     fi
+    retries=0
     # Possible forms of title
     # Two and a Half Men (13) © Recording Now 12:00 - 12:30p
     # Two and a Half Men (13)
@@ -149,10 +179,11 @@ while  true ; do
     -c:a aac \
     "$recfile" &
 
+    sizelog=$VID_RECDIR/$($LOGDATE)_size.log
     ffmpeg_pid=$!
     starttime=`date +%s`
     sleep 10
-    capturepage
+    capturepage adb
     # Get past resume prompt and start over
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
         if  grep "^Start Over" $DATADIR/${recname}_capture_crop.txt ; then
@@ -236,10 +267,10 @@ while  true ; do
         newsize=`stat -c %s "$recfile"`
         let diff=newsize-filesize
         filesize=$newsize
-        echo `$LOGDATE` "size: $filesize  Incr: $diff" >> $VID_RECDIR/${recfile}_size.log
+        echo `$LOGDATE` "size: $filesize  Incr: $diff" >> "$sizelog"
         if (( diff < 5000000 )) ; then
             let lowcount++
-            echo "*** Less than 5 MB *** lowcount=$lowcount" >> $VID_RECDIR/${recfile}_size.log
+            echo "*** Less than 5 MB *** lowcount=$lowcount" >> "$sizelog"
             echo `$LOGDATE` "Less than 5 MB, lowcount=$lowcount"
         else
             lowcount=0
