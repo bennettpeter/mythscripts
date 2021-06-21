@@ -4,9 +4,13 @@
 
 LOGDATE='date +%Y-%m-%d_%H-%M-%S'
 OCR_RESOLUTION=1280x720
+cleartunestatus=0
+ADB_ENDKEY=
 
 function exitfunc {
     rc=$?
+    exec 1>&2
+    # use &2 here because if ffmpeg was runnning then &1 was redirected
     echo `$LOGDATE` "Exit"
     if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && "$LOCKDIR" != "" ]] ; then
         $scriptpath/adb-sendkey.sh $ADB_ENDKEY
@@ -23,6 +27,10 @@ function exitfunc {
         fi
         rmdir $LOCKDIR
     fi
+    if (( cleartunestatus )) ; then
+        true > $tunefile
+    fi
+
     # TODO: Check $rc and notify if not zero
 }
 
@@ -32,8 +40,8 @@ function initialize {
     else
         isterminal=N
     fi
-    exec 1>>$LOGDIR/${scriptname}.log
-    exec 2>&1
+    exec 2>>$LOGDIR/${scriptname}.log
+    exec 1>&2
     tail_pid=
     if [[ $isterminal == Y ]] ; then
         tail -f $LOGDIR/${scriptname}.log >/dev/tty &
@@ -154,6 +162,13 @@ function waitforpage {
     echo `$LOGDATE` "Reached $wanted page"
 }
 
+# tunestatus values
+# idle (default if blank)
+# tuned
+# playing
+#
+# If playing the tuner is locked
+
 function gettunestatus {
     tunefile=$DATADIR/${recname}_tune.stat
     touch $tunefile
@@ -163,7 +178,7 @@ function gettunestatus {
     source $tunefile
     now=$(date +%s)
 
-    # Tuned more than 5 minutes ago and not playing - reset tuner
+    # Tuned more than 5 minutes ago and not playing - reset tunestatus
     if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
         echo `$LOGDATE` Tuner $recname expired, resetting
         tunestatus=idle

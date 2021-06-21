@@ -20,10 +20,10 @@ if [[ "$recname" == "" ]] ; then
 fi
 
 getparms
-tunefile=$DATADIR/${recname}_tune.stat
+#tunefile=$DATADIR/${recname}_tune.stat
 # Clear status and locks
-true > $tunefile
-rm -rf $DATADIR/lock_$recname
+#true > $tunefile
+#rm -rf $DATADIR/lock_$recname
 
 # tunestatus values
 # idle

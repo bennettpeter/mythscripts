@@ -4,8 +4,6 @@
 
 recname=$1
 
-#DATADIR=/var/opt/mythtv
-#LOGDIR=/var/log/mythtv_scripts
 VID_RECDIR=/home/storage/Video/recordings
 if [[ "$recname" == "" ]] ; then
     recname=hdmirec1
@@ -49,10 +47,6 @@ function getrecordings {
     capturepage
 }
 
-# Kill vlc
-wmctrl -c vlc
-wmctrl -c obs
-
 # Tuner kept locked through entire recording
 lockdir=$DATADIR/lock_$recname
 if ! mkdir $lockdir ; then
@@ -66,6 +60,10 @@ if [[ "$tunestatus" != idle ]] ; then
     echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
     exit 2
 fi
+
+# Kill vlc
+wmctrl -c vlc
+wmctrl -c obs
 
 # Get to recordings list
 adb connect $ANDROID_DEVICE
@@ -84,6 +82,8 @@ while  true ; do
                 echo `$LOGDATE` "ERROR: Inconsistent recordings page"
                 exit 2
             fi
+            echo `$LOGDATE` Force stop xfinity
+            # This fails on old version of adb.
             adb shell am force-stop com.xfinity.cloudtvr.tenfoot
             let retries++
             sleep 2
@@ -92,6 +92,8 @@ while  true ; do
         else
             break
         fi
+    elif [[ "$title" == "" ]] ; then
+        break
     fi
     retries=0
     # Possible forms of title

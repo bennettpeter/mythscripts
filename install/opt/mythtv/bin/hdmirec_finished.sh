@@ -9,45 +9,12 @@ recname=$1
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-logfile=$LOGDIR/${scriptname}.log
-exec 1>>$LOGDIR/${scriptname}.log
-exec 2>&1
 
-# Get a date/time stamp to add to log output
-date=`date +%F\ %T\.%N`
-date=${date:0:23}
+source $scriptpath/hdmifuncs.sh
 
-# Select the [default] section of conf and put it in a file
-# to source it
-awk '/^\[default\]$/ { def = 1; next }
-/^\[/ { def = 0; next }
-def == 1 { print $0 } ' /etc/opt/mythtv/$recname.conf \
-> $DATADIR/etc_${recname}.conf
-. $DATADIR/etc_${recname}.conf
-. $DATADIR/${recname}.conf
-if ping -c 1 $ANDROID_MAIN ; then
-    ANDROID_DEVICE=$ANDROID_MAIN
-else
-    ANDROID_DEVICE=$ANDROID_FALLBACK
-fi
-export ANDROID_DEVICE
+ADB_ENDKEY=
+initialize
 
-tunefile=$DATADIR/${recname}_tune.stat
-if [[ ! -f $tunefile ]] ; then
-    echo $date $tunefile not found. >>$logfile
-else
-    . $tunefile
-fi
+getparms
 
-echo $date Finished Recording on recorder $recname
-
-if [[ "$tunestatus" == playing ]] ; then
-    adb connect $ANDROID_DEVICE
-    sleep 0.5
-    # Exit from playback
-    $scriptpath/adb-sendkey.sh BACK
-    sleep 0.5
-    adb disconnect $ANDROID_DEVICE
-    echo "tunetime=$(date +%s)" >> $tunefile
-    echo "tunestatus=stopped" >> $tunefile
-fi
+echo `$LOGDATE` "Finished recording on tuner $recname"
