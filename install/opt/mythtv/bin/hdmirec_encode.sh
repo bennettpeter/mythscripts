@@ -15,60 +15,54 @@ recname=$1
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
-
-ffmpeg_pid=
 source $scriptpath/hdmifuncs.sh
+ffmpeg_pid=
+logfile=$LOGDIR/${scriptname}_${recname}.log
+{
+    initialize NOREDIRECT
+    getparms
+    lockdir=$DATADIR/lock_$recname
+    while ! mkdir $lockdir ; do
+        echo `$LOGDATE` "Encoder $recname is locked, waiting"
+        sleep 5
+        continue
+     done
+    LOCKDIR=$lockdir
+    gettunestatus
 
-# save stdout
-exec 3>&1
+    # tunestatus values
+    # idle
+    # tuned
+    # playing
 
-initialize
-getparms
+    if [[ "$tunestatus" == tuned  ]] ; then
+        echo `$LOGDATE` "Tuned to channel $tunechan"
+    #~ elif [[ "$tunestatus" == playing ]] ; then
+        #~ echo `$LOGDATE` "ERROR: Already playing"
+        #~ exit 2
+    else
+        echo `$LOGDATE` "ERROR: Not tuned, status $tunestatus, cannot record"
+        exit 2
+    fi
 
-# tunestatus values
-# idle
-# tuned
-# playing
+    adb connect $ANDROID_DEVICE
+    if ! adb devices | grep $ANDROID_DEVICE ; then
+        echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
+        exit 2
+    fi
+    #~ ADB_ENDKEY=BACK
 
-lockdir=$DATADIR/lock_$recname
-while ! mkdir $lockdir ; do
-    echo `$LOGDATE` "Encoder $recname is locked, waiting"
-    sleep 5
-    continue
- done
-LOCKDIR=$lockdir
-gettunestatus
-if [[ "$tunestatus" == tuned  ]] ; then
-    echo `$LOGDATE` "Tuned to channel $channum"
-elif [[ "$tunestatus" == playing ]] ; then
-    echo `$LOGDATE` "ERROR: Already playing"
-    exit 2
-else
-    echo `$LOGDATE` "ERROR: Not tuned, status $tunestatus, cannot record"
-    exit 2
-fi
+    if [[ "$AUDIO_OFFSET" == "" ]] ; then
+        AUDIO_OFFSET=0.000
+    fi
+    #~ echo `$LOGDATE` "Starting recording"
+    #~ ADB_ENDKEY=BACK
+    #~ $scriptpath/adb-sendkey.sh DPAD_CENTER
 
-adb connect $ANDROID_DEVICE
-if ! adb devices | grep $ANDROID_DEVICE ; then
-    echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
-    exit 2
-fi
-echo `$LOGDATE` "Starting recording of ${recfile}"
-ADB_ENDKEY=BACK
-
-if [[ "$AUDIO_OFFSET" == "" ]] ; then
-    AUDIO_OFFSET=0.000
-fi
-echo `$LOGDATE` "Starting recording"
-ADB_ENDKEY=BACK
-$scriptpath/adb-sendkey.sh DPAD_CENTER
-
-# Indicator to clear tunestatus at end
-cleartunestatus=1
-echo "tunestatus=playing" >> $tunefile
-
-# Restore stdout for ffmpeg
-exec >&3 3>&-
+    # Indicator to clear tunestatus at end
+    #~ cleartunestatus=1
+    #~ echo "tunestatus=playing" >> $tunefile
+} &>> $logfile
 
 ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format $INPUT_FORMAT \
   -framerate $FRAMERATE -video_size $RESOLUTION \
@@ -79,5 +73,6 @@ ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format
   -f mpegts - &
 
 ffmpeg_pid=$!
+echo tune_ffmpeg_pid=$ffmpeg_pid >> $tunefile
 
-wait
+wait $ffmpeg_pid

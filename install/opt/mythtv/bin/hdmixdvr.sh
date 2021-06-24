@@ -8,8 +8,8 @@ VID_RECDIR=/home/storage/Video/recordings
 if [[ "$recname" == "" ]] ; then
     recname=hdmirec1
 fi
-# Maximum time for 1 recording.
-MAXTIME=100
+# Maximum time for 1 recording. 6 hours.
+MAXTIME=360
 let maxduration=MAXTIME*60
 
 . /etc/opt/mythtv/mythtv.conf

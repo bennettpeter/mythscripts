@@ -9,11 +9,9 @@ ADB_ENDKEY=
 
 function exitfunc {
     rc=$?
-    exec 1>&2
-    # use &2 here because if ffmpeg was runnning then &1 was redirected
-    echo `$LOGDATE` "Exit"
+    echo `$LOGDATE` "Exit" >> $logfile
     if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && "$LOCKDIR" != "" ]] ; then
-        $scriptpath/adb-sendkey.sh $ADB_ENDKEY
+        $scriptpath/adb-sendkey.sh $ADB_ENDKEY >> $logfile
     fi
     if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
         kill $ffmpeg_pid
@@ -23,7 +21,7 @@ function exitfunc {
     fi
     if [[ "$LOCKDIR" != "" ]] ; then
         if [[ "$ANDROID_DEVICE" != "" ]] ; then
-            adb disconnect $ANDROID_DEVICE
+            adb disconnect $ANDROID_DEVICE >> $logfile
         fi
         rmdir $LOCKDIR
     fi
@@ -34,18 +32,24 @@ function exitfunc {
     # TODO: Check $rc and notify if not zero
 }
 
+# param NOREDIRECT to prevent redirection of stdout and stderr
 function initialize {
     if [[ -t 1 ]] ; then
         isterminal=Y
     else
         isterminal=N
     fi
-    exec 2>>$LOGDIR/${scriptname}.log
-    exec 1>&2
     tail_pid=
-    if [[ $isterminal == Y ]] ; then
-        tail -f $LOGDIR/${scriptname}.log >/dev/tty &
-        tail_pid=$!
+    REDIRECT=N
+    logfile=$LOGDIR/${scriptname}_${recname}.log
+    if [[ "$1" != NOREDIRECT ]] ; then
+        REDIRECT=Y
+        exec 1>>$logfile
+        exec 2>&1
+        if [[ $isterminal == Y ]] ; then
+            tail -f $logfile >/dev/tty &
+            tail_pid=$!
+        fi
     fi
     echo `$LOGDATE` "Start of run ***********************"
     trap exitfunc EXIT
@@ -72,7 +76,7 @@ function getparms {
         return
     fi
 
-    if ping -c 1 $ANDROID_MAIN ; then
+    if ping -c 1 $ANDROID_MAIN >/dev/null ; then
         ANDROID_DEVICE=$ANDROID_MAIN
     else
         if [[ "$ANDROID_FALLBACK" == "" ]] ; then
@@ -179,11 +183,11 @@ function gettunestatus {
     now=$(date +%s)
 
     # Tuned more than 5 minutes ago and not playing - reset tunestatus
-    if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
-        echo `$LOGDATE` Tuner $recname expired, resetting
-        tunestatus=idle
-        true > $tunefile
-    fi
+    #~ if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
+        #~ echo `$LOGDATE` Tuner $recname expired, resetting
+        #~ tunestatus=idle
+        #~ true > $tunefile
+    #~ fi
 }
 
 # Navigate to the favorite channels

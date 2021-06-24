@@ -8,16 +8,16 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 
+recname="$1"
+if [[ "$recname" == "" ]] ; then
+    recname=hdmirec1
+fi
+
 source $scriptpath/hdmifuncs.sh
 
 SLEEPTIME=300
 ADB_ENDKEY=
 initialize
-
-recname="$1"
-if [[ "$recname" == "" ]] ; then
-    recname=hdmirec1
-fi
 
 getparms
 #tunefile=$DATADIR/${recname}_tune.stat

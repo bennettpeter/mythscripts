@@ -27,7 +27,7 @@ if [[ ! -d $lockdir ]] ; then
 fi
 gettunestatus
 
-if [[ "$tunestatus" == playing ]] ; then
+if [[ "$tunestatus" == tuned ]] ; then
     now=$(date +%s)
     # 10200 seconds = 2hr 50 mins
     let elapsed=now-tunetime
@@ -44,6 +44,6 @@ if [[ "$tunestatus" == playing ]] ; then
         echo `$LOGDATE` "Too soon to prod $recname"
     fi
 else
-    echo `$LOGDATE` "Encoder $recname is not playing, exiting"
+    echo `$LOGDATE` "Encoder $recname is not tuned, exiting"
 fi
 exit 0

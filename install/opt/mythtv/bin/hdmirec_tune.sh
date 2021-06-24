@@ -44,9 +44,9 @@ if [[ "$tunestatus" == tuned  ]] ; then
     else
         echo `$LOGDATE` "WARNING tuner already tuned to $tunechan, will retune"
     fi
-elif [[ "$tunestatus" == playing ]] ; then
-    echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
-    exit 2
+#~ elif [[ "$tunestatus" == playing ]] ; then
+    #~ echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
+    #~ exit 2
 fi
 
 tuned=N
@@ -60,7 +60,7 @@ true > $tunefile
 
 adb connect $ANDROID_DEVICE
 
-#~ for (( xx=0; xx<5; xx++ )) ; do
+for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
 
     sleep 0.5
@@ -86,11 +86,11 @@ adb connect $ANDROID_DEVICE
             fi
         fi
         echo `$LOGDATE` "channels: ${channels[@]}"
-        echo ${channels[@]} | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
-        if ! sort -nc $DATADIR/${recname}_channels.txt ; then
-            echo ERROR channels out of sequence
-            continue 2
-        fi
+        #~ echo ${channels[@]} | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
+        #~ if ! sort -nc $DATADIR/${recname}_channels.txt ; then
+            #~ echo ERROR channels out of sequence
+            #~ continue 2
+        #~ fi
 
         topchan=${channels[0]}
         prior_currchan=$currchan
@@ -153,11 +153,12 @@ if [[ "$tuned" == Y ]] ; then
     echo "tunechan=$channum" >> $tunefile
     echo "tunestatus=tuned" >> $tunefile
     echo `$LOGDATE` "Complete tuning channel: $channum on recorder: $recname"
+    # Start playback
+    $scriptpath/adb-sendkey.sh DPAD_CENTER
     rc=0
 else
     true > $tunefile
     echo `$LOGDATE` "ERROR: Unable to tune channel: $channum on recorder: $recname"
     rc=2
 fi
-adb disconnect $ANDROID_DEVICE
 exit $rc
