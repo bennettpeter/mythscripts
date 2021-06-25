@@ -4,9 +4,6 @@
 # Parameter 1 - recorder name
 # Parameter 2 - channel number
 
-## Use this for digits with tesseract
-## tesseract 'file.png'  - -c tessedit_char_whitelist=0123456789 2>/dev/null
-
 recname=$1
 channum=$2
 
@@ -80,17 +77,33 @@ for (( xx=0; xx<5; xx++ )) ; do
         if (( arrsize != 5 )) ; then
             channels=($(gocr -C 0-9 -l 200 $DATADIR/${recname}_capture_crop.png))
             arrsize=${#channels[@]}
-            if [[ "${channels[@]}" == *_* ]] ; then
-                echo `$LOGDATE` "ERROR in channel OCR, _ detected"
-                continue 2
-            fi
         fi
         echo `$LOGDATE` "channels: ${channels[@]}"
-        #~ echo ${channels[@]} | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
-        #~ if ! sort -nc $DATADIR/${recname}_channels.txt ; then
-            #~ echo ERROR channels out of sequence
-            #~ continue 2
-        #~ fi
+
+        # Repair OCR errors.
+        # This works OK if there are more channels in the hdmichans list than
+        # in the xfinity favorites. Not so well if there are extra channels in the
+        # favorites. Bad if there are multiple sequential errors.
+
+        echo ${channels[@]} | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
+        mapfile -t diffs < \
+        <(diff -y $DATADIR/${recname}_channels.txt /etc/opt/mythtv/hdmichans.txt)
+        for diff in "${diffs[@]}" ; do
+            split=($diff)
+            if [[ "${split[0]}" == ">" ]] ; then
+                # Possible missing channel in favorites
+                if (( split[1] >= channels[0] && split[1] <= channels[arrsize-1] )) ; then
+                    echo "WARNING channel ${split[1]} missing in favorites"
+                fi
+            elif [[ "${split[1]}" == "<" ]] ; then
+                echo "WARNING channel ${split[0]} missing in hdmichans.txt"
+            elif [[ "${split[1]}" == "|" ]] ; then
+                fix=$(echo ${channels[@]} | sed "s/ ${split[0]} / ${split[2]} /")
+                echo "INFO Channel ${split[0]} changed to ${split[2]}"
+                channels=($fix)
+                echo `$LOGDATE` "Fixed channels ${channels[@]}"
+            fi
+        done
 
         topchan=${channels[0]}
         prior_currchan=$currchan
