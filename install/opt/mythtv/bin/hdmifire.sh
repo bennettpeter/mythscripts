@@ -120,7 +120,7 @@ for (( xx = 0 ; xx < loops ; xx++ )) ; do
             echo `$LOGDATE` "ffmpeg terminated"
             break 2
         fi
-        if (( lowcount > 2 )) ; then
+        if (( lowcount > 3 )) ; then
             echo `$LOGDATE` "Playback paused"
             if (( xx < responses )) ; then break ; fi
             break 2
@@ -129,9 +129,9 @@ for (( xx = 0 ; xx < loops ; xx++ )) ; do
         let diff=newsize-filesize
         filesize=$newsize
         echo `$LOGDATE` "size: $filesize  Incr: $diff" >> $VID_RECDIR/${recfile}_size.log
-        if (( diff < 5000000 )) ; then 
+        if (( diff < 4000000 )) ; then
             let lowcount=lowcount+1
-            echo "*** Less than 5 MB *** lowcount=$lowcount" >> $VID_RECDIR/${recfile}_size.log
+            echo "*** Less than 4 MB *** lowcount=$lowcount" >> $VID_RECDIR/${recfile}_size.log
         else
             lowcount=0
         fi
