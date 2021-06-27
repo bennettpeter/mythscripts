@@ -77,7 +77,8 @@ while  true ; do
     if [[ "$title" == "Deleted Recordings" ]] ; then
         break;
     elif [[ "$title" == "You have no completed recordings"* ]] ; then
-        if grep "% Full [0-9]* Recordings" $DATADIR/${recname}_capture_crop.txt ; then
+        status=$(grep -m 1 "% Full [0-9]* Recordings" $DATADIR/${recname}_capture_crop.txt)
+        if [[ "$status" != "0% Full 0 Recordings" ]] ; then
             if (( retries > 2 )) ; then
                 echo `$LOGDATE` "ERROR: Inconsistent recordings page"
                 exit 2
