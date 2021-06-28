@@ -24,15 +24,11 @@ echo `$LOGDATE` "Request to tune channel $channum "
 # tunestatus values
 # idle
 # tuned
-# playing
 
-lockdir=$DATADIR/lock_$recname
-while ! mkdir $lockdir ; do
-    echo `$LOGDATE` "Encoder $recname is locked, waiting"
-    sleep 5
-    continue
- done
-LOCKDIR=$lockdir
+if ! locktuner 120 ; then
+    echo `$LOGDATE` "Encoder $recname is locked, exiting"
+    exit 2
+fi
 gettunestatus
 if [[ "$tunestatus" == tuned  ]] ; then
     if [[ "$tunechan" == "$channum" ]] ; then
@@ -41,9 +37,6 @@ if [[ "$tunestatus" == tuned  ]] ; then
     else
         echo `$LOGDATE` "WARNING tuner already tuned to $tunechan, will retune"
     fi
-#~ elif [[ "$tunestatus" == playing ]] ; then
-    #~ echo `$LOGDATE` "ERROR: Tuner in use. Status $tunestatus"
-    #~ exit 2
 fi
 
 tuned=N

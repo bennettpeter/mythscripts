@@ -15,13 +15,10 @@ source $scriptpath/hdmifuncs.sh
 ADB_ENDKEY=
 initialize
 getparms
-lockdir=$DATADIR/lock_$recname
-while ! mkdir $lockdir ; do
-    echo `$LOGDATE` "Encoder $recname is locked, waiting"
-    sleep 5
-    continue
- done
-LOCKDIR=$lockdir
+if ! locktuner 120 ; then
+    echo `$LOGDATE` "Unable to lock tuner $recname - aborting"
+    exit 2
+fi
 gettunestatus
 # Set this to kill recording in case it has not actually finished
 ffmpeg_pid=$tune_ffmpeg_pid

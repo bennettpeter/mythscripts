@@ -20,39 +20,25 @@ ADB_ENDKEY=
 initialize
 
 getparms
-#tunefile=$DATADIR/${recname}_tune.stat
-# Clear status and locks
-#true > $tunefile
-#rm -rf $DATADIR/lock_$recname
 
 # tunestatus values
 # idle
 # tuned
-# playing
 
 while true ; do
-    lockdir=$DATADIR/lock_$recname
-    if ! mkdir $lockdir ; then
-        echo `$LOGDATE` "Encoder $recname is locked, waiting"
+    if ! locktuner ; then
+        echo `$LOGDATE` "Encoder $recname is already locked, waiting"
         sleep $SLEEPTIME
         continue
     fi
-    LOCKDIR=$lockdir
     gettunestatus
     if [[ "$tunestatus" == idle ]] ; then
         adb connect $ANDROID_DEVICE
-        #~ if (( ! reset_done )) ; then
-            # This fails on old version of adb.
-            #~ echo force stop
-            #~ adb shell am force-stop com.xfinity.cloudtvr.tenfoot
-            #~ reset_done=1
-        #~ fi
         getfavorites
         adb disconnect $ANDROID_DEVICE
     else
         echo `$LOGDATE` "Encoder $recname is tuned, waiting"
     fi
-    rmdir $LOCKDIR
-    LOCKDIR=
+    unlocktuner
     sleep $SLEEPTIME
 done

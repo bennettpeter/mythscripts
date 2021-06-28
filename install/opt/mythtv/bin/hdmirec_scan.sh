@@ -39,10 +39,14 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     fi
     recname=$(basename $conffile .conf)
 
+    if ! locktuner ; then
+        echo `$LOGDATE` "ERROR Encoder $recname is already locked - abort."
+        exit 2
+    fi
+
     tunefile=$DATADIR/${recname}_tune.stat
     # Clear status and locks
     true > $tunefile
-    rm -rf $DATADIR/lock_$recname
 
     getparms
     if [[ "$ANDROID_DEVICE" == "" ]] ; then

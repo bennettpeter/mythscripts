@@ -20,16 +20,16 @@ getparms
 
 echo `$LOGDATE` "New Episode on chennel $channum "
 
-lockdir=$DATADIR/lock_$recname
-if [[ ! -d $lockdir ]] ; then
+if locktuner ; then
+    unlocktuner
     echo `$LOGDATE` "Encoder $recname is not locked, exiting"
     exit
 fi
+
 gettunestatus
 
 if [[ "$tunestatus" == tuned ]] ; then
     now=$(date +%s)
-    # 10200 seconds = 2hr 50 mins
     let elapsed=now-tunetime
     if (( elapsed > MINTIME )) ; then
         # A button press to ensure the playback does not stop with

@@ -48,12 +48,10 @@ function getrecordings {
 }
 
 # Tuner kept locked through entire recording
-lockdir=$DATADIR/lock_$recname
-if ! mkdir $lockdir ; then
-    echo `$LOGDATE` "ERROR Encoder $recname is locked."
+if ! locktuner ; then
+    echo `$LOGDATE` "ERROR Encoder $recname is already locked by another process."
     exit 2
 fi
-LOCKDIR=$lockdir
 gettunestatus
 
 if [[ "$tunestatus" != idle ]] ; then

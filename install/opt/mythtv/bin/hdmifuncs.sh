@@ -6,11 +6,12 @@ LOGDATE='date +%Y-%m-%d_%H-%M-%S'
 OCR_RESOLUTION=1280x720
 cleartunestatus=0
 ADB_ENDKEY=
+LOCKBASEDIR=/var/lock/hdmirec
 
 function exitfunc {
     rc=$?
     echo `$LOGDATE` "Exit" >> $logfile
-    if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && "$LOCKDIR" != "" ]] ; then
+    if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && istunerlocked ]] ; then
         $scriptpath/adb-sendkey.sh $ADB_ENDKEY >> $logfile
     fi
     if [[ "$ffmpeg_pid" != "" ]] && ps -q $ffmpeg_pid >/dev/null ; then
@@ -19,17 +20,68 @@ function exitfunc {
     if [[ "$tail_pid" != "" ]] && ps -q $tail_pid >/dev/null ; then
         kill $tail_pid
     fi
-    if [[ "$LOCKDIR" != "" ]] ; then
+    if istunerlocked ; then
         if [[ "$ANDROID_DEVICE" != "" ]] ; then
             adb disconnect $ANDROID_DEVICE >> $logfile
         fi
-        rmdir $LOCKDIR
+        unlocktuner
     fi
     if (( cleartunestatus )) ; then
         true > $tunefile
     fi
-
     # TODO: Check $rc and notify if not zero
+}
+
+# before calling this recname must be set
+# Param 1 = number of extra attempts (1 sec each)
+# 0 or blank = 1 attempt
+function locktuner {
+    if [[ "$recname" == "" ]] ; then return 1 ; fi
+    attempts=$1
+    mkdir -p $LOCKBASEDIR
+    touch $LOCKBASEDIR/$recname.pid
+    while (( attempts-- >= 0 )) ; do
+        if ln $LOCKBASEDIR/$recname.pid $LOCKBASEDIR/$recname.lock 2>/dev/null ; then
+            # We have the lock - store the pid
+            echo $$ > $LOCKBASEDIR/$recname.pid
+            return 0
+        else
+            pid=$(cat $LOCKBASEDIR/${recname}.lock)
+            # If the lock is already ours then return success
+            if [[ "$pid" == $$ ]] ; then return 0 ; fi
+            # If lock expired, remove it and try again
+            if [[ "$pid" == "" ]] || ! ps -q "$pid" >/dev/null ; then
+                rm $LOCKBASEDIR/$recname.lock
+                let attempts++
+            else
+                if (( attempts%5 == 0 )) ; then
+                    echo `$LOGDATE` "Waiting for lock on $recname"
+                fi
+                if (( attempts >= 0 )) ; then
+                    sleep 1
+                fi
+            fi
+        fi
+    done
+    return 1
+}
+
+# check if locked by us
+function istunerlocked {
+    if [[ "$recname" == "" ]] ; then return 1 ; fi
+    pid=$(cat $LOCKBASEDIR/${recname}.lock 2>/dev/null)
+    # If we locked it purselves return true
+    if [[ "$pid" == $$ ]] ; then return 0 ; fi
+    return 1
+}
+
+function unlocktuner {
+    if [[ "$recname" == "" ]] ; then return 1 ; fi
+    pid=$(cat $LOCKBASEDIR/${recname}.lock 2>/dev/null)
+    if [[ "$pid" == $$ ]] ; then
+        # remove lock
+        rm $LOCKBASEDIR/$recname.lock
+    fi
 }
 
 # param NOREDIRECT to prevent redirection of stdout and stderr
@@ -169,11 +221,14 @@ function waitforpage {
 # tunestatus values
 # idle (default if blank)
 # tuned
-# playing
 #
 # If playing the tuner is locked
 
 function gettunestatus {
+    if ! locktuner ; then
+        echo `$LOGDATE` "ERROR - Cannot lock to get tune status"
+        return 1
+    fi
     tunefile=$DATADIR/${recname}_tune.stat
     touch $tunefile
     # Default tunestatus
@@ -183,11 +238,12 @@ function gettunestatus {
     now=$(date +%s)
 
     # Tuned more than 5 minutes ago and not playing - reset tunestatus
-    #~ if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
-        #~ echo `$LOGDATE` Tuner $recname expired, resetting
-        #~ tunestatus=idle
-        #~ true > $tunefile
-    #~ fi
+    if (( tunetime < now-300 )) && [[ "$tunestatus" == tuned ]] ; then
+        echo `$LOGDATE` Tuner $recname expired, resetting
+        tunestatus=idle
+        true > $tunefile
+    fi
+    return 0
 }
 
 # Navigate to the favorite channels

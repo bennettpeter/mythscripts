@@ -21,25 +21,18 @@ logfile=$LOGDIR/${scriptname}_${recname}.log
 {
     initialize NOREDIRECT
     getparms
-    lockdir=$DATADIR/lock_$recname
-    while ! mkdir $lockdir ; do
-        echo `$LOGDATE` "Encoder $recname is locked, waiting"
-        sleep 5
-        continue
-     done
-    LOCKDIR=$lockdir
+    if ! locktuner 120 ; then
+        echo `$LOGDATE` "Unable to lock tuner $recname - aborting"
+        exit 2
+    fi
     gettunestatus
 
     # tunestatus values
     # idle
     # tuned
-    # playing
 
     if [[ "$tunestatus" == tuned  ]] ; then
         echo `$LOGDATE` "Tuned to channel $tunechan"
-    #~ elif [[ "$tunestatus" == playing ]] ; then
-        #~ echo `$LOGDATE` "ERROR: Already playing"
-        #~ exit 2
     else
         echo `$LOGDATE` "ERROR: Not tuned, status $tunestatus, cannot record"
         exit 2
@@ -50,18 +43,10 @@ logfile=$LOGDIR/${scriptname}_${recname}.log
         echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
         exit 2
     fi
-    #~ ADB_ENDKEY=BACK
 
     if [[ "$AUDIO_OFFSET" == "" ]] ; then
         AUDIO_OFFSET=0.000
     fi
-    #~ echo `$LOGDATE` "Starting recording"
-    #~ ADB_ENDKEY=BACK
-    #~ $scriptpath/adb-sendkey.sh DPAD_CENTER
-
-    # Indicator to clear tunestatus at end
-    #~ cleartunestatus=1
-    #~ echo "tunestatus=playing" >> $tunefile
 } &>> $logfile
 
 ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format $INPUT_FORMAT \

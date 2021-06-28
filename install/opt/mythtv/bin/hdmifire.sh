@@ -44,12 +44,10 @@ getparms 1
 ffmpeg_pid=
 
 # Tuner kept locked through entire recording
-lockdir=$DATADIR/lock_$recname
-if ! mkdir $lockdir ; then
+if ! locktuner ; then
     echo `$LOGDATE` "ERROR Encoder $recname is locked."
     exit 2
 fi
-LOCKDIR=$lockdir
 gettunestatus
 
 if [[ "$tunestatus" != idle ]] ; then
