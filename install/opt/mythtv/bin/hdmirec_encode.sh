@@ -49,6 +49,9 @@ logfile=$LOGDIR/${scriptname}_${recname}.log
     fi
 } &>> $logfile
 
+# Update the tune time at end
+updatetunetime=1
+
 ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format $INPUT_FORMAT \
   -framerate $FRAMERATE -video_size $RESOLUTION \
   -use_wallclock_as_timestamps 1 \

@@ -13,7 +13,6 @@ scriptname=`basename "$scriptname" .sh`
 
 source $scriptpath/hdmifuncs.sh
 
-ADB_ENDKEY=
 initialize
 
 if ! ls /etc/opt/mythtv/hdmirec*.conf ; then

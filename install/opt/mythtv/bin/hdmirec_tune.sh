@@ -14,7 +14,6 @@ scriptname=`basename "$scriptname" .sh`
 
 source $scriptpath/hdmifuncs.sh
 
-ADB_ENDKEY=
 initialize
 
 getparms

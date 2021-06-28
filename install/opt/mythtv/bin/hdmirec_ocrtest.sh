@@ -24,7 +24,6 @@ fi
 
 source $scriptpath/hdmifuncs.sh
 
-ADB_ENDKEY=
 initialize
 
 getparms

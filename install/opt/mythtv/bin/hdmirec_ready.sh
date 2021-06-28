@@ -16,7 +16,6 @@ fi
 source $scriptpath/hdmifuncs.sh
 
 SLEEPTIME=300
-ADB_ENDKEY=
 initialize
 
 getparms

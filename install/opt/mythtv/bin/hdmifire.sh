@@ -23,7 +23,6 @@ scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
 
 source $scriptpath/hdmifuncs.sh
-ADB_ENDKEY=
 
 let responses=responses
 let minutes=minutes

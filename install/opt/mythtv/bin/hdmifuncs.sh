@@ -4,7 +4,7 @@
 
 LOGDATE='date +%Y-%m-%d_%H-%M-%S'
 OCR_RESOLUTION=1280x720
-cleartunestatus=0
+updatetunetime=0
 ADB_ENDKEY=
 LOCKBASEDIR=/var/lock/hdmirec
 
@@ -21,15 +21,14 @@ function exitfunc {
         kill $tail_pid
     fi
     if istunerlocked ; then
+        if (( updatetunetime )) ; then
+            echo "tunetime=$(date +%s)" >> $tunefile
+        fi
         if [[ "$ANDROID_DEVICE" != "" ]] ; then
             adb disconnect $ANDROID_DEVICE >> $logfile
         fi
         unlocktuner
     fi
-    if (( cleartunestatus )) ; then
-        true > $tunefile
-    fi
-    # TODO: Check $rc and notify if not zero
 }
 
 # before calling this recname must be set
@@ -70,7 +69,7 @@ function locktuner {
 function istunerlocked {
     if [[ "$recname" == "" ]] ; then return 1 ; fi
     pid=$(cat $LOCKBASEDIR/${recname}.lock 2>/dev/null)
-    # If we locked it purselves return true
+    # If we locked it ourselves return true
     if [[ "$pid" == $$ ]] ; then return 0 ; fi
     return 1
 }
