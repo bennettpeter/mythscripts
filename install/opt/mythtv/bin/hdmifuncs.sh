@@ -107,10 +107,9 @@ function initialize {
     true > $DATADIR/${recname}_capture_crop.txt
 }
 
-# Parameter 1 - set to 1 to exit with an error if primary device
+# Parameter 1 - set to PRIMARY to return with code 2 if primary device
 # (ethernet) is not available.
 function getparms {
-    local eth_reqd=$1
     # Select the [default] section of conf and put it in a file
     # to source it
     ANDROID_MAIN=
@@ -127,20 +126,21 @@ function getparms {
         return
     fi
 
-    if ping -c 1 $ANDROID_MAIN >/dev/null ; then
-        ANDROID_DEVICE=$ANDROID_MAIN
-    else
+    ANDROID_DEVICE=$ANDROID_MAIN
+    if ! ping -c 1 $ANDROID_MAIN >/dev/null ; then
         if [[ "$ANDROID_FALLBACK" == "" ]] ; then
             echo `$LOGDATE` "ERROR: Primary network failure and no fallback"
-            exit 2
-        elif (( eth_reqd )) ; then
+            return 2
+        elif [[ "$1" == "PRIMARY" ]] ; then
             echo `$LOGDATE` "ERROR: Primary network failure"
-            exit 2
+            return 2
         else
+            echo `$LOGDATE` "WARNING: Using fallback network adapter"
             ANDROID_DEVICE=$ANDROID_FALLBACK
         fi
     fi
     export ANDROID_DEVICE
+    return 0
 }
 
 # Parameter 1 - set to video to only allow capture from /dev/video.

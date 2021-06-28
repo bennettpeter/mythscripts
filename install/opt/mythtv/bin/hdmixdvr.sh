@@ -21,7 +21,9 @@ scriptname=`basename "$scriptname" .sh`
 source $scriptpath/hdmifuncs.sh
 ADB_ENDKEY=HOME
 initialize
-getparms 1
+if ! getparms PRIMARY ; then
+    exit 2
+fi
 ffmpeg_pid=
 
 function getrecordings {

@@ -39,7 +39,9 @@ read -e resp
 if [[ "$resp" != Y ]] ; then exit 2 ; fi
 
 initialize
-getparms 1
+if ! getparms PRIMARY ; then
+    exit 2
+fi
 ffmpeg_pid=
 
 # Tuner kept locked through entire recording
