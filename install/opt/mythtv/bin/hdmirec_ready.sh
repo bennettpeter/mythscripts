@@ -33,7 +33,10 @@ while true ; do
     gettunestatus
     if [[ "$tunestatus" == idle ]] ; then
         adb connect $ANDROID_DEVICE
-        getfavorites
+        if ! getfavorites ; then
+            $scriptpath/notify.py "Fire Stick Problem" \
+              "hdmirec_ready: Failed to get to favorite channels on ${recname}" &
+        fi
         adb disconnect $ANDROID_DEVICE
     else
         echo `$LOGDATE` "Encoder $recname is tuned, waiting"

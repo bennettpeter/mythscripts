@@ -21,5 +21,6 @@ diff -yN $DATADIR/recording_channels.txt /etc/opt/mythtv/hdmichans.txt > $DATADI
 missing_chans=$(grep "[<|]" $DATADIR/channel_diff.txt | sed "s/ .*//g")
 missing_chans=$(echo $missing_chans)
 if [[ "$missing_chans" != "" ]] ; then
-    $scriptpath/notify.py "Channels missing from xfinity favorites" "$missing_chans"
+    $scriptpath/notify.py "Missing Channels" \
+      "Channels missing from xfinity favorites: $missing_chans" &
 fi

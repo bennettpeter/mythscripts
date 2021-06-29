@@ -48,8 +48,13 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     true > $tunefile
 
     getparms
+    rc=$?
     if [[ "$ANDROID_DEVICE" == "" ]] ; then
         continue
+    fi
+    if (( rc == 1 )) ; then
+        $scriptpath/notify.py "Fire Stick Problem" \
+          "hdmirec_scan: Primary network adapter for $recname failed" &
     fi
     adb connect $ANDROID_DEVICE
     sleep 0.5
@@ -57,6 +62,8 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     status=${res[1]}
     if [[ "$status" != device ]] ; then
         echo `$LOGDATE` "WARNING: Device offline: $recname, skipping"
+        $scriptpath/notify.py "Fire Stick Problem" \
+          "hdmirec_scan: Device offline: $recname" &
         adb disconnect $ANDROID_DEVICE
         continue
     fi
@@ -109,6 +116,8 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
 
     if [[ $match != Y ]] ; then
         echo `$LOGDATE` "Failed to start XFinity on ${recname} - see $DATADIR/${recname}_capture.png"
+        $scriptpath/notify.py "Fire Stick Problem" \
+          "hdmirec_scan: Failed to start XFinity on ${recname}" &
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
         continue

@@ -123,7 +123,7 @@ function getparms {
     . $DATADIR/${recname}.conf
         if [[ "$ANDROID_MAIN" == "" ]] ; then
         echo `$LOGDATE` "WARNING: $recname not set up"
-        return
+        return 0
     fi
 
     ANDROID_DEVICE=$ANDROID_MAIN
@@ -137,6 +137,7 @@ function getparms {
         else
             echo `$LOGDATE` "WARNING: Using fallback network adapter"
             ANDROID_DEVICE=$ANDROID_FALLBACK
+            return 1
         fi
     fi
     export ANDROID_DEVICE
@@ -271,5 +272,7 @@ function getfavorites {
     done
     if [[ "$pagename" != "Favorite Channels" ]] ; then
         echo `$LOGDATE` "ERROR: Unable to reach Favorite Channels: $recname."
+        return 2
     fi
+    return 0
 }
