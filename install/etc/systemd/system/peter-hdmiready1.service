@@ -1,0 +1,20 @@
+# /etc/systemd/system/peter-hdmiready1.service
+[Unit]
+Description=HDMI Monitor 1
+Wants=mysql.service network-online.target peter-hdmiscan.service
+After=mysql.service network-online.target peter-hdmiscan.service
+
+[Service]
+Type=simple
+User=mythtv
+UMask=0002
+WorkingDirectory=~
+ExecStart=/opt/mythtv/bin/hdmirec_ready.sh hdmirec1
+Restart=on-failure
+StartLimitInterval=10min
+StartLimitBurst=5
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+

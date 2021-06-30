@@ -113,15 +113,24 @@ sudo mv -f /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
+        # The script does not enable these.
+        # It should be done manually when ready
         if ! diff install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service ; then
             sudo cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
             daemonrestart=Y
         fi
-        # The script does not enable mythtv-backend.service.
-        # It should be done manually when ready
+        if ! diff install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/peter-hdmiscan.service ; then
+            sudo cp install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/
+            daemonrestart=Y
+        fi
+        if ! diff install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/peter-hdmiready1.service ; then
+            sudo cp install/etc/systemd/system/peter-hdmiready1.service.service /etc/systemd/system/
+            daemonrestart=Y
+        fi
     else
         sudo cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
     fi
+    
 fi
 
 # Do we need to install monitor (Y or N)
