@@ -109,6 +109,7 @@ function initialize {
 
 # Parameter 1 - set to PRIMARY to return with code 2 if primary device
 # (ethernet) is not available.
+# Return code 1 for fallback, 2 for error
 function getparms {
     # Select the [default] section of conf and put it in a file
     # to source it
@@ -125,17 +126,20 @@ function getparms {
         echo `$LOGDATE` "WARNING: $recname not set up"
         return 0
     fi
-
+    errormsg=
     ANDROID_DEVICE=$ANDROID_MAIN
     if ! ping -c 1 $ANDROID_MAIN >/dev/null ; then
         if [[ "$ANDROID_FALLBACK" == "" ]] ; then
-            echo `$LOGDATE` "ERROR: Primary network failure and no fallback"
+            errormsg="Primary network failure and no fallback"
+            echo `$LOGDATE` "ERROR: $errormsg"
             return 2
         elif [[ "$1" == "PRIMARY" ]] ; then
-            echo `$LOGDATE` "ERROR: Primary network failure"
+            errormsg="Primary network failure"
+            echo `$LOGDATE` "ERROR: $errormsg"
             return 2
         else
-            echo `$LOGDATE` "WARNING: Using fallback network adapter"
+            errormsg="Using fallback network adapter"
+            echo `$LOGDATE` "WARNING: $errormsg"
             ANDROID_DEVICE=$ANDROID_FALLBACK
             return 1
         fi
@@ -272,7 +276,7 @@ function getfavorites {
     done
     if [[ "$pagename" != "Favorite Channels" ]] ; then
         echo `$LOGDATE` "ERROR: Unable to reach Favorite Channels: $recname."
-        return 2
+        return 3
     fi
     return 0
 }

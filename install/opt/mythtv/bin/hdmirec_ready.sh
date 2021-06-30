@@ -18,24 +18,32 @@ source $scriptpath/hdmifuncs.sh
 SLEEPTIME=300
 initialize
 
-getparms
-
 # tunestatus values
 # idle
 # tuned
-
+errored=0
 while true ; do
     if ! locktuner ; then
         echo `$LOGDATE` "Encoder $recname is already locked, waiting"
         sleep $SLEEPTIME
         continue
     fi
+    getparms
+    rc=$?
+    if (( rc > errored )) ; then
+        $scriptpath/notify.py "Fire Stick Problem" \
+            "hdmirec_ready: $errormsg on ${recname}" &
+        errored=rc
+    fi
     gettunestatus
     if [[ "$tunestatus" == idle ]] ; then
         adb connect $ANDROID_DEVICE
-        if ! getfavorites ; then
+        getfavorites
+        rc=$?
+        if (( rc > errored ))  ; then
             $scriptpath/notify.py "Fire Stick Problem" \
               "hdmirec_ready: Failed to get to favorite channels on ${recname}" &
+            errored=rc
         fi
         adb disconnect $ANDROID_DEVICE
     else
