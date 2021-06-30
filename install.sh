@@ -124,7 +124,7 @@ if [[ "$IS_BACKEND" == true ]] ; then
             daemonrestart=Y
         fi
         if ! diff install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/peter-hdmiready1.service ; then
-            sudo cp install/etc/systemd/system/peter-hdmiready1.service.service /etc/systemd/system/
+            sudo cp install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/
             daemonrestart=Y
         fi
     else
