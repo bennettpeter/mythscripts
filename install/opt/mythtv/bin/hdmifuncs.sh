@@ -38,6 +38,10 @@ function locktuner {
     if [[ "$recname" == "" ]] ; then return 1 ; fi
     attempts=$1
     mkdir -p $LOCKBASEDIR
+    if [[ ! -w  $LOCKBASEDIR ]] ; then
+        echo `$LOGDATE` "ERROR: $LOCKBASEDIR is not writable"
+        exit 2
+    fi
     touch $LOCKBASEDIR/$recname.pid
     while (( attempts-- >= 0 )) ; do
         if ln $LOCKBASEDIR/$recname.pid $LOCKBASEDIR/$recname.lock 2>/dev/null ; then
