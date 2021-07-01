@@ -21,6 +21,7 @@ initialize
 # tunestatus values
 # idle
 # tuned
+sleep 15
 errored=0
 while true ; do
     if ! locktuner ; then

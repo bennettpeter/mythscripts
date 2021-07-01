@@ -38,7 +38,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     fi
     recname=$(basename $conffile .conf)
 
-    if ! locktuner ; then
+    if ! locktuner 60 ; then
         echo `$LOGDATE` "ERROR Encoder $recname is already locked - abort."
         exit 2
     fi

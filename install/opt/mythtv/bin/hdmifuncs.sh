@@ -96,7 +96,11 @@ function initialize {
     fi
     tail_pid=
     REDIRECT=N
-    logfile=$LOGDIR/${scriptname}_${recname}.log
+    if [[ "$recname" == "" ]] ; then
+        logfile=$LOGDIR/${scriptname}.log
+    else
+        logfile=$LOGDIR/${scriptname}_${recname}.log
+    fi
     if [[ "$1" != NOREDIRECT ]] ; then
         REDIRECT=Y
         exec 1>>$logfile
@@ -108,7 +112,9 @@ function initialize {
     fi
     echo `$LOGDATE` "Start of run ***********************"
     trap exitfunc EXIT
-    true > $DATADIR/${recname}_capture_crop.txt
+    if [[ "$recname" != "" ]] ; then
+        true > $DATADIR/${recname}_capture_crop.txt
+    fi
 }
 
 # Parameter 1 - set to PRIMARY to return with code 2 if primary device
