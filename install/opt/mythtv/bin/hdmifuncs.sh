@@ -273,6 +273,8 @@ function getfavorites {
             $scriptpath/adb-sendkey.sh HOME HOME
         elif [[ "$pagename" == "We can't detect your remote" ]] ; then
             $scriptpath/adb-sendkey.sh DPAD_CENTER
+        elif [[ "$pagename" == "xfinity stream" ]] ; then
+            sleep 1
         elif [[ "$pagename" == "For You" ]] ; then
             $scriptpath/adb-sendkey.sh MENU
         elif [[ "$pagename" == "Search" ]] ; then
@@ -280,6 +282,7 @@ function getfavorites {
         elif [[ "$pagename" == "Favorite Channels" ]] ; then
             break
         else
+            adb shell am force-stop com.xfinity.cloudtvr.tenfoot
             # This expects xfinity to be the first application in the list
             $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
         fi
