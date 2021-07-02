@@ -164,6 +164,8 @@ if [[ "$tuned" == Y ]] ; then
 else
     true > $tunefile
     echo `$LOGDATE` "ERROR: Unable to tune channel: $channum on recorder: $recname"
+    $scriptpath/notify.py "Unable to Tune" \
+        "hdmirec_tune: Unable to tune channel: $channum on recorder: $recname" &
     rc=2
 fi
 exit $rc
