@@ -23,15 +23,16 @@ logfile=$LOGDIR/${scriptname}_${recname}.log
 {
     initialize NOREDIRECT
     getparms
-    rc=0
+    rc=$?
+    if (( rc > 1 )) ; then exit $rc ; fi
     if [[ ! -e $VIDEO_IN ]] ; then
-        echo "$date" ERROR $VIDEO_IN does not exist >>$logfile
+        echo `$LOGDATE` ERROR $VIDEO_IN does not exist >>$logfile
         rc=2
     fi
 
     srch=$(echo $AUDIO_IN | sed 's/hw:/card /;s/,/.*device /')
     if ! arecord -l|grep -q "$srch" ; then
-        echo "$date" ERROR $AUDIO_IN does not exist >>$logfile
+        echo `$LOGDATE` ERROR $AUDIO_IN does not exist >>$logfile
         rc=2
     fi
 

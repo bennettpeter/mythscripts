@@ -119,7 +119,7 @@ function initialize {
 
 # Parameter 1 - set to PRIMARY to return with code 2 if primary device
 # (ethernet) is not available.
-# Return code 1 for fallback, 2 for error
+# Return code 1 for fallback, 2 for error, 3 for not set up
 function getparms {
     # Select the [default] section of conf and put it in a file
     # to source it
@@ -132,9 +132,10 @@ function getparms {
     . $DATADIR/etc_${recname}.conf
     # This sets VIDEO_IN and AUDIO_IN
     . $DATADIR/${recname}.conf
-        if [[ "$ANDROID_MAIN" == "" ]] ; then
-        echo `$LOGDATE` "WARNING: $recname not set up"
-        return 0
+    if [[ "$ANDROID_MAIN" == "" ]] ; then
+        errormsg="$recname not set up"
+        echo `$LOGDATE` "ERROR: $errormsg"
+        return 3
     fi
     errormsg=
     ANDROID_DEVICE=$ANDROID_MAIN
