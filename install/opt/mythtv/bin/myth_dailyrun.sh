@@ -126,6 +126,8 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
             fi
           )
     fi
+    # Check favorites up to date
+    "$scriptpath/hdmirec_checkfavorites.sh"
     # Daily IP address check
     if [[ -f $DATADIR/ipaddress.txt ]] ; then
         oldipaddress=`cat $DATADIR/ipaddress.txt`
