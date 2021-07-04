@@ -58,19 +58,21 @@ fi
 
 echo `$LOGDATE` "Record for $minutes minutes and respond $responses times."
 
-adb disconnect $ANDROID_DEVICE 2>/dev/null || true
 adb connect $ANDROID_DEVICE
 if ! adb devices | grep $ANDROID_DEVICE ; then
     echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
     exit 2
 fi
 
+capturepage adb
+rc=$?
+if (( rc == 1 )) ; then exit $rc ; fi
+
 # Kill vlc
 wmctrl -c vlc
 wmctrl -c obs
 sleep 2
 
-capturepage
 recfile=`$LOGDATE`
 echo `$LOGDATE` "Starting recording of ${recfile}"
 ADB_ENDKEY=HOME

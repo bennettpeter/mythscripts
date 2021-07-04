@@ -164,9 +164,11 @@ function getparms {
 # VIDEO_IN - set to blank will prevent capture from /dev/video
 # TESSPARM - set to "-c tessedit_char_whitelist=0123456789" to restrict to numerics
 # CROP - crop parameter (default -gravity East -crop 95%x100%)
+# Return 1 if wrong resolution is found
 function capturepage {
     pagename=
     local source_req=$1
+    rc=0
     sleep 1
     if [[ "$CROP" == "" ]] ; then
         CROP="-gravity East -crop 95%x100%"
@@ -196,6 +198,7 @@ function capturepage {
     if (( imagesize > 0 )) ; then
         resolution=$(identify -format %wx%h $DATADIR/${recname}_capture.png)
         if [[ "$resolution" != "$OCR_RESOLUTION" ]] ; then
+            rc=1
             echo `$LOGDATE` "WARNING Incorrect resolution $resolution"
             convert $DATADIR/${recname}_capture.png -resize "$OCR_RESOLUTION" $DATADIR/${recname}_capturex.png
             cp -f $DATADIR/${recname}_capturex.png $DATADIR/${recname}_capture.png
@@ -218,6 +221,7 @@ function capturepage {
     fi
     TESSPARM=
     CROP=
+    return $rc
 }
 
 function waitforpage {

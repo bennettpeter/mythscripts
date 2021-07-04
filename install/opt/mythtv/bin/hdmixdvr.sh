@@ -61,12 +61,20 @@ if [[ "$tunestatus" != idle ]] ; then
     exit 2
 fi
 
+adb connect $ANDROID_DEVICE
+if ! adb devices | grep $ANDROID_DEVICE ; then
+    echo `$LOGDATE` "ERROR: Unable to connect to $ANDROID_DEVICE"
+    exit 2
+fi
+capturepage adb
+rc=$?
+if (( rc == 1 )) ; then exit $rc ; fi
+
 # Kill vlc
 wmctrl -c vlc
 wmctrl -c obs
 
 # Get to recordings list
-adb connect $ANDROID_DEVICE
 getrecordings
 
 # See if there are any recordings

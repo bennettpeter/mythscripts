@@ -37,8 +37,18 @@ while true ; do
         errored=rc
     fi
     gettunestatus
+    today=$(date +%Y-%m-%d)
     if [[ "$tunestatus" == idle ]] ; then
         adb connect $ANDROID_DEVICE
+        if [[ "$lastrescheck" != "$today" ]] ; then
+            capturepage adb
+            rc=$?
+            if (( rc == 1 )) ; then
+                $scriptpath/notify.py "Fire Stick Problem" \
+                  "hdmirec_ready: Wrong resolution on ${recname}" &
+            fi
+            lastrescheck="$today"
+        fi
         getfavorites
         rc=$?
         if (( rc > errored ))  ; then
