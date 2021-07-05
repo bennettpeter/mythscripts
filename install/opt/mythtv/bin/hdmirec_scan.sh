@@ -91,11 +91,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     fi
 
     echo `$LOGDATE` "Reset recorder: $recname"
-
-    # This expects xfinity to be the first application in the list
-    $scriptpath/adb-sendkey.sh HOME
-    sleep 2
-    $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+    launchXfinity
     sleep 2
     match=N
     for trynum in 1 2 3 4 5; do

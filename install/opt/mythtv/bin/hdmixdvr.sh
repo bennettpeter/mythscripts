@@ -31,7 +31,7 @@ function getrecordings {
     xx=0
     while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
         sleep 0.5
-        $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+        launchXfinity
         waitforpage "For You"
         $scriptpath/adb-sendkey.sh MENU
         waitforpage "Search"
@@ -93,7 +93,7 @@ while  true ; do
             fi
             echo `$LOGDATE` Force stop xfinity
             # This fails on old version of adb.
-            adb shell am force-stop com.xfinity.cloudtvr.tenfoot
+            adb -s $ANDROID_DEVICE shell am force-stop com.xfinity.cloudtvr.tenfoot
             let retries++
             sleep 2
             getrecordings

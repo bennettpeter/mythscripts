@@ -190,7 +190,7 @@ function capturepage {
     imagesize=$(stat -c %s $DATADIR/${recname}_capture.png)
     if (( imagesize == 0 )) ; then
         if [[ "$source_req" == "" || "$source_req" == adb  ]] ; then
-            adb exec-out screencap -p > $DATADIR/${recname}_capture.png
+            adb -s $ANDROID_DEVICE exec-out screencap -p > $DATADIR/${recname}_capture.png
             cap_source=adb
             imagesize=$(stat -c %s $DATADIR/${recname}_capture.png)
         fi
@@ -265,6 +265,12 @@ function gettunestatus {
     return 0
 }
 
+function launchXfinity {
+    adb -s $ANDROID_DEVICE shell am force-stop com.xfinity.cloudtvr.tenfoot
+    sleep 2
+    adb -s $ANDROID_DEVICE shell am start -n com.xfinity.cloudtvr.tenfoot/com.xfinity.common.view.LaunchActivity
+}
+
 # Navigate to the favorite channels
 function getfavorites {
     sleep 0.5
@@ -287,9 +293,7 @@ function getfavorites {
         elif [[ "$pagename" == "Favorite Channels" ]] ; then
             break
         else
-            adb shell am force-stop com.xfinity.cloudtvr.tenfoot
-            # This expects xfinity to be the first application in the list
-            $scriptpath/adb-sendkey.sh HOME RIGHT RIGHT RIGHT DPAD_CENTER
+            launchXfinity
         fi
     done
     if [[ "$pagename" != "Favorite Channels" ]] ; then
