@@ -90,7 +90,7 @@ for (( xx=0; xx<5; xx++ )) ; do
             elif [[ "${split[1]}" == "<" ]] ; then
                 echo "WARNING channel ${split[0]} missing in hdmichans.txt"
             elif [[ "${split[1]}" == "|" ]] ; then
-                fix=$(echo ${channels[@]} | sed "s/ ${split[0]} / ${split[2]} /")
+                fix=$(echo " ${channels[@]} " | sed "s/ ${split[0]} / ${split[2]} /")
                 echo "INFO Channel ${split[0]} changed to ${split[2]}"
                 channels=($fix)
                 echo `$LOGDATE` "Fixed channels ${channels[@]}"

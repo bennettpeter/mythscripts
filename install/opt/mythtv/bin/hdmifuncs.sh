@@ -269,7 +269,7 @@ function launchXfinity {
     adb -s $ANDROID_DEVICE shell am force-stop com.xfinity.cloudtvr.tenfoot
     sleep 1
     adb -s $ANDROID_DEVICE shell am start -n com.xfinity.cloudtvr.tenfoot/com.xfinity.common.view.LaunchActivity
-    sleep 1
+    sleep 2
 }
 
 # Navigate to the favorite channels
