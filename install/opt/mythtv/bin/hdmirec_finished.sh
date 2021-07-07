@@ -25,7 +25,8 @@ if [[ "$tunestatus" == tuned  ]] ; then
     echo `$LOGDATE` "Ending playback"
     adb connect $ANDROID_DEVICE
     $scriptpath/adb-sendkey.sh BACK
-    true > $tunefile
+    # Clear tunefile
+    echo "tunetime=$(date +%s)" > $tunefile
 else
     echo `$LOGDATE` "Playback already ended - nothing to do"
 fi

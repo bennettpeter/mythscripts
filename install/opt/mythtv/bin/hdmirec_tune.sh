@@ -52,7 +52,6 @@ adb connect $ANDROID_DEVICE
 for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
 
-    sleep 0.5
     getfavorites
     ##favorites - channel numbers##
     currchan=0

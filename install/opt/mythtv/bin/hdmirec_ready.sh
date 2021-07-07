@@ -29,16 +29,18 @@ while true ; do
         sleep $SLEEPTIME
         continue
     fi
-    getparms
-    rc=$?
-    if (( rc > errored )) ; then
-        $scriptpath/notify.py "Fire Stick Problem" \
-            "hdmirec_ready: $errormsg on ${recname}" &
-        errored=rc
-    fi
     gettunestatus
-    today=$(date +%Y-%m-%d)
-    if [[ "$tunestatus" == idle ]] ; then
+    # Stopped more than 5 minutes ago and not playing - tweak it
+    now=$(date +%s)
+    if (( tunetime < now-300 )) && [[ "$tunestatus" == idle ]] ; then
+        getparms
+        rc=$?
+        if (( rc > errored )) ; then
+            $scriptpath/notify.py "Fire Stick Problem" \
+                "hdmirec_ready: $errormsg on ${recname}" &
+            errored=rc
+        fi
+        today=$(date +%Y-%m-%d)
         adb connect $ANDROID_DEVICE
         if [[ "$lastrescheck" != "$today" ]] ; then
             capturepage adb
@@ -49,6 +51,7 @@ while true ; do
             fi
             lastrescheck="$today"
         fi
+        $scriptpath/adb-sendkey.sh MENU MENU
         getfavorites
         rc=$?
         if (( rc > errored ))  ; then

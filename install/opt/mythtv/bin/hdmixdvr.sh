@@ -127,6 +127,7 @@ while  true ; do
         done
         $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER
     fi
+    sleep 1
     capturepage
     season_episode=`grep "^[S$][^ ]* *| *Ep[^ ]*$" $DATADIR/${recname}_capture_crop.txt | tail -1`
     season_episode=$(echo $season_episode | sed "s/| / /;s/ |/ /;s/ *Ep/E/;s/\\$/S/")
@@ -231,6 +232,7 @@ while  true ; do
                 if grep "Delete Recording" $DATADIR/${recname}_capture_crop.txt ; then
                     echo `$LOGDATE` "End of Recording - Delete"
                     $scriptpath/adb-sendkey.sh DPAD_CENTER
+                    sleep 1
                     capturepage
                     xx=0
                     while ! grep "Delete Now"  $DATADIR/${recname}_capture_crop.txt ; do
@@ -238,6 +240,7 @@ while  true ; do
                             echo `$LOGDATE` "ERROR Cannot get to Delete Now page"
                             exit 2
                         fi
+                        sleep 1
                         capturepage
                     done
                     ques=$(grep -n "Are you sure you want to delete " $DATADIR/${recname}_capture_crop.txt)

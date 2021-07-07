@@ -104,6 +104,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
                 match=Y
                 break
             fi
+            sleep 1
         done
         if [[ $match == Y ]] ; then break ; fi
         echo `$LOGDATE` "Failed to read screen on ${recname}, trying again"

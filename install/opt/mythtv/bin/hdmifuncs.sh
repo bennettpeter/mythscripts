@@ -169,7 +169,6 @@ function capturepage {
     pagename=
     local source_req=$1
     rc=0
-    sleep 1
     if [[ "$CROP" == "" ]] ; then
         CROP="-gravity East -crop 95%x100%"
     fi
@@ -229,6 +228,7 @@ function waitforpage {
     xx=0
     while [[ "$pagename" != "$wanted" ]] && (( xx++ < 90 )) ; do
         capturepage
+        sleep 1
     done
     if [[ "$pagename" != "$wanted" ]] ; then
         echo `$LOGDATE` "ERROR - Cannot get to $wanted Page"
@@ -269,16 +269,13 @@ function launchXfinity {
     adb -s $ANDROID_DEVICE shell am force-stop com.xfinity.cloudtvr.tenfoot
     sleep 1
     adb -s $ANDROID_DEVICE shell am start -n com.xfinity.cloudtvr.tenfoot/com.xfinity.common.view.LaunchActivity
-    sleep 2
 }
 
 # Navigate to the favorite channels
 function getfavorites {
-    sleep 0.5
-    # use MENU MENU to keep awake
-    $scriptpath/adb-sendkey.sh MENU MENU
+    tries=0
     for (( xx=0 ; xx < 20 ; xx++ )) ; do
-        sleep 1
+        sleep 0.5
         capturepage
         # If blank the only thing that works is HOME
         if [[ "$pagename" == "" ]] ; then
@@ -286,7 +283,7 @@ function getfavorites {
         elif [[ "$pagename" == "We can't detect your remote" ]] ; then
             $scriptpath/adb-sendkey.sh DPAD_CENTER
         elif [[ "$pagename" == "xfinity stream" ]] ; then
-            sleep 1
+            continue
         elif [[ "$pagename" == "For You" ]] ; then
             $scriptpath/adb-sendkey.sh MENU
         elif [[ "$pagename" == "Search" ]] ; then
@@ -294,7 +291,10 @@ function getfavorites {
         elif [[ "$pagename" == "Favorite Channels" ]] ; then
             break
         else
-            launchXfinity
+            if (( ++tries > 2 )) ;then
+                launchXfinity
+                tries=0
+            fi
         fi
     done
     if [[ "$pagename" != "Favorite Channels" ]] ; then
