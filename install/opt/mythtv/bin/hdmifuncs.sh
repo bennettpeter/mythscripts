@@ -225,7 +225,7 @@ function capturepage {
 
 function waitforpage {
     wanted="$1"
-    xx=0
+    local xx=0
     while [[ "$pagename" != "$wanted" ]] && (( xx++ < 90 )) ; do
         capturepage
         sleep 1
@@ -273,7 +273,8 @@ function launchXfinity {
 
 # Navigate to the favorite channels
 function getfavorites {
-    tries=0
+    local tries=0
+    local xx=0
     for (( xx=0 ; xx < 20 ; xx++ )) ; do
         sleep 0.5
         capturepage

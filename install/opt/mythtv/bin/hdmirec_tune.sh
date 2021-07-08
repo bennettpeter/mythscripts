@@ -3,9 +3,14 @@
 # External Recorder Tuner
 # Parameter 1 - recorder name
 # Parameter 2 - channel number
+# Parameter 3 - LOCK or NOLOCK, default is LOCK
 
 recname=$1
 channum=$2
+lockreq=$3
+if [[ "$lockreq" != NOLOCK ]] ; then
+    lockreq=LOCK
+fi
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -24,27 +29,29 @@ echo `$LOGDATE` "Request to tune channel $channum "
 # idle
 # tuned
 
-if ! locktuner 120 ; then
-    echo `$LOGDATE` "Encoder $recname is locked, exiting"
-    exit 2
-fi
-gettunestatus
-if [[ "$tunestatus" == tuned  ]] ; then
-    if [[ "$tunechan" == "$channum" ]] ; then
-        echo `$LOGDATE` "Tuner already tuned, all ok"
-        exit 0
-    else
-        echo `$LOGDATE` "WARNING tuner already tuned to $tunechan, will retune"
+if [[ "$lockreq" == LOCK ]] ; then
+    if ! locktuner 120 ; then
+        echo `$LOGDATE` "Encoder $recname is locked, exiting"
+        exit 2
+    fi
+    gettunestatus
+    if [[ "$tunestatus" == tuned  ]] ; then
+        if [[ "$tunechan" == "$channum" ]] ; then
+            echo `$LOGDATE` "Tuner already tuned, all ok"
+            exit 0
+        else
+            echo `$LOGDATE` "WARNING tuner already tuned to $tunechan, will retune"
+        fi
     fi
 fi
 
 tuned=N
-
 if (( channum <= 0 )) ; then
     echo `$LOGDATE` "ERROR Invalid channel number: $channum"
     exit 2
 fi
 
+tunefile=$DATADIR/${recname}_tune.stat
 true > $tunefile
 
 adb connect $ANDROID_DEVICE
@@ -68,6 +75,11 @@ for (( xx=0; xx<5; xx++ )) ; do
         if (( arrsize != 5 )) ; then
             channels=($(gocr -C 0-9 -l 200 $DATADIR/${recname}_capture_crop.png))
             arrsize=${#channels[@]}
+        fi
+        if (( arrsize != 5 )) ; then
+            echo `$LOGDATE` "Wrong number of channels, trying again"
+            $scriptpath/adb-sendkey.sh MENU MENU
+            continue 2
         fi
         echo `$LOGDATE` "channels: ${channels[@]}"
 
@@ -130,6 +142,7 @@ for (( xx=0; xx<5; xx++ )) ; do
         echo `$LOGDATE` "Current channel: $currchan"
         if (( currchan == prior_currchan || currchan == 0 )); then
             echo `$LOGDATE` "ERROR failed to select channel: $channum, using: ${channels[@]}"
+            $scriptpath/adb-sendkey.sh MENU MENU
             continue 2
         fi
         prior_direction=$direction
@@ -146,6 +159,7 @@ for (( xx=0; xx<5; xx++ )) ; do
         if [[ $prior_direction != N && $prior_direction != $direction ]] ; then
             # Moving up and down indicates channel is not in the list
             echo `$LOGDATE` "ERROR channel: $channum not found in favorites, using: ${channels[@]}"
+            $scriptpath/adb-sendkey.sh MENU MENU
             continue 2
         fi
         $scriptpath/adb-sendkey.sh $direction

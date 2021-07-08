@@ -63,4 +63,16 @@ ffmpeg -hide_banner -loglevel error -f v4l2 -thread_queue_size 256 -input_format
 ffmpeg_pid=$!
 echo tune_ffmpeg_pid=$ffmpeg_pid >> $tunefile
 
+{
+    sleep 20
+    adb connect $ANDROID_DEVICE
+    capturepage adb
+    if [[ "$pagename" == "Playback Issue"* ]] ; then
+        echo `$LOGDATE` "ERROR: playback failed, retrying."
+        $scriptpath/notify.py "Xfinity Problem" \
+            "hdmirec_encode: Playback Failed on ${recname}, retrying" &
+        $scriptpath/hdmirec_tune.sh $recname $tunechan NOLOCK
+    fi
+} &>> $logfile
+
 wait $ffmpeg_pid
