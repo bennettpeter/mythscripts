@@ -23,6 +23,7 @@ initialize
 # tuned
 sleep 15
 errored=0
+lastrescheck=
 while true ; do
     if ! locktuner ; then
         echo `$LOGDATE` "Encoder $recname is already locked, waiting"
@@ -38,11 +39,12 @@ while true ; do
         if (( rc > errored )) ; then
             $scriptpath/notify.py "Fire Stick Problem" \
                 "hdmirec_ready: $errormsg on ${recname}" &
-            errored=rc
+            errored=$rc
         fi
         today=$(date +%Y-%m-%d)
         adb connect $ANDROID_DEVICE
         if [[ "$lastrescheck" != "$today" ]] ; then
+            errored=0
             capturepage adb
             rc=$?
             if (( rc == 1 )) ; then
@@ -57,7 +59,7 @@ while true ; do
         if (( rc > errored ))  ; then
             $scriptpath/notify.py "Fire Stick Problem" \
               "hdmirec_ready: Failed to get to favorite channels on ${recname}" &
-            errored=rc
+            errored=$rc
         fi
         adb disconnect $ANDROID_DEVICE
     else

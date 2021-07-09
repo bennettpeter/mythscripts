@@ -273,30 +273,45 @@ function launchXfinity {
 
 # Navigate to the favorite channels
 function getfavorites {
-    local tries=0
+    local unknowns=0
+    local blanks=0
     local xx=0
+    # Normal would be 5 or 6 to get to favorites
     for (( xx=0 ; xx < 20 ; xx++ )) ; do
         sleep 0.5
         capturepage
-        # If blank the only thing that works is HOME
-        if [[ "$pagename" == "" ]] ; then
-            $scriptpath/adb-sendkey.sh HOME HOME
-        elif [[ "$pagename" == "We can't detect your remote" ]] ; then
-            $scriptpath/adb-sendkey.sh DPAD_CENTER
-        elif [[ "$pagename" == "xfinity stream" ]] ; then
-            continue
-        elif [[ "$pagename" == "For You" ]] ; then
-            $scriptpath/adb-sendkey.sh MENU
-        elif [[ "$pagename" == "Search" ]] ; then
-            $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
-        elif [[ "$pagename" == "Favorite Channels" ]] ; then
-            break
-        else
-            if (( ++tries > 2 )) ;then
+        case "$pagename" in
+        "")
+        # If blank due to inactivity the only thing that works is HOME
+            if (( xx == 0 || ++blanks > 4 )) ; then
+                $scriptpath/adb-sendkey.sh HOME HOME
+                sleep 0.5
                 launchXfinity
-                tries=0
+                blanks=0
             fi
-        fi
+            ;;
+        "We can't detect your remote")
+            $scriptpath/adb-sendkey.sh DPAD_CENTER
+            ;;
+        "xfinity stream")
+            continue
+            ;;
+        "For You")
+            $scriptpath/adb-sendkey.sh MENU
+            ;;
+        "Search")
+            $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
+            ;;
+        "Favorite Channels")
+            break
+            ;;
+        *)
+            if (( ++unknowns > 2 )) ;then
+                launchXfinity
+                unknowns=0
+            fi
+            ;;
+        esac
     done
     if [[ "$pagename" != "Favorite Channels" ]] ; then
         echo `$LOGDATE` "ERROR: Unable to reach Favorite Channels: $recname."
