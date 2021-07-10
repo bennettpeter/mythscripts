@@ -305,7 +305,12 @@ function getfavorites {
         "Favorite Channels")
             break
             ;;
-        Tv|TV|Filter|"TV Go Channels"|Movies)
+        Recordings | Scheduled | Favorites | Purchases | \
+        "All Channels" | "TV Go Channels" | Networks | \
+        Tv | TV | Filter | "TV Go Channels" | Movies | \
+        Recordings | Scheduled | Favorites | Purchases| \
+        Sports | "Black Experience" | "Kids & Family" | \
+        News | Latino)
             # I don't know how it gets here but this may fix it
             $scriptpath/adb-sendkey.sh BACK MENU UP DOWN
             ;;
