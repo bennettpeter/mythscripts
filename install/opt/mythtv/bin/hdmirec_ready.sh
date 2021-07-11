@@ -54,7 +54,7 @@ while true ; do
             lastrescheck="$today"
         fi
         $scriptpath/adb-sendkey.sh MENU MENU
-        getfavorites
+        navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
         rc=$?
         if (( rc > errored ))  ; then
             $scriptpath/notify.py "Fire Stick Problem" \

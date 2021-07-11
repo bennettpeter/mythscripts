@@ -27,24 +27,7 @@ fi
 ffmpeg_pid=
 
 function getrecordings {
-    pagename=
-    xx=0
-    while [[ "$pagename" != Recordings ]] && (( xx++ < 5 )) ; do
-        sleep 0.5
-        launchXfinity
-        waitforpage "For You"
-        $scriptpath/adb-sendkey.sh MENU
-        waitforpage "Search"
-        $scriptpath/adb-sendkey.sh DOWN DPAD_CENTER
-        sleep 0.5
-        capturepage
-    done
-    if [[ "$pagename" == Recordings ]] ; then
-        echo `$LOGDATE` "Reached Recordings Page"
-    else
-        echo `$LOGDATE` "ERROR - Cannot get to Recordings Page"
-        exit 2
-    fi
+    navigate Recordings "DOWN DPAD_CENTER"
     sleep 3
     capturepage
 }

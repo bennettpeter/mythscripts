@@ -59,7 +59,7 @@ adb connect $ANDROID_DEVICE
 for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
 
-    getfavorites
+    navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
     ##favorites - channel numbers##
     currchan=0
     direction=N

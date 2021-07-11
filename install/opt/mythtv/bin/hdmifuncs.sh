@@ -271,8 +271,17 @@ function launchXfinity {
     adb -s $ANDROID_DEVICE shell am start -n com.xfinity.cloudtvr.tenfoot/com.xfinity.common.view.LaunchActivity
 }
 
-# Navigate to the favorite channels
-function getfavorites {
+# Navigate to a desired page
+# params
+# 1 Desired page name, e.g. "Favorite Channels"
+# 2 Keystrokes in menu
+#   favorites:  "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
+#   recordings: "DOWN DPAD_CENTER"
+# e.g. navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
+#      navigate Recordings "DOWN DPAD_CENTER"
+function navigate {
+    local pagereq="$1"
+    local keystrokes="$2"
     local unknowns=0
     local blanks=0
     local xx=0
@@ -300,9 +309,9 @@ function getfavorites {
             $scriptpath/adb-sendkey.sh MENU
             ;;
         "Search")
-            $scriptpath/adb-sendkey.sh DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER
+            $scriptpath/adb-sendkey.sh $keystrokes
             ;;
-        "Favorite Channels")
+        "$pagereq")
             break
             ;;
         *)
@@ -313,8 +322,8 @@ function getfavorites {
             ;;
         esac
     done
-    if [[ "$pagename" != "Favorite Channels" ]] ; then
-        echo `$LOGDATE` "ERROR: Unable to reach Favorite Channels: $recname."
+    if [[ "$pagename" != "$pagereq" ]] ; then
+        echo `$LOGDATE` "ERROR: Unable to reach $pagereq: $recname."
         return 3
     fi
     return 0
