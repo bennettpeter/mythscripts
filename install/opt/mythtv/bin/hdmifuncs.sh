@@ -277,7 +277,7 @@ function getfavorites {
     local blanks=0
     local xx=0
     # Normal would be 5 or 6 iterations to get to favorites
-    for (( xx=0 ; xx < 100 ; xx++ )) ; do
+    for (( xx=0 ; xx < 25 ; xx++ )) ; do
         sleep 0.5
         capturepage
         case "$pagename" in
@@ -304,15 +304,6 @@ function getfavorites {
             ;;
         "Favorite Channels")
             break
-            ;;
-        Recordings | Scheduled | Favorites | Purchases | \
-        "All Channels" | "TV Go Channels" | Networks | \
-        Tv | TV | Filter | "TV Go Channels" | Movies | \
-        Recordings | Scheduled | Favorites | Purchases| \
-        Sports | "Black Experience" | "Kids & Family" | \
-        News | Latino)
-            # I don't know how it gets here but this may fix it
-            $scriptpath/adb-sendkey.sh BACK MENU UP DOWN
             ;;
         *)
             if (( ++unknowns > 2 )) ;then
