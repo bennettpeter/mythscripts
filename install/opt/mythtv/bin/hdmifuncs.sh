@@ -321,7 +321,7 @@ function navigate {
             break
             ;;
         *)
-            if (( expect == 1 )) ; then
+            if (( expect++ == 1 )) ; then
                 # landed on wrong page - back and try again once only
                 $scriptpath/adb-sendkey.sh BACK
             elif (( ++unknowns > 2 )) ;then
