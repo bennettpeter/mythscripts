@@ -53,13 +53,17 @@ while true ; do
             fi
             lastrescheck="$today"
         fi
-        $scriptpath/adb-sendkey.sh MENU MENU
-        navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
+        $scriptpath/adb-sendkey.sh MENU
+        $scriptpath/adb-sendkey.sh MENU
+        navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN"
         rc=$?
         if (( rc > errored ))  ; then
             $scriptpath/notify.py "Fire Stick Problem" \
               "hdmirec_ready: Failed to get to favorite channels on ${recname}" &
             errored=$rc
+        fi
+        if (( rc == 0 )) ; then
+            errored=0
         fi
         adb disconnect $ANDROID_DEVICE
     else

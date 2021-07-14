@@ -27,7 +27,7 @@ fi
 ffmpeg_pid=
 
 function getrecordings {
-    navigate Recordings "DOWN DPAD_CENTER"
+    navigate Recordings "DOWN"
     sleep 3
     capturepage
 }
@@ -108,7 +108,8 @@ while  true ; do
         for (( xx=0; xx<numepisodes; xx++ )) ; do
             $scriptpath/adb-sendkey.sh DOWN
         done
-        $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER
+        $scriptpath/adb-sendkey.sh RIGHT
+        $scriptpath/adb-sendkey.sh DPAD_CENTER
     fi
     sleep 1
     capturepage
@@ -183,7 +184,8 @@ while  true ; do
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
         if  grep "^Start Over" $DATADIR/${recname}_capture_crop.txt ; then
             echo `$LOGDATE` "Selecting Start Over from Resume Prompt"
-            $scriptpath/adb-sendkey.sh DOWN DPAD_CENTER
+            $scriptpath/adb-sendkey.sh DOWN
+            $scriptpath/adb-sendkey.sh DPAD_CENTER
             starttime=`date +%s`
         fi
     fi
@@ -238,7 +240,8 @@ while  true ; do
                     subtitle=$(echo $subtitle|sed "s/ *?$//;s/- /-/;s/|/ I /g;s/  / /g")
                     # Confirm delete
                     echo `$LOGDATE` "Confirm Delete"
-                    $scriptpath/adb-sendkey.sh RIGHT DPAD_CENTER
+                    $scriptpath/adb-sendkey.sh RIGHT
+                    $scriptpath/adb-sendkey.sh DPAD_CENTER
                     if [[ "$subtitle" != "" ]] ; then
                         echo `$LOGDATE` "Rename recording file with subtitle"
                         newrecfile="$VID_RECDIR/$title/$season_episode $subtitle.mkv"

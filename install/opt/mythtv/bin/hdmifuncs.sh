@@ -275,25 +275,27 @@ function launchXfinity {
 # params
 # 1 Desired page name, e.g. "Favorite Channels"
 # 2 Keystrokes in menu
-#   favorites:  "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
-#   recordings: "DOWN DPAD_CENTER"
-# e.g. navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
-#      navigate Recordings "DOWN DPAD_CENTER"
+#   favorites:  "DOWN DOWN DOWN DOWN DOWN DOWN"
+#   recordings: "DOWN"
+# e.g. navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN"
+#      navigate Recordings "DOWN"
 function navigate {
     local pagereq="$1"
     local keystrokes="$2"
     local unknowns=0
     local blanks=0
     local xx=0
+    local expect=0
     # Normal would be 5 or 6 iterations to get to favorites
     for (( xx=0 ; xx < 25 ; xx++ )) ; do
         sleep 0.5
         capturepage
         case "$pagename" in
         "")
-        # If blank due to inactivity the only thing that works is HOME
+            # If blank due to inactivity the only thing that works is HOME
             if (( xx == 0 || ++blanks > 4 )) ; then
-                $scriptpath/adb-sendkey.sh HOME HOME
+                $scriptpath/adb-sendkey.sh HOME
+                $scriptpath/adb-sendkey.sh HOME
                 sleep 0.5
                 launchXfinity
                 blanks=0
@@ -306,16 +308,23 @@ function navigate {
             continue
             ;;
         "For You")
+            sleep 0.5
             $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
             ;;
         "Search")
-            $scriptpath/adb-sendkey.sh $keystrokes
+            # Assume that menu is at the top and "For You" is selected
+            $scriptpath/adb-sendkey.sh $keystrokes DPAD_CENTER
+            let expect++
             ;;
         "$pagereq")
             break
             ;;
         *)
-            if (( ++unknowns > 2 )) ;then
+            if (( expect == 1 )) ; then
+                # landed on wrong page - back and try again once only
+                $scriptpath/adb-sendkey.sh BACK
+            elif (( ++unknowns > 2 )) ;then
                 launchXfinity
                 unknowns=0
             fi

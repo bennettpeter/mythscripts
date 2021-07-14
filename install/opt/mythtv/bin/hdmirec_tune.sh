@@ -59,7 +59,7 @@ adb connect $ANDROID_DEVICE
 for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
 
-    navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN DPAD_CENTER"
+    navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN"
     ##favorites - channel numbers##
     currchan=0
     direction=N
@@ -78,7 +78,8 @@ for (( xx=0; xx<5; xx++ )) ; do
         fi
         if (( arrsize != 5 )) ; then
             echo `$LOGDATE` "Wrong number of channels, trying again"
-            $scriptpath/adb-sendkey.sh MENU MENU
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh MENU
             continue 2
         fi
         echo `$LOGDATE` "channels: ${channels[@]}"
@@ -142,7 +143,8 @@ for (( xx=0; xx<5; xx++ )) ; do
         echo `$LOGDATE` "Current channel: $currchan"
         if (( currchan == prior_currchan || currchan == 0 )); then
             echo `$LOGDATE` "ERROR failed to select channel: $channum, using: ${channels[@]}"
-            $scriptpath/adb-sendkey.sh MENU MENU
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh MENU
             continue 2
         fi
         prior_direction=$direction
@@ -159,7 +161,8 @@ for (( xx=0; xx<5; xx++ )) ; do
         if [[ $prior_direction != N && $prior_direction != $direction ]] ; then
             # Moving up and down indicates channel is not in the list
             echo `$LOGDATE` "ERROR channel: $channum not found in favorites, using: ${channels[@]}"
-            $scriptpath/adb-sendkey.sh MENU MENU
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh MENU
             continue 2
         fi
         $scriptpath/adb-sendkey.sh $direction

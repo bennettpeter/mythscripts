@@ -305,7 +305,9 @@ if [[ "$ANDROID_DEVICE" != "" ]] ; then
     devparm="-s $ANDROID_DEVICE"
 fi
 
+keylist=
 while true ; do
+    # interactive option
     if [[ "$key1parm" == "" ]] ; then
         keyname=$(zenity  --width=360 --height=1920 --list --title "Android adb Test" \
         --text "Send Key" --column Key \
@@ -314,16 +316,23 @@ while true ; do
         if [[ "$keyname" == "" ]] ; then exit ; fi
     else
         keyname="$1"
-        if [[ "$keyname" == "" ]] ; then exit ; fi
+        if [[ "$keyname" == "" ]] ; then break ; fi
         shift
     fi
     keycode=`eval echo "$"KEYCODE_$keyname`
     if [[ "$keycode" == "" ]]; then echo ERROR INVALID CODE $keyname ; exit 2 ; fi
-    echo "$keyname ($keycode)"
     option=
     if echo $keyname | grep LONGPRESS ; then
         option="--longpress"
     fi
-    adb $devparm shell input keyevent $option $keycode
-    if [[ "$?" != 0 ]] ; then exit 2 ; fi
+    # interactive option
+    if [[ "$key1parm" == "" ]] ; then
+        echo "$keyname ($keycode)"
+        adb $devparm shell input keyevent $option $keycode
+    else
+        keylist="$keylist $keycode"
+        desc="$desc $keyname ($keycode)"
+    fi
 done
+echo $desc
+adb $devparm shell input keyevent $option $keylist
