@@ -314,7 +314,11 @@ function navigate {
             ;;
         "Search")
             # Assume that menu is at the top and "For You" is selected
-            $scriptpath/adb-sendkey.sh $keystrokes
+            # Sending a bunch of keystrokes too qucikly causes the wrong selection
+            #~ $scriptpath/adb-sendkey.sh $keystrokes
+            for key in $keystrokes ; do
+                $scriptpath/adb-sendkey.sh $key
+            done
             $scriptpath/adb-sendkey.sh DPAD_CENTER
             let expect++
             ;;
