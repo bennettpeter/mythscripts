@@ -337,3 +337,41 @@ function navigate {
     fi
     return 0
 }
+
+function getselection {
+    convert $DATADIR/${recname}_capture_crop.png $DATADIR/${recname}_capture_crop.jpg
+    jp2a --width=10  -i $DATADIR/${recname}_capture_crop.jpg \
+      | sed 's/ //g' > $DATADIR/${recname}_capture_crop.ascii
+
+    selection=$(awk  '
+        BEGIN {
+            entry=-1
+            selectstart=-1
+            selectend=-1
+            error=-1
+        }
+        {
+            if (length==10) {
+                if (priorleng==0) {
+                    if (selectstart==-1)
+                        selectstart=entry+1
+                    else if (selectend==-1)
+                        selectend=entry
+                    else
+                        error=entry
+                }
+            }
+            else if (length>0) {
+                if (priorleng==0)
+                    entry++
+            }
+            priorleng=length
+        }
+        END {
+            if (selectstart == selectend && error == -1)
+                print selectstart
+            else
+                print "ERROR: selectstart:" selectstart " selectend:" selectend " error:" error > "/dev/stderr"
+        }
+        ' $DATADIR/${recname}_capture_crop.ascii)
+}

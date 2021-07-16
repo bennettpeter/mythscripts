@@ -20,7 +20,7 @@ sudo apt install fswebcam
 sudo apt install xmltv apache2 php php-mysql mysql-server
 
 # For firetv recorder on backend
-sudo apt install gocr tesseract-ocr imagemagick vlc obs-studio
+sudo apt install gocr tesseract-ocr imagemagick vlc obs-studio jp2a
 # Manuallt put latest adb in /usr/local/bin/adb
 
 if [[ `arch` == x86_64 ]] ; then

@@ -41,6 +41,12 @@ if [[ "$lockreq" == LOCK ]] ; then
             exit 0
         else
             echo `$LOGDATE` "WARNING tuner already tuned to $tunechan, will retune"
+            capturepage
+            if [[ "$pagename" != "Favorite Channels" ]] ; then
+                adb connect $ANDROID_DEVICE
+                $scriptpath/adb-sendkey.sh BACK
+                sleep 1
+            fi
         fi
     fi
 fi
@@ -113,6 +119,9 @@ for (( xx=0; xx<5; xx++ )) ; do
         prior_currchan=$currchan
         if (( currchan == 0 )) ; then
             $scriptpath/adb-sendkey.sh DOWN DOWN DOWN
+            CROP="-crop 86x600+208+120"
+            TESSPARM="-c tessedit_char_whitelist=0123456789"
+            capturepage
         fi
         if (( currchan <= 0 )) ; then
             currchan=${channels[1]}
@@ -141,6 +150,15 @@ for (( xx=0; xx<5; xx++ )) ; do
             done
         fi
         echo `$LOGDATE` "Current channel: $currchan"
+        getselection
+        selchan=0
+        if [[ "$selection" != "" ]] && (( selection >= 0 )) ; then
+            selchan=${channels[selection]}
+        fi
+        echo `$LOGDATE` "Selection: $selection -> $selchan"
+        if [[ "$selchan" != "$currchan" ]] ; then
+            echo `$LOGDATE` "ERROR: Incorrect channel selection"
+        fi
         if (( currchan == prior_currchan || currchan == 0 )); then
             echo `$LOGDATE` "ERROR failed to select channel: $channum, using: ${channels[@]}"
             $scriptpath/adb-sendkey.sh MENU
