@@ -313,6 +313,8 @@ function navigate {
             $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
             ;;
         "Search")
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh MENU
             # Assume that menu is at the top and "For You" is selected
             # Sending a bunch of keystrokes too qucikly causes the wrong selection
             #~ $scriptpath/adb-sendkey.sh $keystrokes
