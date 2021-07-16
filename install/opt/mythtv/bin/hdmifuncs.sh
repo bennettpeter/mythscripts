@@ -314,7 +314,8 @@ function navigate {
             ;;
         "Search")
             # Assume that menu is at the top and "For You" is selected
-            $scriptpath/adb-sendkey.sh $keystrokes DPAD_CENTER
+            $scriptpath/adb-sendkey.sh $keystrokes
+            $scriptpath/adb-sendkey.sh DPAD_CENTER
             let expect++
             ;;
         "$pagereq")
