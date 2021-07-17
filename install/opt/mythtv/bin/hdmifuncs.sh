@@ -317,10 +317,10 @@ function navigate {
             $scriptpath/adb-sendkey.sh MENU
             # Assume that menu is at the top and "For You" is selected
             # Sending a bunch of keystrokes too qucikly causes the wrong selection
-            #~ $scriptpath/adb-sendkey.sh $keystrokes
-            for key in $keystrokes ; do
-                $scriptpath/adb-sendkey.sh $key
-            done
+            $scriptpath/adb-sendkey.sh $keystrokes
+            #~ for key in $keystrokes ; do
+                #~ $scriptpath/adb-sendkey.sh $key
+            #~ done
             $scriptpath/adb-sendkey.sh DPAD_CENTER
             let expect++
             ;;
@@ -328,7 +328,8 @@ function navigate {
             break
             ;;
         *)
-            if (( expect++ == 1 )) ; then
+            if (( expect == 1 )) ; then
+                let expect++
                 # landed on wrong page - back and try again once only
                 $scriptpath/adb-sendkey.sh BACK
             elif (( ++unknowns > 2 )) ;then
