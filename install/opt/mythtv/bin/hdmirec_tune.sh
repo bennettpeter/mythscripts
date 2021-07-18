@@ -45,7 +45,7 @@ if [[ "$lockreq" == LOCK ]] ; then
             if [[ "$pagename" != "Favorite Channels" ]] ; then
                 adb connect $ANDROID_DEVICE
                 $scriptpath/adb-sendkey.sh BACK
-                sleep 1
+                sleep 3
             fi
         fi
     fi
