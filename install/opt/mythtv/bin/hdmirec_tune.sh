@@ -62,6 +62,7 @@ true > $tunefile
 
 adb connect $ANDROID_DEVICE
 
+hdmichans=($(cat /etc/opt/mythtv/hdmichans.txt))
 for (( xx=0; xx<5; xx++ )) ; do
     if [[ "$tuned" == Y ]] ; then  break; fi
 
@@ -98,21 +99,37 @@ for (( xx=0; xx<5; xx++ )) ; do
         echo ${channels[@]} | sed 's/ /\n/g' > $DATADIR/${recname}_channels.txt
         mapfile -t diffs < \
         <(diff -y $DATADIR/${recname}_channels.txt /etc/opt/mythtv/hdmichans.txt)
+        diffnum=0
         for diff in "${diffs[@]}" ; do
             split=($diff)
             if [[ "${split[0]}" == ">" ]] ; then
                 # Possible missing channel in favorites
-                if (( split[1] >= channels[0] && split[1] <= channels[arrsize-1] )) ; then
+                if (( split[1] > channels[0] && split[1] < channels[arrsize-1] )) ; then
                     echo "WARNING channel ${split[1]} missing in favorites"
                 fi
             elif [[ "${split[1]}" == "<" ]] ; then
                 echo "WARNING channel ${split[0]} missing in hdmichans.txt"
             elif [[ "${split[1]}" == "|" ]] ; then
-                fix=$(echo " ${channels[@]} " | sed "s/ ${split[0]} / ${split[2]} /")
-                echo "INFO Channel ${split[0]} changed to ${split[2]}"
-                channels=($fix)
+                if (( diffnum == 0 )) ; then
+                    # an error in ocr of the first channel is not handled correctly
+                    # by diff - set first channel to the one before second channel
+                    # in hdmichans if possible
+                    for (( ix=1; ix<${#hdmichans[@]}; ix++ )) ; do
+                        if (( hdmichans[ix] == channels[1] )) ; then
+                            first=${channels[0]}
+                            channels[0]=${hdmichans[ix-1]}
+                            echo "INFO Channel $first changed to ${channels[0]}"
+                            break
+                        fi
+                    done
+                else
+                    fix=$(echo " ${channels[@]} " | sed "s/ ${split[0]} / ${split[2]} /")
+                    echo "INFO Channel ${split[0]} changed to ${split[2]}"
+                    channels=($fix)
+                fi
                 echo `$LOGDATE` "Fixed channels ${channels[@]}"
             fi
+            let diffnum++
         done
 
         topchan=${channels[0]}
