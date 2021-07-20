@@ -30,12 +30,14 @@ while true ; do
         sleep $SLEEPTIME
         continue
     fi
+    mrc=0
     gettunestatus
     # Stopped more than 5 minutes ago and not playing - tweak it
     now=$(date +%s)
     if (( tunetime < now-300 )) && [[ "$tunestatus" == idle ]] ; then
         getparms
         rc=$?
+        if (( rc > mrc )) ; then mrc=$rc ; fi
         if (( rc > errored )) ; then
             $scriptpath/notify.py "Fire Stick Problem" \
                 "hdmirec_ready: $errormsg on ${recname}" &
@@ -47,6 +49,7 @@ while true ; do
             errored=0
             capturepage adb
             rc=$?
+            if (( rc > mrc )) ; then mrc=$rc ; fi
             if (( rc == 1 )) ; then
                 $scriptpath/notify.py "Fire Stick Problem" \
                   "hdmirec_ready: Wrong resolution on ${recname}" &
@@ -57,12 +60,14 @@ while true ; do
         $scriptpath/adb-sendkey.sh MENU
         navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN"
         rc=$?
+        if (( rc > mrc )) ; then mrc=$rc ; fi
         if (( rc > errored ))  ; then
             $scriptpath/notify.py "Fire Stick Problem" \
               "hdmirec_ready: Failed to get to favorite channels on ${recname}" &
             errored=$rc
         fi
-        if (( rc == 0 )) ; then
+        # If no error this entire run, reset errored so messages can resume.
+        if (( mrc == 0 )) ; then
             errored=0
         fi
         adb disconnect $ANDROID_DEVICE

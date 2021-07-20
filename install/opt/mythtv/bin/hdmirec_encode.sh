@@ -67,7 +67,8 @@ echo tune_ffmpeg_pid=$ffmpeg_pid >> $tunefile
     sleep 20
     adb connect $ANDROID_DEVICE
     capturepage adb
-    if [[ "$pagename" == "Playback Issue"* ]] ; then
+    # Possible pagenames - "Playback Issue"* or name of a show
+    if [[ "$pagename" != "" ]] ; then
         echo `$LOGDATE` "ERROR: playback failed, retrying."
         $scriptpath/notify.py "Xfinity Problem" \
             "hdmirec_encode: Playback Failed on ${recname}, retrying" &

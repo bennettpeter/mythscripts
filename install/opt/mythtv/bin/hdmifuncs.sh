@@ -301,7 +301,7 @@ function navigate {
                 blanks=0
             fi
             ;;
-        "We can't detect your remote")
+        "We"*"detect your remote")
             $scriptpath/adb-sendkey.sh DPAD_CENTER
             ;;
         "xfinity stream")
