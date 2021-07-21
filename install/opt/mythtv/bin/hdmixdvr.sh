@@ -4,7 +4,6 @@
 
 recname=$1
 
-VID_RECDIR=/home/storage/Video/recordings
 if [[ "$recname" == "" ]] ; then
     recname=hdmirec1
 fi

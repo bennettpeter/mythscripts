@@ -1,8 +1,6 @@
 #!/bin/bash
 # Record from fire stick
 
-VID_RECDIR=/home/storage/Video/recordings
-
 responses="$1"
 minutes="$2"
 recname="$3"
