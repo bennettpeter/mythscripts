@@ -52,7 +52,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     if [[ "$ANDROID_DEVICE" == "" ]] ; then
         continue
     fi
-    if (( rc == 1 )) ; then
+    if (( rc > 0 )) ; then
         $scriptpath/notify.py "Fire Stick Problem" \
           "hdmirec_scan: Primary network adapter for $recname failed" &
     fi

@@ -9,7 +9,7 @@ ADB_ENDKEY=
 LOCKBASEDIR=/var/lock/hdmirec
 
 function exitfunc {
-    rc=$?
+    local rc=$?
     echo `$LOGDATE` "Exit" >> $logfile
     if [[ "$ADB_ENDKEY" != "" && "$ANDROID_DEVICE" != "" && istunerlocked ]] ; then
         $scriptpath/adb-sendkey.sh $ADB_ENDKEY >> $logfile
@@ -139,7 +139,16 @@ function getparms {
     fi
     errormsg=
     ANDROID_DEVICE=$ANDROID_MAIN
-    if ! ping -c 1 $ANDROID_MAIN >/dev/null ; then
+    ping -c 1 $ANDROID_MAIN >/dev/null
+    local rc=$?
+    if (( rc == 2 )) ; then
+        # network unavailable - wait and try again. This can happen
+        # if we just resumed from suspend
+        sleep 10
+        ping -c 1 $ANDROID_MAIN >/dev/null
+        rc=$?
+    fi
+    if (( rc > 0 )) ; then
         if [[ "$ANDROID_FALLBACK" == "" ]] ; then
             errormsg="Primary network failure and no fallback"
             echo `$LOGDATE` "ERROR: $errormsg"
@@ -148,11 +157,15 @@ function getparms {
             errormsg="Primary network failure"
             echo `$LOGDATE` "ERROR: $errormsg"
             return 2
-        else
+        elif ping -c 1 $ANDROID_FALLBACK >/dev/null ; then
             errormsg="Using fallback network adapter"
             echo `$LOGDATE` "WARNING: $errormsg"
             ANDROID_DEVICE=$ANDROID_FALLBACK
             return 1
+        else
+            errormsg="Primary and secondary network failure"
+            echo `$LOGDATE` "ERROR: $errormsg"
+            return 2
         fi
     fi
     export ANDROID_DEVICE
@@ -168,7 +181,7 @@ function getparms {
 function capturepage {
     pagename=
     local source_req=$1
-    rc=0
+    local rc=0
     if [[ "$CROP" == "" ]] ; then
         CROP="-gravity East -crop 95%x100%"
     fi

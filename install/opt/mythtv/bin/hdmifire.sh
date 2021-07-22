@@ -11,7 +11,7 @@ fi
 echo "*** $0 ***"
 echo "Input parameters:"
 echo "Number of responses (default 0)"
-echo "Maximum Number of minutes [default 300*(responses+1)]"
+echo "Maximum Number of minutes [default 360*(responses+1)]"
 echo "Recorder id (default hdmirec1)"
 
 . /etc/opt/mythtv/mythtv.conf
@@ -24,15 +24,19 @@ source $scriptpath/hdmifuncs.sh
 
 let responses=responses
 let minutes=minutes
-# Default to 300 minutes - 5 hours
+# Default to 360 minutes - 6 hours
 if (( $minutes == 0 )) ; then
-    let minutes=300*\(responses+1\)
+    let minutes=360*\(responses+1\)
 fi
 echo
 let seconds=minutes*60
-echo Record for $minutes minutes and respond $responses times.
-echo This script will press the DPAD_CENTER to start. Do not press it.
-echo Type Y to start
+echo "Record for $minutes minutes and respond $responses times."
+if (( responses > 10 )) ; then
+    echo "ERROR Invalid response count $responses"
+    exit 2
+fi
+echo "This script will press DPAD_CENTER to start. Do not press it."
+echo "Type Y to start"
 read -e resp
 if [[ "$resp" != Y ]] ; then exit 2 ; fi
 
