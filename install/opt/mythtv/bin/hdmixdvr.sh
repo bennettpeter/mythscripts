@@ -120,6 +120,19 @@ while  true ; do
         season_episode=`date "+%Y%m%d_%H%M%S"`
         echo `$LOGDATE` "Bad episode number, using $season_episode instead."
     fi
+    if [[ "$season_episode" =~ ^S[0-9]*E[0-9]*$ ]] ; then
+        # Insert leading zero in season and episode if needed
+        str=${season_episode%E*}
+        season=${str#S}
+        episode=${season_episode#S*E}
+        if (( ${#season} == 1 )) ; then
+            season=0$season
+        fi
+        if (( ${#episode} == 1 )) ; then
+            episode=0$episode
+        fi
+        season_episode=S${season}E${episode}
+    fi
     mkdir -p "$VID_RECDIR/$title"
     recfile="$VID_RECDIR/$title/$season_episode.mkv"
     convert $DATADIR/${recname}_capture.png -gravity East -crop 25%x100% -negate -brightness-contrast 0x20 $DATADIR/${recname}_capture_details.png
