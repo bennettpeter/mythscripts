@@ -222,7 +222,9 @@ function capturepage {
     fi
     if [[ `stat -c %s $DATADIR/${recname}_capture_crop.png` != 0 ]] ; then
         tesseract -c page_separator="" $DATADIR/${recname}_capture_crop.png  - $TESSPARM 2>/dev/null | sed '/^ *$/d' > $DATADIR/${recname}_capture_crop.txt
-        if diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
+        if [[ `stat -c %s $DATADIR/${recname}_capture_crop.txt` == 0 ]] ; then
+            echo `$LOGDATE` Blank Screen from $cap_source
+        elif diff -q $DATADIR/${recname}_capture_crop.txt $DATADIR/${recname}_capture_crop_prior.txt >/dev/null ; then
             echo `$LOGDATE` Same Screen Again
         else
             echo "*****" `$LOGDATE` Screen from $cap_source
@@ -230,6 +232,8 @@ function capturepage {
             echo "*****"
         fi
         pagename=$(head -n 1 $DATADIR/${recname}_capture_crop.txt)
+    else
+        echo `$LOGDATE` No Screen capture
     fi
     TESSPARM=
     CROP=

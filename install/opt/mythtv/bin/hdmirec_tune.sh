@@ -174,7 +174,10 @@ for (( xx=0; xx<5; xx++ )) ; do
         fi
         echo `$LOGDATE` "Selection: $selection -> $selchan"
         if [[ "$selchan" != "$currchan" ]] ; then
-            echo `$LOGDATE` "ERROR: Incorrect channel selection"
+            echo `$LOGDATE` "ERROR: Incorrect channel selection, trying again"
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh MENU
+            continue 2
         fi
         # Note selection is -1 if a program is selected rather than a channel
         if (( currchan == prior_currchan || currchan == 0 || selection == -1 )); then
