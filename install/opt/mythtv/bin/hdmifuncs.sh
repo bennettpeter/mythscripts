@@ -441,7 +441,7 @@ function getmenuselection {
       | sed 's/ //g' > $DATADIR/${recname}_capture_crop.ascii
     # 7 blank rows between each, but selected one removed and 15 blank rows there
     # each entry 2-3 rows
-    tesseract $DATADIR/${recname}_capture_crop.jpg - | sed  '/^$/d' > $DATADIR/${recname}_capture_crop.txt
+    tesseract $DATADIR/${recname}_capture_crop.jpg - 2>/dev/null | sed  '/^$/d' > $DATADIR/${recname}_capture_crop.txt
     mapfile -t menuitems < <(cat $DATADIR/${recname}_capture_crop.txt)
 
     selection=$(awk  '
