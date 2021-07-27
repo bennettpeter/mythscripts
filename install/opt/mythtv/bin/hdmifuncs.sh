@@ -309,9 +309,9 @@ function navigate {
         capturepage
         case "$pagename" in
         "")
-            # If blank due to inactivity the only thing that works is HOME
+            # If sleeping need to send POWER to turn it back on
             if (( xx == 0 || ++blanks > 4 )) ; then
-                $scriptpath/adb-sendkey.sh HOME
+                $scriptpath/adb-sendkey.sh POWER
                 $scriptpath/adb-sendkey.sh HOME
                 sleep 0.5
                 launchXfinity
