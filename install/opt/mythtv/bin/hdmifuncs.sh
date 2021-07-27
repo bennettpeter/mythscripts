@@ -326,20 +326,45 @@ function navigate {
             ;;
         "For You")
             sleep 0.5
-            $scriptpath/adb-sendkey.sh MENU
+            # LEFT invokes the menu
+            $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
             $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
-            ;;
-        "Search")
-            $scriptpath/adb-sendkey.sh MENU
-            $scriptpath/adb-sendkey.sh MENU
-            # Assume that menu is at the top and "For You" is selected
-            # Sending a bunch of keystrokes too qucikly causes the wrong selection
-            $scriptpath/adb-sendkey.sh $keystrokes
-            #~ for key in $keystrokes ; do
-                #~ $scriptpath/adb-sendkey.sh $key
-            #~ done
-            $scriptpath/adb-sendkey.sh DPAD_CENTER
-            let expect++
+            if [[ "$keystrokes" != "" ]] ; then
+                $scriptpath/adb-sendkey.sh $keystrokes
+            fi
+            # Check if the correct menu item is selected
+            while true ; do
+                capturepage
+                getmenuselection
+                if [[ "$selection" == "" || "${menuitems[selection]}" == "$pagereq" ]] ; then
+                    $scriptpath/adb-sendkey.sh DPAD_CENTER
+                    let expect++
+                    break
+                else
+                    echo `$LOGDATE` "Wrong item selected, wanted $pagereq got ${menuitems[$selection]}"
+                    local xx2
+                    local entries=${#menuitems[@]}
+                    local wanted=
+                    for (( xx2=0; xx2<entries ; xx2++ )) ; do
+                        if [[ "${menuitems[xx2]}" == "$pagereq" ]] ; then
+                            wanted=xx2
+                            break
+                        fi
+                    done
+                    if [[ "$wanted" == "" ]] || (( wanted == selection )) ; then
+                        echo `$LOGDATE` "WARNING Cannot find correct menu item, assume it is correct"
+                        $scriptpath/adb-sendkey.sh DPAD_CENTER
+                        let expect++
+                        break
+                    else
+                        if (( wanted > selection )) ; then
+                            $scriptpath/adb-sendkey.sh DOWN
+                        else
+                            $scriptpath/adb-sendkey.sh UP
+                        fi
+                    fi
+                fi
+            done
             ;;
         "$pagereq")
             break
@@ -363,7 +388,11 @@ function navigate {
     return 0
 }
 
-function getselection {
+# Get channel selection. Must be preceded by capturepage to capture the menu.
+# Return:
+# selection - index of selected item or blank if error
+
+function getchannelselection {
     convert $DATADIR/${recname}_capture_crop.png $DATADIR/${recname}_capture_crop.jpg
     jp2a --width=10  -i $DATADIR/${recname}_capture_crop.jpg \
       | sed 's/ //g' > $DATADIR/${recname}_capture_crop.ascii
@@ -399,4 +428,63 @@ function getselection {
                 print "ERROR: selectstart:" selectstart " selectend:" selectend " error:" error > "/dev/stderr"
         }
         ' $DATADIR/${recname}_capture_crop.ascii)
+}
+
+
+# Get menu selection. Must be preceded by capturepage to capture the menu.
+# Return:
+# menuitems - array of menu items
+# selection - index of selected item or blank if error
+function getmenuselection {
+    convert $DATADIR/${recname}_capture_crop.png -gravity West -crop 25%x100% $DATADIR/${recname}_capture_crop.jpg
+    jp2a --width=50 -i --red=1 --green=0 --blue=0 $DATADIR/${recname}_capture_crop.jpg \
+      | sed 's/ //g' > $DATADIR/${recname}_capture_crop.ascii
+    # 7 blank rows between each, but selected one removed and 15 blank rows there
+    # each entry 2-3 rows
+    tesseract $DATADIR/${recname}_capture_crop.jpg - | sed  '/^$/d' > $DATADIR/${recname}_capture_crop.txt
+    mapfile -t menuitems < <(cat $DATADIR/${recname}_capture_crop.txt)
+
+    selection=$(awk  '
+        BEGIN {
+            blank=0
+            nonblank=0
+            entry=-1
+            selection=-1
+            error=0
+        }
+        {
+            if (length < 3) {
+                blank++
+                nonblank = 0
+            }
+            else {
+                if (nonblank == 0)
+                    entry++
+                nonblank++
+                #~ print "blank " blank " entry " entry > "/dev/stderr"
+                if (blank > 7) {
+                    if (selection >= 0) {
+                        print "ERROR: multiple selected: " selection " and " entry > "/dev/stderr"
+                        error = 1
+                    }
+                    else
+                        selection = entry
+                    entry++
+                }
+                blank=0
+            }
+        }
+        END {
+            if (!error) {
+                if (blank > 5 && selection < 0)
+                    selection = entry + 1
+                print selection
+            }
+        }
+        ' $DATADIR/${recname}_capture_crop.ascii)
+    if [[ "$selection" == "" ]] ; then
+        echo `$LOGDATE` "ERROR: Failed to find menu selection"
+    else
+        echo `$LOGDATE` "Menu selection: ${menuitems[selection]}"
+    fi
 }
