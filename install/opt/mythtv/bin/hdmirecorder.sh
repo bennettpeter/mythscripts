@@ -22,6 +22,23 @@ source $scriptpath/hdmifuncs.sh
 logfile=$LOGDIR/${scriptname}_${recname}.log
 {
     initialize NOREDIRECT
+    count=0
+    rc=90
+    while (( rc != 0 )) ; do
+        let count++
+        if [[ -f $LOCKBASEDIR/scandate ]] ; then
+            rc=0
+        else
+            rc=99
+            if (( count > 2 )) ; then
+            echo `$LOGDATE` "ERROR hdmirec_scan not yet run, tuner disabled"
+                break
+            fi
+            echo `$LOGDATE` "hdmirec_scan not yet run, waiting 5 seconds"
+            sleep 5
+        fi
+    done
+    if (( rc > 1 )) ; then exit $rc ; fi
     getparms
     rc=$?
     if (( rc > 1 )) ; then exit $rc ; fi

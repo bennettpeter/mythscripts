@@ -6,7 +6,7 @@ LOGDATE='date +%Y-%m-%d_%H-%M-%S'
 OCR_RESOLUTION=1280x720
 updatetunetime=0
 ADB_ENDKEY=
-LOCKBASEDIR=/var/lock/hdmirec
+LOCKBASEDIR=/run/lock/hdmirec
 
 function exitfunc {
     local rc=$?
@@ -245,13 +245,17 @@ function waitforpage {
     local xx=0
     while [[ "$pagename" != "$wanted" ]] && (( xx++ < 90 )) ; do
         capturepage
-        sleep 1
+        if [[ "$pagename" == "We"*"detect your remote" ]] ; then
+            $scriptpath/adb-sendkey.sh DPAD_CENTER
+        fi
+        sleep 0.5
     done
     if [[ "$pagename" != "$wanted" ]] ; then
         echo `$LOGDATE` "ERROR - Cannot get to $wanted Page"
-        exit 2
+        return 2
     fi
     echo `$LOGDATE` "Reached $wanted page"
+    return 0
 }
 
 # tunestatus values

@@ -25,11 +25,7 @@ if [[ "$reqname" == "" ]] ; then
     reqname=hdmirec*
 fi
 
-# In case another version of adb is running
-adb kill-server
-sleep 0.5
-
-# First set all tuners to HOME
+# Quickly lock all the tuners
 for conffile in /etc/opt/mythtv/$reqname.conf ; do
     echo $conffile found
     if [[ "$conffile" == "/etc/opt/mythtv/hdmirec*.conf" ]] ; then
@@ -38,13 +34,19 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     fi
     recname=$(basename $conffile .conf)
 
-    if ! locktuner 60 ; then
+    if ! locktuner ; then
         echo `$LOGDATE` "ERROR Encoder $recname is already locked - abort."
         exit 2
     fi
+done
+
+# set all tuners to HOME
+for conffile in /etc/opt/mythtv/$reqname.conf ; do
+    echo $conffile found
+    recname=$(basename $conffile .conf)
 
     tunefile=$DATADIR/${recname}_tune.stat
-    # Clear status and locks
+    # Clear status
     true > $tunefile
 
     getparms
@@ -67,6 +69,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
         adb disconnect $ANDROID_DEVICE
         continue
     fi
+    $scriptpath/adb-sendkey.sh POWER
     $scriptpath/adb-sendkey.sh HOME
     adb disconnect $ANDROID_DEVICE
 done
@@ -77,6 +80,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     true > $DATADIR/${recname}.conf
     getparms
     if [[ "$ANDROID_DEVICE" == "" ]] ; then
+        unlocktuner
         continue
     fi
     adb connect $ANDROID_DEVICE
@@ -87,6 +91,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     if [[ "$status" != device ]] ; then
         echo `$LOGDATE` "WARNING: Device offline: $recname, skipping"
         adb disconnect $ANDROID_DEVICE
+        unlocktuner
         continue
     fi
 
@@ -103,6 +108,9 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
             if [[ "$pagename" == "For You" ]] ; then
                 match=Y
                 break
+            elif [[ "$pagename" == "We"*"detect your remote" ]] ; then
+                $scriptpath/adb-sendkey.sh DPAD_CENTER
+                sleep 1
             fi
             sleep 1
         done
@@ -117,6 +125,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
           "hdmirec_scan: Failed to start XFinity on ${recname}" &
         $scriptpath/adb-sendkey.sh HOME
         adb disconnect $ANDROID_DEVICE
+        unlocktuner
         continue
     fi
     # We have the video device,now get the audio device
@@ -131,6 +140,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     audiodev=$(readlink /dev/snd/by-path/${vid_path}?)
     if [[ "$audiodev" != ../controlC* ]] ; then
         echo `$LOGDATE` "ERROR Failed to find audio device for $VIDEO_IN"
+        unlocktuner
         continue
     fi
     AUDIO_IN="hw:"${audiodev#../controlC},0
@@ -138,6 +148,7 @@ for conffile in /etc/opt/mythtv/$reqname.conf ; do
     echo "VIDEO_IN=$VIDEO_IN" > $DATADIR/${recname}.conf
     echo "AUDIO_IN=$AUDIO_IN" >> $DATADIR/${recname}.conf
     echo `$LOGDATE` Successfully created parameters in $DATADIR/${recname}.conf.
-    
+    unlocktuner
 done
 
+$LOGDATE > $LOCKBASEDIR/scandate

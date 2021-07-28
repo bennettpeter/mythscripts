@@ -102,7 +102,9 @@ while  true ; do
         echo `$LOGDATE` "There are $numepisodes episodes of $title."
     fi
     $scriptpath/adb-sendkey.sh DPAD_CENTER
-    waitforpage "$title"
+    if ! waitforpage "$title" ; then
+        exit 2
+    fi
     if (( numepisodes > 1 )) ; then
         for (( xx=0; xx<numepisodes; xx++ )) ; do
             $scriptpath/adb-sendkey.sh DOWN
@@ -293,7 +295,9 @@ while  true ; do
     if [[ "$pagename" != "Recordings" ]] ; then
         $scriptpath/adb-sendkey.sh BACK
     fi
-    waitforpage "Recordings"
+    if ! waitforpage "Recordings" ; then
+        exit 2
+    fi
     sleep 5
     capturepage
 done
