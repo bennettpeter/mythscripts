@@ -65,7 +65,7 @@ with open(logfilename,"a") as logfile:
         destination.append(email2)
     if len(destination) > 0 \
     and mailoption != "nomail" :
-        msg = MIMEText(now + " " + content)
+        msg = MIMEText(now + " " + os.uname().nodename + " " + content)
         msg['Subject'] = subject
         msg['From'] = "mythtv <" + config.get(" default ","SMTP_SENDER") + ">"
         msg['To'] = destination[0]
