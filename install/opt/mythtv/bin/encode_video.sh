@@ -400,6 +400,14 @@ if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
     fi
 fi
 
+if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
+    AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
+    SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
+    if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
+        audio=copy
+    fi
+fi
+
 if [[ "$ffrate" == y && "$framerate" == "" && "$isDVD" == N ]] ; then
     framerate=`mediainfo '--Inform=Video;%FrameRate%' "$input"`
     if [[ `echo "$framerate > 54" | bc` == 1 ]] ; then
