@@ -263,7 +263,7 @@ if [[ "$error" == y ]] ; then
     echo "-E audio - mp3, copy, ac3, av_aac|aac, others - default copy"
     echo "-q quality - override quality level"
     echo "  Default is 21, 22 or 23 for x264, 4 for mpeg4. Lower is better"
-    echo "-R audio sample rate for lame - default 48000"
+    echo "-R audio sample rate for lame or aac - default 48000"
     echo "--crop T:B:L:R Crop parameter, or AUTO. Defaults to 0:0:0:0."
     echo "  Only for use with x264 and ffmpeg (i.e. HandBrake)"
     echo "--ffrate Fixed frame rate of < 30 fps"
