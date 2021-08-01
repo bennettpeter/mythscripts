@@ -364,7 +364,7 @@ function navigate {
                         if [[ "$keystrokes" != "" ]] ; then
                             $scriptpath/adb-sendkey.sh $keystrokes
                         fi
-                        break
+                        continue
                     else
                         if (( wanted > selection )) ; then
                             $scriptpath/adb-sendkey.sh DOWN
