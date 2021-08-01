@@ -356,9 +356,14 @@ function navigate {
                         fi
                     done
                     if [[ "$wanted" == "" ]] || (( wanted == selection )) ; then
-                        echo `$LOGDATE` "WARNING Cannot find correct menu item, assume it is correct"
-                        $scriptpath/adb-sendkey.sh DPAD_CENTER
-                        let expect++
+                        echo `$LOGDATE` "Cannot find correct menu item, try again"
+                        sleep 1
+                        # LEFT invokes the menu
+                        $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+                        $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
+                        if [[ "$keystrokes" != "" ]] ; then
+                            $scriptpath/adb-sendkey.sh $keystrokes
+                        fi
                         break
                     else
                         if (( wanted > selection )) ; then
@@ -378,6 +383,8 @@ function navigate {
                 let expect++
                 # landed on wrong page - back and try again once only
                 $scriptpath/adb-sendkey.sh BACK
+                $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+                $scriptpath/adb-sendkey.sh RIGHT
             elif (( ++unknowns > 2 )) ;then
                 launchXfinity
                 unknowns=0
