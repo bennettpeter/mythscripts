@@ -330,8 +330,9 @@ function navigate {
             ;;
         "For You")
             sleep 0.5
-            # LEFT invokes the menu
-            $scriptpath/adb-sendkey.sh MENU LEFT LEFT
+            # LEFT invokes the menu in case MENU dismissed it
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh LEFT
             $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
             if [[ "$keystrokes" != "" ]] ; then
                 $scriptpath/adb-sendkey.sh $keystrokes
@@ -358,8 +359,9 @@ function navigate {
                     if [[ "$wanted" == "" ]] || (( wanted == selection )) ; then
                         echo `$LOGDATE` "Cannot find correct menu item, try again"
                         sleep 1
-                        # LEFT invokes the menu
-                        $scriptpath/adb-sendkey.sh MENU LEFT LEFT
+                        # LEFT invokes the menu again if MENU dismissed it
+                        $scriptpath/adb-sendkey.sh MENU
+                        $scriptpath/adb-sendkey.sh LEFT
                         $scriptpath/adb-sendkey.sh UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP UP DOWN
                         if [[ "$keystrokes" != "" ]] ; then
                             $scriptpath/adb-sendkey.sh $keystrokes
@@ -382,8 +384,6 @@ function navigate {
                 let expect++
                 # landed on wrong page - back and try again once only
                 $scriptpath/adb-sendkey.sh BACK
-                $scriptpath/adb-sendkey.sh MENU LEFT LEFT
-                $scriptpath/adb-sendkey.sh RIGHT
             elif (( ++unknowns > 2 )) ;then
                 launchXfinity
                 unknowns=0

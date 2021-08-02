@@ -85,7 +85,8 @@ for (( xx=0; xx<5; xx++ )) ; do
         fi
         if (( arrsize != 5 )) ; then
             echo `$LOGDATE` "Wrong number of channels, trying again"
-            $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh LEFT
             $scriptpath/adb-sendkey.sh RIGHT
             continue 2
         fi
@@ -175,14 +176,16 @@ for (( xx=0; xx<5; xx++ )) ; do
         echo `$LOGDATE` "Selection: $selection -> $selchan"
         if [[ "$selchan" != "$currchan" ]] ; then
             echo `$LOGDATE` "ERROR: Incorrect channel selection, trying again"
-            $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh LEFT
             $scriptpath/adb-sendkey.sh RIGHT
             continue 2
         fi
         # Note selection is -1 if a program is selected rather than a channel
         if (( currchan == prior_currchan || currchan == 0 || selection == -1 )); then
             echo `$LOGDATE` "ERROR failed to select channel: $channum, using: ${channels[@]}"
-            $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh LEFT
             $scriptpath/adb-sendkey.sh RIGHT
             continue 2
         fi
@@ -200,7 +203,8 @@ for (( xx=0; xx<5; xx++ )) ; do
         if [[ $prior_direction != N && $prior_direction != $direction ]] ; then
             # Moving up and down indicates channel is not in the list
             echo `$LOGDATE` "ERROR channel: $channum not found in favorites, using: ${channels[@]}"
-            $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+            $scriptpath/adb-sendkey.sh MENU
+            $scriptpath/adb-sendkey.sh LEFT
             $scriptpath/adb-sendkey.sh RIGHT
             continue 2
         fi

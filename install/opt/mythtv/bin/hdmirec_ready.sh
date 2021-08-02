@@ -56,8 +56,8 @@ while true ; do
             fi
             lastrescheck="$today"
         fi
-        # LEFT invokes the menu
-        $scriptpath/adb-sendkey.sh LEFT LEFT LEFT
+        $scriptpath/adb-sendkey.sh MENU
+        $scriptpath/adb-sendkey.sh LEFT
         $scriptpath/adb-sendkey.sh RIGHT
         navigate "Favorite Channels" "DOWN DOWN DOWN DOWN DOWN DOWN"
         rc=$?
