@@ -338,7 +338,8 @@ function navigate {
                 $scriptpath/adb-sendkey.sh $keystrokes
             fi
             # Check if the correct menu item is selected
-            while true ; do
+            local xy=0
+            for (( xy=0 ; xy < 25 ; xy++ )) ; do
                 capturepage
                 getmenuselection
                 if [[ "$selection" == "" || "${menuitems[selection]}" == "$pagereq" ]] ; then
@@ -375,6 +376,11 @@ function navigate {
                     fi
                 fi
             done
+            if (( xy == 25 )) ; then
+                # failed to get to menu item - back out of menu
+                echo `$LOGDATE` "Cannot find correct menu item after many tries, go back"
+                $scriptpath/adb-sendkey.sh BACK
+            fi
             ;;
         "$pagereq")
             break
