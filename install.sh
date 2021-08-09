@@ -34,12 +34,15 @@ fi
 
 create_dir() {
     perm=$2
+    # Param 3 optional is owner:group
+    owner=$3
     if [[ "$perm" == "" ]] ; then
         perm=775
     fi
     mkdir -pv "$1"
-    chown mythtv "$1" || true
-    chgrp mythtv "$1"
+    if [[ "$3" != "" ]] ; then
+        chown "$3" "$1" || true
+    fi
     chmod $perm "$1"
 }
 
@@ -48,25 +51,25 @@ create_dir() {
 $scriptpath/fixpermissions.sh
 
 if [[ "$IS_BACKEND" == true ]] ; then
-    create_dir $VIDEODIR 2775
+    create_dir $VIDEODIR 2775 mythtv:mythtv
 fi
-create_dir $DATADIR 2775
+create_dir $DATADIR 2775 mythtv:mythtv
 create_dir /opt/mythtv
 create_dir /opt/mythtv/bin
 create_dir /etc/opt/mythtv
-create_dir /etc/rc_keymaps
+#~ create_dir /etc/rc_keymaps
 # create_dir $MOUNTDIR
-create_dir $LOGDIR 2775
+create_dir $LOGDIR 2775 mythtv:mythtv
 mkdir -p /var/log/mythtv
 chgrp adm /var/log/mythtv
 chmod 2775 /var/log/mythtv
 
 if [[ "$IS_BACKEND" == true ]] ; then
-    create_dir $VIDEODIR/video1 2775
-    create_dir $VIDEODIR/video2 2775
-    create_dir $VIDEODIR/video3 2775
-    create_dir $VIDEODIR/video4 2775
-    create_dir $LOCALVIDEODIR 2775
+    create_dir $VIDEODIR/video1 2775 mythtv:mythtv
+    create_dir $VIDEODIR/video2 2775 mythtv:mythtv
+    create_dir $VIDEODIR/video3 2775 mythtv:mythtv
+    create_dir $VIDEODIR/video4 2775 mythtv:mythtv
+    create_dir $LOCALVIDEODIR 2775 mythtv:mythtv
 fi
 
 # This cannot work becuase remote user is not allowed root access through nfs
@@ -75,7 +78,7 @@ fi
 #fi
 
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
-    create_dir $TCSTORAGEDIR/keepalive 2775
+    create_dir $TCSTORAGEDIR/keepalive 2775 mythtv:mythtv
 fi
 
 mkdir -p $scriptpath/backup/
@@ -88,22 +91,22 @@ pushd install/etc/opt/mythtv/
 # Remove old options files
 rm -f /etc/opt/mythtv/*.options
 for file in ${hostname}_* ; do
-    cp -pv "$file" /etc/opt/mythtv/${file#*_}
+    cp -v "$file" /etc/opt/mythtv/${file#*_}
 done
 for file in all_* ; do
-    cp -pv "$file" /etc/opt/mythtv/${file#*_}
+    cp -v "$file" /etc/opt/mythtv/${file#*_}
 done
 popd
 
-chgrp mythtv /etc/opt/mythtv/mythtv.conf
+#~ chgrp mythtv /etc/opt/mythtv/mythtv.conf
 cd install/opt/mythtv/bin
 # Remove old script files
 rm -f /opt/mythtv/bin/*
-cp -pv `find . -maxdepth 1 -type f` /opt/mythtv/bin/
+cp -v --preserve=mode `find . -maxdepth 1 -type f` /opt/mythtv/bin/
 if [[ -d $ver ]] ; then
-    cp -pv $ver/* /opt/mythtv/bin/
+    cp -v  --preserve=mode $ver/* /opt/mythtv/bin/
 fi
-chgrp mythtv /opt/mythtv/bin/*
+#~ chgrp mythtv /opt/mythtv/bin/*
 cd $scriptpath/
 # xmltv
 rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
@@ -127,8 +130,8 @@ if [[ "$IS_BACKEND" == true ]] ; then
             cp install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/
             daemonrestart=Y
         fi
-    else
-        cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
+    #~ else
+        #~ cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
     fi
     
 fi
@@ -143,8 +146,8 @@ if [[ "$USE_MONITOR" == Y ]] ; then
         if ! systemctl is-enabled mythtv-monitor.service ; then
             systemctl enable mythtv-monitor.service 
         fi
-    else
-        cp install/etc/init/mythtv-monitor.conf /etc/init/
+    #~ else
+        #~ cp install/etc/init/mythtv-monitor.conf /etc/init/
     fi
 fi
 # Do we need to install vnc (Y or N)
