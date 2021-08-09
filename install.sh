@@ -6,8 +6,8 @@ datetime=`date +%Y%m%d_%H%M`
 set -e
 
 if ! grep '^mythtv:' /etc/group ; then
-    sudo addgroup --gid 200 mythtv
-    sudo adduser `id -nu` mythtv
+    addgroup --gid 200 mythtv
+    adduser `id -nu` mythtv
 fi
 
 $scriptpath/fixpermissions.sh
@@ -37,10 +37,10 @@ create_dir() {
     if [[ "$perm" == "" ]] ; then
         perm=775
     fi
-    sudo mkdir -pv "$1"
-    sudo chown mythtv "$1" || true
-    sudo chgrp mythtv "$1"
-    sudo chmod $perm "$1"
+    mkdir -pv "$1"
+    chown mythtv "$1" || true
+    chgrp mythtv "$1"
+    chmod $perm "$1"
 }
 
 # mythver=`mythutil --version|grep "MythTV Version"|sed -e "s/MythTV Version : v//"`
@@ -57,9 +57,9 @@ create_dir /etc/opt/mythtv
 create_dir /etc/rc_keymaps
 # create_dir $MOUNTDIR
 create_dir $LOGDIR 2775
-sudo mkdir -p /var/log/mythtv
-sudo chgrp adm /var/log/mythtv
-sudo chmod 2775 /var/log/mythtv
+mkdir -p /var/log/mythtv
+chgrp adm /var/log/mythtv
+chmod 2775 /var/log/mythtv
 
 if [[ "$IS_BACKEND" == true ]] ; then
     create_dir $VIDEODIR/video1 2775
@@ -106,9 +106,9 @@ fi
 chgrp mythtv /opt/mythtv/bin/*
 cd $scriptpath/
 # xmltv
-sudo rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
+rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
 # Need to move this not link it so it is not in the path twice
-sudo mv -f /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
+mv -f /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
   /usr/local/bin/tv_grab_zz_sdjson_sqlite
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
@@ -116,19 +116,19 @@ if [[ "$IS_BACKEND" == true ]] ; then
         # The script does not enable these.
         # It should be done manually when ready
         if ! diff install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service ; then
-            sudo cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
+            cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
             daemonrestart=Y
         fi
         if ! diff install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/peter-hdmiscan.service ; then
-            sudo cp install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/
+            cp install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/
             daemonrestart=Y
         fi
         if ! diff install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/peter-hdmiready1.service ; then
-            sudo cp install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/
+            cp install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/
             daemonrestart=Y
         fi
     else
-        sudo cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
+        cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
     fi
     
 fi
@@ -137,26 +137,26 @@ fi
 if [[ "$USE_MONITOR" == Y ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         if ! diff install/etc/systemd/system/mythtv-monitor.service /etc/systemd/system/mythtv-monitor.service ; then
-            sudo cp install/etc/systemd/system/mythtv-monitor.service /etc/systemd/system/mythtv-monitor.service
+            cp install/etc/systemd/system/mythtv-monitor.service /etc/systemd/system/mythtv-monitor.service
             daemonrestart=Y
         fi
         if ! systemctl is-enabled mythtv-monitor.service ; then
-            sudo systemctl enable mythtv-monitor.service 
+            systemctl enable mythtv-monitor.service 
         fi
     else
-        sudo cp install/etc/init/mythtv-monitor.conf /etc/init/
+        cp install/etc/init/mythtv-monitor.conf /etc/init/
     fi
 fi
 # Do we need to install vnc (Y or N)
 if [[ "$USE_VNC" == Y ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         if ! diff install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service ; then
-            sudo cp install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service
+            cp install/etc/systemd/system/peter-vnc.service /etc/systemd/system/peter-vnc.service
             daemonrestart=Y
         fi
         # Do not enable by default - it may be causing crashes.
 #        if ! systemctl is-enabled peter-vnc.service ; then
-#            sudo systemctl enable peter-vnc.service
+#            systemctl enable peter-vnc.service
 #        fi
     fi
 fi
@@ -164,11 +164,11 @@ fi
 if [[ "$USE_PROXY" == Y ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         if ! diff install/etc/systemd/system/peter-proxy.service /etc/systemd/system/peter-proxy.service ; then
-            sudo cp install/etc/systemd/system/peter-proxy.service /etc/systemd/system/peter-proxy.service
+            cp install/etc/systemd/system/peter-proxy.service /etc/systemd/system/peter-proxy.service
             daemonrestart=Y
         fi
         if ! systemctl is-enabled peter-proxy.service ; then
-            sudo systemctl enable peter-proxy.service
+            systemctl enable peter-proxy.service
         fi
     fi
 fi
@@ -176,125 +176,125 @@ fi
 #systemd
 if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     if ! diff install/etc/systemd/system/peter-suspend.service /etc/systemd/system/peter-suspend.service ; then
-        sudo cp install/etc/systemd/system/peter-suspend.service /etc/systemd/system/peter-suspend.service
+        cp install/etc/systemd/system/peter-suspend.service /etc/systemd/system/peter-suspend.service
         daemonrestart=Y
     fi
     if ! systemctl is-enabled peter-suspend.service ; then
-        sudo systemctl enable peter-suspend.service 
+        systemctl enable peter-suspend.service 
     fi
 #    if ! diff install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service ; then
-#        sudo cp install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service
+#        cp install/etc/systemd/system/peter-resume.service /etc/systemd/system/peter-resume.service
 #        daemonrestart=Y
 #    fi
 #    if ! systemctl is-enabled peter-resume.service ; then
-#        sudo systemctl enable peter-resume.service
+#        systemctl enable peter-resume.service
 #    fi
 
 #    os=`cat /etc/issue|sed "s/ .*//"`
 #    if [[ "$os" == Raspbian ]] ; then
 #        if ! diff install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service ; then
-#            sudo cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
+#            cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
 #            daemonrestart=Y
 #        fi
 #        if ! systemctl is-enabled peter-addips.service ; then
-#            sudo systemctl enable peter-addips.service
+#            systemctl enable peter-addips.service
 #        fi
 #    fi
 
     if [[ "$WEBCAM" == Y ]] ; then
         if ! diff install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service ; then
-            sudo cp install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service
+            cp install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service
             daemonrestart=Y
         fi
         if ! systemctl is-enabled peter-webcam.service ; then
-            sudo systemctl enable peter-webcam.service
+            systemctl enable peter-webcam.service
         fi
     fi
 
     if [[ "$IRC" == Y ]] ; then
         if ! diff install/etc/systemd/system/peter-irc.service /etc/systemd/system/peter-irc.service ; then
-            sudo cp install/etc/systemd/system/peter-irc.service /etc/systemd/system/peter-irc.service
+            cp install/etc/systemd/system/peter-irc.service /etc/systemd/system/peter-irc.service
             daemonrestart=Y
         fi
         if ! systemctl is-enabled peter-irc.service ; then
-            sudo systemctl enable peter-irc.service
+            systemctl enable peter-irc.service
         fi
     fi
 
     if ! grep ^HandlePowerKey /etc/systemd/logind.conf ; then
-        echo "HandlePowerKey=ignore" | sudo tee -a /etc/systemd/logind.conf
+        echo "HandlePowerKey=ignore" | tee -a /etc/systemd/logind.conf
         daemonrestart=Y
     fi
 else
-    sudo cp install/etc/pm/sleep.d/* /etc/pm/sleep.d/
+    cp install/etc/pm/sleep.d/* /etc/pm/sleep.d/
     if [[ -d /etc/acpi/events/ ]] ; then
-        sudo cp install/etc/acpi/events/* /etc/acpi/events/
+        cp install/etc/acpi/events/* /etc/acpi/events/
     fi    
 fi
 
 #udev
-sudo cp install/etc/udev/rules.d/89-pulseaudio-usb.rules \
+cp install/etc/udev/rules.d/89-pulseaudio-usb.rules \
   /etc/udev/rules.d/89-pulseaudio-usb.rules
 
 #syslog
-sudo cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
+cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 #netmanager
-sudo rm -f /etc/network/if-up.d/010addipaddress
-# sudo ln -fs /opt/mythtv/bin/addipaddress.sh \
+rm -f /etc/network/if-up.d/010addipaddress
+# ln -fs /opt/mythtv/bin/addipaddress.sh \
 #   /etc/network/if-up.d/010addipaddress
-# sudo chown root:root /opt/mythtv/bin/10addipaddress.sh
-# sudo chmod g-w /opt/mythtv/bin/10addipaddress.sh
+# chown root:root /opt/mythtv/bin/10addipaddress.sh
+# chmod g-w /opt/mythtv/bin/10addipaddress.sh
 
 if [[ "$daemonrestart" == Y ]] ; then
-    sudo systemctl restart rsyslog.service
-    sudo systemctl daemon-reload
+    systemctl restart rsyslog.service
+    systemctl daemon-reload
 fi
 
 if ! grep '^catch22:' /etc/group ; then
-    sudo addgroup --gid 1099 catch22
+    addgroup --gid 1099 catch22
 fi
 if ! grep "^$SOFT_USER" /etc/passwd ; then
-    sudo adduser --ingroup catch22 $SOFT_USER
+    adduser --ingroup catch22 $SOFT_USER
 fi
 if ! grep "^mythtv" /etc/passwd ; then
-    sudo adduser --ingroup mythtv --system --uid 200 mythtv 
+    adduser --ingroup mythtv --system --uid 200 mythtv 
 fi
 if ! grep "^mythtv:.*$SOFT_USER" /etc/group ; then
-    sudo adduser $SOFT_USER mythtv
+    adduser $SOFT_USER mythtv
 fi
 if ! grep "^video:.*mythtv" /etc/group ; then
-    sudo adduser mythtv audio
-    sudo adduser mythtv video
+    adduser mythtv audio
+    adduser mythtv video
 fi
 
 myuser=`id -nu`
 mygroup=`id -ng`
 
 if [[ "$mygroup" != catch22 ]] ; then
-    sudo usermod -g catch22 $myuser
+    usermod -g catch22 $myuser
 fi
 
 if [[ $ARCH == arm* ]] ; then
     if ! grep "^video:.*$SOFT_USER" /etc/group ; then
-        sudo adduser $SOFT_USER audio 
-        sudo adduser $SOFT_USER video 
-        sudo adduser $SOFT_USER dialout 
-        sudo adduser $SOFT_USER plugdev 
-        sudo adduser $SOFT_USER input 
+        adduser $SOFT_USER audio 
+        adduser $SOFT_USER video 
+        adduser $SOFT_USER dialout 
+        adduser $SOFT_USER plugdev 
+        adduser $SOFT_USER input 
     fi
 fi
 
 
 if [[ "$AMPLIFY" == Y ]] ; then
 #    if [[ -f $MYTHTVDIR/bin/mythfrontend ]] ; then
-#        sudo cp -av install/home/.config /home/$SOFT_USER/
-#        sudo chown -R $SOFT_USER /home/$SOFT_USER/.config
-#        sudo chgrp -R $SOFT_USER /home/$SOFT_USER/.config
+#        cp -av install/home/.config /home/$SOFT_USER/
+#        chown -R $SOFT_USER /home/$SOFT_USER/.config
+#        chgrp -R $SOFT_USER /home/$SOFT_USER/.config
 #    fi
-    sudo cp -v install/home/.asoundrc_arm /home/$SOFT_USER/.asoundrc
-    sudo chown -R $SOFT_USER /home/$SOFT_USER/.asoundrc
-    sudo chgrp -R $SOFT_USER /home/$SOFT_USER/.asoundrc
+    cp -v install/home/.asoundrc_arm /home/$SOFT_USER/.asoundrc
+    chown -R $SOFT_USER /home/$SOFT_USER/.asoundrc
+    chgrp -R $SOFT_USER /home/$SOFT_USER/.asoundrc
 else
     rm -f /home/$SOFT_USER/.asoundrc
 fi
@@ -303,12 +303,12 @@ cp -avf install/home/bin $HOME/
 
 # Remove automatic weekly db backup
 if [[ -f /etc/cron.weekly/mythtv-database ]] ; then
-    sudo mkdir -p /etc/cron.removed/
-    sudo mv -f /etc/cron.weekly/mythtv-database /etc/cron.removed/
+    mkdir -p /etc/cron.removed/
+    mv -f /etc/cron.weekly/mythtv-database /etc/cron.removed/
 fi
 
 #Remove obsoletes
-sudo rm -f /lib/systemd/system-sleep/mythtv_sleep.sh
+rm -f /lib/systemd/system-sleep/mythtv_sleep.sh
 
 # Check for presence of ccextractor
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
@@ -320,5 +320,5 @@ fi
 
 # Disable guest logon (after next reboot)
 if [[ -d /etc/lightdm/lightdm.conf.d ]] ; then
-    sudo sh -c 'printf "[Seat:*]\nallow-guest=false\n" >/etc/lightdm/lightdm.conf.d/50-no-guest.conf'
+    sh -c 'printf "[Seat:*]\nallow-guest=false\n" >/etc/lightdm/lightdm.conf.d/50-no-guest.conf'
 fi
