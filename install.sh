@@ -122,14 +122,6 @@ if [[ "$IS_BACKEND" == true ]] ; then
             cp install/etc/systemd/system/mythtv-backend.service /etc/systemd/system/mythtv-backend.service
             daemonrestart=Y
         fi
-        if ! diff install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/peter-hdmiscan.service ; then
-            cp install/etc/systemd/system/peter-hdmiscan.service /etc/systemd/system/
-            daemonrestart=Y
-        fi
-        if ! diff install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/peter-hdmiready1.service ; then
-            cp install/etc/systemd/system/peter-hdmiready1.service /etc/systemd/system/
-            daemonrestart=Y
-        fi
     #~ else
         #~ cp install/etc/init/mythtv-backend.conf /etc/init/mythtv-backend.conf
     fi
@@ -234,10 +226,6 @@ else
         cp install/etc/acpi/events/* /etc/acpi/events/
     fi    
 fi
-
-#udev
-cp install/etc/udev/rules.d/89-pulseaudio-usb.rules \
-  /etc/udev/rules.d/89-pulseaudio-usb.rules
 
 #syslog
 cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
