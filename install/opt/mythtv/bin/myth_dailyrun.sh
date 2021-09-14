@@ -3,6 +3,7 @@
 
 . /etc/opt/mythtv/mythtv.conf
 . /etc/opt/mythtv/private.conf
+LEANCAP=/opt/mythtv/leancap
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
@@ -40,6 +41,12 @@ if [[ "$today" == Sat* ]]; then
             "$scriptpath/notify.py" "Database Backup failed" "mythtv_dbbackup.sh"
         fi
         echo $today > $DATADIR/dbbackup_date
+        echo Running leancap_chanlist
+        $LEANCAP/leancap_chanlist.sh leancap2
+        rc=$?
+        if [[ "$rc" != 0 ]] ; then
+            "$scriptpath/notify.py" "Leancap Chanlist failed" "$LEANCAP/leancap_chanlist.sh leancap1"
+        fi
         # Run roamexport to keep portable drive up to date.
         # This must be run here to ensure consistent with DB backup above
         $scriptpath/roamexport.sh
