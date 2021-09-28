@@ -336,6 +336,33 @@ if [[ "$preset" != "" ]] ; then
     esac
 fi
 
+# This gives MP3 but blank for AAC
+AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
+if [[ "$AudioCodec" == "" ]] ; then
+    # This gives AAC result
+    AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
+fi
+SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
+VideoFormat=`mediainfo '--Inform=Video;%Format%' "$input"`
+
+if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
+    if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
+        audio=copy
+    fi
+fi
+
+if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
+    if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
+        audio=copy
+    fi
+fi
+
+if [[ "$Height" == "" || "$Height" == "$orgHeight" ]] ; then
+    if [[ "$audio" == copy && "$encoder" == x264 && "$VideoFormat" == AVC && "$morph" == "" ]] ; then
+        encoder=copy
+    fi
+fi
+
 if [[ "$Height" == "" ]] ; then
     Height=$orgHeight
     maxWidth=0
@@ -392,21 +419,21 @@ if [[ ( "$encoder" == mpeg4 ) \
     Quality=4
 fi
 
-if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
-    AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
-    SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
-    if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
-        audio=copy
-    fi
-fi
+#~ if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
+    #~ AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
+    #~ SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
+    #~ if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
+        #~ audio=copy
+    #~ fi
+#~ fi
 
-if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
-    AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
-    SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
-    if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
-        audio=copy
-    fi
-fi
+#~ if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
+    #~ AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
+    #~ SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
+    #~ if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
+        #~ audio=copy
+    #~ fi
+#~ fi
 
 if [[ "$ffrate" == y && "$framerate" == "" && "$isDVD" == N ]] ; then
     framerate=`mediainfo '--Inform=Video;%FrameRate%' "$input"`
