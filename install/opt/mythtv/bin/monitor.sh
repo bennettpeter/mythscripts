@@ -75,6 +75,10 @@ else
     while true ; do
         sleep 60
         if  $scriptpath/mythshutdown.sh ; then
+            if [[ "WAKEUPTIME" != "" ]] ; then
+                # Sets wakeup to the default if one was provided
+                sudo $scriptpath/setwakeup 1
+            fi
             setsid $scriptpath/systemshutdown.sh || true
         fi
     done

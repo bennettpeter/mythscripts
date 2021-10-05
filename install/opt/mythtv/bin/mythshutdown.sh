@@ -91,7 +91,7 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
 fi
 
 # if there are other encoders add them here
-encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder|hdmixdvr\.sh'
+encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder|leanxdvr\.sh'
 if [[ "$CAN_TRANSCODE" == Y ]] ; then
     # Check if multi_encode.sh script is running
     if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
@@ -302,6 +302,28 @@ if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
             wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
             date > $DATADIR/last_ceton_reboot
         fi
+    fi
+fi
+
+# Only run leanxdvr if all other tests say shutdown is OK
+if [[ "$rc" == 0 && "$RUN_LEANXDVR" == Y ]] ; then
+    prev_leanxdvr=0
+    now=`date +%s`
+    prev_wakeup=`date -d "$WAKEUPTIME" +%s`
+    if (( prev_wakeup > now )) ; then
+        prev_wakeup=`date -d " yesterday $WAKEUPTIME" +%s`
+    fi
+    if [[ -f $DATADIR/leanxdvr_time ]]; then
+        prev_leanxdvr=`cat $DATADIR/leanxdvr_time`
+    fi
+    # If we are within 6 hours of the wakeup time and more than 18 hours
+    # since the last leanxdvr start, we can start it.
+    # 21600 sec = 6 hours, 64800 sec = 18 hours
+    if (( now - prev_wakeup < 21600 && now - prev_leanxdvr > 64800 )) ; then
+        /opt/mythtv/leancap/leanxdvr.sh &
+        echo $DATE "Starting leanxdvr, don't shut down for $CHECK_MINUTES min."
+        echo $now > $DATADIR/leanxdvr_time
+        rc=1
     fi
 fi
 
