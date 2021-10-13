@@ -1,6 +1,9 @@
 #!/bin/bash
 # Shut down or suspend
 # Runs under "mythtv" not root
+# parm 1 : NOREBOOT to prevent reboot
+
+option="$1"
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -20,10 +23,15 @@ echo "Last reboot was $priorreboot"
 vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
 if [[ "$CAN_SUSPEND" == Y ]] ; then
-    if [[ ( "$priorreboot" == "$s7daysago" || "$priorreboot" < "$s7daysago" ) && "$vbox" == "" ]] ; then
+    if [[ ( "$priorreboot" == "$s7daysago" || "$priorreboot" < "$s7daysago" ) \
+        && "$vbox" == "" && "$option" != NOREBOOT ]] ; then
         date +%F > $DATADIR/reboot_date
         echo "Restarting"
         sudo /sbin/shutdown -r now
+        userid=$(id -u -n)
+        if [[ "$userid" != mythtv && "$userid" != root ]] ; then
+            pkill -KILL -u $userid
+        fi
     else
         echo "Suspending"
         if [[ "$X11_DISABLE" != "" ]] ; then
