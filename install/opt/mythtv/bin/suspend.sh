@@ -32,8 +32,11 @@ shutparm=
 if [[ "$CAN_SUSPEND" == Y ]] ; then
     if [[ ( "$priorreboot" == "$s7daysago" || "$priorreboot" < "$s7daysago" ) && "$vbox" == "" ]] ; then
         zenity --question --no-wrap --timeout=15 --icon-name=dialog-warning \
-         --text="WARNING - Reboot time.\nAfter 15 seconds this message will vanish\nand the system will stay awake." \
-        --ok-label="Reboot" --cancel-label="Sleep"
+         --width 1000 --height 500 \
+         --text='<span font="64">WARNING - Reboot time.\n'\
+'After 15 seconds this message will vanish\nand the system will stay awake.\n'\
+'Select Reboot or Sleep below</span>' \
+         --ok-label='Reboot' --cancel-label="Sleep"
         rc=$?
         if [[ $rc == 0 ]] ; then
             shutparm=
