@@ -14,7 +14,9 @@ if (( REBOOT_DAYS < 1 )) ; then
 fi
 
 s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
-priorreboot=`cat $DATADIR/reboot_date`
+# priorreboot=`cat $DATADIR/reboot_date`
+resp=($(who -b))
+priorreboot=${resp[2]}
 echo "Last reboot was $priorreboot"
 vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
