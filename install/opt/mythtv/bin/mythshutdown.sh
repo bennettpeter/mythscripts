@@ -320,7 +320,7 @@ if [[ "$rc" == 0 && "$RUN_LEANXDVR" == Y ]] ; then
     # since the last leanxdvr start, we can start it.
     # 21600 sec = 6 hours, 64800 sec = 18 hours
     if (( now - prev_wakeup < 21600 && now - prev_leanxdvr > 64800 )) ; then
-        /opt/mythtv/leancap/leanxdvr.sh &
+        /opt/mythtv/leancap/leanxdvr.sh leancap1 3 &
         echo $DATE "Starting leanxdvr, don't shut down for $CHECK_MINUTES min."
         echo $now > $DATADIR/leanxdvr_time
         rc=1
