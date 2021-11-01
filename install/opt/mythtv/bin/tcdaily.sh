@@ -240,7 +240,7 @@ for (( stage=0 ; stage<10 ; stage=stage+1 )) ; do
                         "$scriptpath/notify.py" "tcdaily warning" \
                             "Episode $episode wrong extension. Format is $videoformat. Running user job."
                         # Find the chanid and starttime for the file
-                        set -- `echo "select chanid, starttime from recorded where basename like '$basename.%';" | \
+                        set -- `echo "select chanid, starttime from recorded where basename = '$bname';" | \
                         $mysqlcmd | tail -1`
                         chanid=$1
                         starttime="$2 $3"
