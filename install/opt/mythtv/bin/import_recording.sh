@@ -121,7 +121,8 @@ if [[ "$action" == I ]] ; then
 
     basename=${VODCHAN}_${fntime}.$ext
     newbasename=$basename
-    sql1="INSERT INTO recorded
+    sql1="set sql_mode = '';
+    INSERT INTO recorded
     (chanid,starttime,endtime,title,subtitle,description,season,episode,category,hostname,bookmark,
     editing,cutlist,autoexpire,commflagged,recgroup,recordid,seriesid,programid,inetref,lastmodified,
     filesize,stars,previouslyshown,originalairdate,preserve,findid,deletepending,transcoder,timestretch,
@@ -133,7 +134,7 @@ if [[ "$action" == I ]] ; then
     0,0,0,0,'Default',0,'','','',CURRENT_TIMESTAMP,
     $filesize,0,0,'$originalairdate',0,0,0,0,1,
     0,'$basename','$starttime','$endtime','Default','Default',1,0,0,'Default',
-    null,
+    '0000-00-00 00:00:00',
     1,0,'Import');"
 
     sql2="INSERT INTO oldrecorded
