@@ -17,6 +17,8 @@ title="$2"
 subtitle="$3"
 originalairdate="$4"
 description="$5"
+season="$6"
+episode="$7"
 action="$6"
 
 wkday=`date +%a`
@@ -24,14 +26,45 @@ junktoday=junk$wkday
 
 echo "$@"
 
-if [[ "$filename" == "" || "$title" == "" ]] ; then
+if [[ "$filename" == "" ]] ; then
     echo Usage
-    echo "$0 filename title subtitle originalairdate description action(I/U/E)"
+    echo "$0 filename title subtitle originalairdate description season episode action(I/U/E)"
     echo "I=insert,U=update,E=either default blank is prompt"
     echo "To match existing recording - title, subtitle and originalairdate must match"
+    echo "If any field is blank - parse filename in format yymmdd S99E99 subtitle, with title  as"
+    echo "  the file directory"
     exit 2
 fi
 date
+
+# Sample Filename
+# Young Sheldon/980430 S03E21 A Secret Letter and a Lowly Disc of Processed Meat.mkv
+
+if [[ "$title" == "" ]] ; then
+    canonical=$(readlink -f "$filename")
+    dir=$(dirname "$canonical")
+    title=$(basename "$dir")
+fi
+bname=$(basename "$filename")
+if [[ "$subtitle" == "" ]] ; then
+    subtitle=$(echo "$bname" | sed "s/^[0-9]* //;s/^S[0-9]*E[0-9]* //;s/\.[^.]*$//")
+fi
+if [[ "$originalairdate" == "" ]] ; then
+    originalairdate=$(echo "$bname" | grep -o "^[0-9]* " | sed "s/ //")
+    # Correct century?
+    if (( originalairdate > 500000 )) ; then
+        originalairdate=19$originalairdate
+    fi
+    originalairdate=$(date -d $originalairdate "+%Y-%m-%d")
+fi
+
+if [[ "$season" == "" ]] ; then
+    season=$(echo "$bname" | grep -o "S[0-9]*E" | sed "s/S//;s/E//;s/^0*//")
+fi
+if [[ "$episode" == "" ]] ; then
+    episode=$(echo "$bname" | grep -o "E[0-9]* " | sed "s/E//;s/ //;s/^0*//")
+fi
+
 # get DB details
 . $scriptpath/getconfig.sh
 
@@ -73,8 +106,8 @@ case $action in
     ;;
   *)
     if [[ "$chanid" == "" ]] ; then
-        echo "$title / $subtitle not found"
-        echo "Enter Y to insert"
+        echo "title:$title subtitle:$subtitle originalairdate:$originalairdate season:$season episode:$episode" 
+        echo "Not Found. Enter Y to insert"
         read -e ans
         if [[ "$ans" == Y || "$ans" == y ]] ; then
             action=I
@@ -102,6 +135,12 @@ storagedir="$IMPORTDIR"
 mkdir -p $storagedir
 
 if [[ "$action" == I ]] ; then
+    if [[ "$season" == "" ]] ; then
+        season=0
+    fi
+    if [[ "$episode" == "" ]] ; then
+        episode=0
+    fi
     # sleep 2 sec to make sure no two files get the same name
     sleep 2
     fntmf='+%Y%m%d%H%M%S'
@@ -130,7 +169,7 @@ if [[ "$action" == I ]] ; then
     bookmarkupdate,
     recgroupid,recordedid,inputname )
     VALUES(
-    $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",0,0,'','$LocalHostName',0,
+    $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",$season,$episode,'','$LocalHostName',0,
     0,0,0,0,'Default',0,'','','',CURRENT_TIMESTAMP,
     $filesize,0,0,'$originalairdate',0,0,0,0,1,
     0,'$basename','$starttime','$endtime','Default','Default',1,0,0,'Default',
@@ -143,7 +182,7 @@ if [[ "$action" == I ]] ; then
     findid,recordid,station,rectype,duplicate,recstatus,reactivate,generic,future
     )
     VALUES(
-    $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",0,0,'',
+    $chanid,'$starttime','$endtime',\"$title\",\"$subtitle\",\"$description\",$season,$episode,'',
     '','','',
     0,0,'DOWNLOAD',4,1,-3,0,0,0
     );"
