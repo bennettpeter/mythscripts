@@ -229,6 +229,12 @@ if ps -ef|grep roamexport.sh|grep -v grep ; then
     rc=1
 fi
 
+# xfburn
+if pidof xfburn ; then
+    echo $DATE "xfburn is running, don't shut down for $CHECK_MINUTES min."
+    rc=1
+fi
+
 # Check if anybody is accessing my drives via nfs
 if [[ -f /usr/sbin/nfsstat && -f /proc/net/rpc/nfsd ]] ; then
     touch /tmp/${userid}_mythshutdown_nfs_count
