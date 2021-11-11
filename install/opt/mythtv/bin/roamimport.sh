@@ -23,6 +23,8 @@ if [[ "$DBName" != mythdbroam ]] ; then
     exit 2
 fi
 
+hostname=$(cat /etc/hostname)
+
 echo "drop database $DBName;
 create database $DBName;" | \
 sudo mysql
@@ -30,24 +32,24 @@ sudo mysql
 $MYTHTVDIR/share/mythtv/mythconverg_restore.pl --verbose --filename "$backupfile"
 
 echo "
-update recordedartwork set host = 'raza';
-update storagegroup set hostname = 'raza';
-update videometadata set host = 'raza';
+update recordedartwork set host = '$hostname';
+update storagegroup set hostname = '$hostname';
+update videometadata set host = '$hostname';
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
 delete from settings where value = 'MasterServerIP' and hostname is null;
-delete from settings where value = 'BackendServerIP' and hostname = 'raza';
-delete from settings where value = 'BackendServerAddr' and hostname = 'raza';
+delete from settings where value = 'BackendServerIP' and hostname = '$hostname';
+delete from settings where value = 'BackendServerAddr' and hostname = '$hostname';
 delete from settings where value = 'MasterServerName' and hostname is null;
-delete from settings where value = 'ListenOnAllIps' and hostname = 'raza';
-delete from settings where value = 'SecurityPin' and hostname = 'raza';
+delete from settings where value = 'ListenOnAllIps' and hostname = '$hostname';
+delete from settings where value = 'SecurityPin' and hostname = '$hostname';
 insert into settings (value,data,hostname) values
   ('DeletedMaxAge','-1',null),
   ('MasterServerIP','$ROAM_IPADDRESS',null),
-  ('BackendServerIP','$ROAM_IPADDRESS','raza'),
-  ('BackendServerAddr','$ROAM_IPADDRESS','raza'),
-  ('MasterServerName','raza',null),
-  ('ListenOnAllIps','1','raza'),
-  ('SecurityPin','0000','raza');
+  ('BackendServerIP','$ROAM_IPADDRESS','$hostname'),
+  ('BackendServerAddr','$ROAM_IPADDRESS','$hostname'),
+  ('MasterServerName','$hostname',null),
+  ('ListenOnAllIps','1','$hostname'),
+  ('SecurityPin','0000','$hostname');
 select * from settings
 where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
 'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr');

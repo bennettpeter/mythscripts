@@ -28,7 +28,7 @@ case $project in
         # commented out to use default config dir
         export MYTHCONFDIR=$HOME/.mythtv-$shortname
         # dist-packages if installed by debian
-        export PYTHONPATH=$basedir/local/lib/python2.7/dist-packages
+        export PYTHONPATH=`ls -d $basedir/local/lib/python*/dist-packages`
         export PERL5LIB=`ls -d $basedir/local/share/perl/*`${PERL5LIB:+:${PERL5LIB}}
         exec $pgm "$@"
         ;;
