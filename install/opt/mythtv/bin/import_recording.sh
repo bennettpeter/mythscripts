@@ -107,9 +107,9 @@ case $action in
   *)
     if [[ "$chanid" == "" ]] ; then
         echo "title:$title subtitle:$subtitle originalairdate:$originalairdate season:$season episode:$episode" 
-        echo "Not Found. Enter Y to insert"
+        echo "Not Found. Enter I to insert"
         read -e ans
-        if [[ "$ans" == Y || "$ans" == y ]] ; then
+        if [[ "$ans" == I || "$ans" == i ]] ; then
             action=I
         else
             echo "Canceled"
@@ -117,10 +117,12 @@ case $action in
         fi
     else
         echo "$title / $subtitle already exists chanid $chanid starttime $starttime originalairdate $found_originalairdate"
-        echo "Enter Y to update"
+        echo "Enter U to update, I to insert"
         read -e ans
-        if [[ "$ans" == Y || "$ans" == y ]] ; then
+        if [[ "$ans" == U || "$ans" == u ]] ; then
             action=U
+        elif [[ "$ans" == I || "$ans" == i ]] ; then
+            action=I
         else
             echo "Canceled"
             exit 2
