@@ -29,7 +29,10 @@ done
 if [[ "$option" == done ]] ; then
     exit $rc
 fi
-if [[ `arch` == arm* ]] ; then
+
+# Defunct raspberry pi method for applying updates
+if [[ `arch` == NOTHING ]] ; then
+#~ if [[ `arch` == arm* ]] ; then
     mount /srv/ahome || true
     git checkout $gitbasedir
     git clean -f
