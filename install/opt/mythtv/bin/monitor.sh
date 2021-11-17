@@ -81,5 +81,21 @@ else
             fi
             setsid $scriptpath/systemshutdown.sh || true
         fi
+        if [[ "$BATTERY_CHECK" != "" ]] ; then
+            if acpi -a|grep off-line ; then
+                batt=$(acpi -b|grep -o [0-9]*%)
+                batt=${batt%\%}
+                if (( batt < $BATTERY_CHECK )) ; then
+                    echo "Battery low ${batt}%"
+                    rc=0
+                    x_users=(`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
+                    DISPLAY=:0 sudo -u ${x_users[0]} zenity --warning --no-wrap \
+                    --icon-name=dialog-warning \
+                    --width 1000 --height 500 --timeout=15 \
+                    --text='<span font="64">WARNING - BATTERY LOW.\n'"Battery level = ${batt}%</span>" \
+                    2>/dev/null >/dev/null || rc=$?
+                fi
+            fi
+        fi
     done
 fi
