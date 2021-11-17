@@ -1,7 +1,6 @@
 #!/bin/bash
 # Import a recording into mythtv
-# command line - 
-# 
+
 set -e
 
 . /etc/opt/mythtv/mythtv.conf
@@ -12,29 +11,105 @@ scriptname=`basename "$scriptname" .sh`
 # exec 2>&1
 # date
 
-filename="$1"
-title="$2"
-subtitle="$3"
-originalairdate="$4"
-description="$5"
-season="$6"
-episode="$7"
-action="$6"
+filename=
+title=
+subtitle=
+originalairdate=
+description=
+season=
+episode=
+action=
+
+while (( "$#" >= 1 )) ; do
+    case $1 in
+        -i)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -i." ; error=y
+            else
+                filename="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -t)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -t." ; error=y
+            else
+                title="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -s)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -s." ; error=y
+            else
+                subtitle="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -a)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -a." ; error=y
+            else
+                originalairdate="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -d)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -d." ; error=y
+            else
+                description="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -S)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -S." ; error=y
+            else
+                season="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -E)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -E." ; error=y
+            else
+                episode="$2"
+                shift||rc=$?
+            fi
+            ;;
+        -u)
+            if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for -a." ; error=y
+            else
+                action="$2"
+                shift||rc=$?
+            fi
+            ;;
+        *)
+            echo "Invalid option $1"
+            error=y
+            ;;
+    esac
+    shift||rc=$?
+done
+
+if [[ "$error" == y || "$filename" == "" ]] ; then
+    echo "Import video as recording"
+    echo "Options"
+    echo "-i filename Input file, required."
+    echo "-t Title. Default is File directory."
+    echo "-s Subtitle. Default is file name excluding leading date and leading SxxExx."
+    echo "-a Original Air Date in any format accepted by date command, eg YYYYMMDD YYYY-MM-DD YY-MM-DD."
+    echo "-d Description. Optional."
+    echo "-S Season. Optional. Default is from filename if it includes S99E99."
+    echo "-E Episode. Optional. Default is from filename if it includes S99E99."
+    echo "-u Update action."
+    echo "   I=insert, U=update, E=update if found otherwise insert. Default blank is prompt"
+    echo
+    echo "If any field is blank - parse filename in format yymmdd S99E99 subtitle, with title  as"
+    echo "  the file directory"
+    exit 2
+fi
+
 
 wkday=`date +%a`
 junktoday=junk$wkday
 
 echo "$@"
 
-if [[ "$filename" == "" ]] ; then
-    echo Usage
-    echo "$0 filename title subtitle originalairdate description season episode action(I/U/E)"
-    echo "I=insert,U=update,E=either default blank is prompt"
-    echo "To match existing recording - title, subtitle and originalairdate must match"
-    echo "If any field is blank - parse filename in format yymmdd S99E99 subtitle, with title  as"
-    echo "  the file directory"
-    exit 2
-fi
 date
 
 # Sample Filename
@@ -87,11 +162,11 @@ starttime="$2 $3"
 basename="$4"
 found_originalairdate="$5"
 
-case $action in 
+case $action in
   I)
     if [[ "$chanid" != "" ]] ; then
-        echo "Error $title / $subtitle already exists chanid $chanid starttime $starttime originalairdate $found_originalairdate"
-        exit 2
+        echo "$title / $subtitle already exists chanid $chanid starttime $starttime originalairdate $found_originalairdate"
+        echo "Will insert another copy"
     fi
     ;;
   U)
@@ -104,9 +179,16 @@ case $action in
         exit 2
     fi
     ;;
-  *)
+  E)
+    if [[ "$chanid" != ""  &&  "$originalairdate" == "$found_originalairdate" ]] ; then
+        action=U
+    else
+        action=I
+    fi
+    ;;
+  '')
     if [[ "$chanid" == "" ]] ; then
-        echo "title:$title subtitle:$subtitle originalairdate:$originalairdate season:$season episode:$episode" 
+        echo "title:$title subtitle:$subtitle originalairdate:$originalairdate season:$season episode:$episode"
         echo "Not Found. Enter I to insert"
         read -e ans
         if [[ "$ans" == I || "$ans" == i ]] ; then
@@ -129,6 +211,10 @@ case $action in
         fi
     fi
     ;;
+  *)
+    echo "ERROR Invalid Action $action"
+    exit 2
+    ;;
 esac
 echo action $action
 
@@ -146,7 +232,7 @@ if [[ "$action" == I ]] ; then
     # sleep 2 sec to make sure no two files get the same name
     sleep 2
     fntmf='+%Y%m%d%H%M%S'
-    time=`date -u +%s`
+    time=`date -u -d "2 hours ago" +%s`
     chanid=$VODCHAN
     starttime=`date -u --date=@$time "$tmf"`
     durationmilli=`mediainfo '--Inform=Video;%Duration%' "$filename"|cut -d . -f 1`
@@ -191,7 +277,7 @@ if [[ "$action" == I ]] ; then
 
     cp -ivLp "$filename" "$storagedir/$basename"
     # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
-    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$basename" 
+    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$basename"
 
     echo sudo chown mythtv "$storagedir/$basename"
     sudo chown mythtv "$storagedir/$basename"
@@ -212,16 +298,15 @@ if [[ "$action" == I ]] ; then
     echo "Video;%Width%,%Height%,%FrameRate%,%Width%/%Height%,'%Format%'," >> /tmp/${myuser}_mediainfo.parm
     echo "Audio;'%Format%'" >> /tmp/${myuser}_mediainfo.parm
 
-    mediainfo "--Inform=file:///tmp/${myuser}_mediainfo.parm" "$storagedir/$basename" > /tmp/${myuser}_mediainfo.out 
+    mediainfo "--Inform=file:///tmp/${myuser}_mediainfo.parm" "$storagedir/$basename" > /tmp/${myuser}_mediainfo.out
 
     sql3="INSERT INTO recordedfile
     (basename, filesize, container, width, height, fps, aspect, video_codec, audio_codec, audio_sample_rate, audio_channels,  comment, hostname, storagegroup, id, recordedid,  total_bitrate, video_avg_bitrate, video_max_bitrate, audio_avg_bitrate, audio_max_bitrate)
     VALUES( '$basename', "`cat /tmp/${myuser}_mediainfo.out`", 0,0,'','$LocalHostName','Default',0,
     $recordedid,0,0,0,0,0);"
 
-    echo "$sql3" 
+    echo "$sql3"
     echo "$sql3" | $mysqlcmd
-        
 fi
 
 if [[ "$action" == U ]] ; then
@@ -246,16 +331,16 @@ if [[ "$action" == U ]] ; then
         storagedir="$IMPORTDIR"
     else
         storagedir=`dirname "$oldfile"`
-    fi        
+    fi
     newbasename="${basename%.*}".$ext
-    sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime', filesize = $filesize where chanid = '$chanid' and starttime = '$starttime' ;" 
+    sql1="UPDATE recorded set basename = '$newbasename', endtime = '$endtime', filesize = $filesize where chanid = '$chanid' and starttime = '$starttime' ;"
     # Need to fix other fields on recordedfile
     sql2="update recordedfile set basename = '$newbasename', filesize = $filesize, video_codec = 'H264' where basename = '$basename';"
     mkdir -p "$storagedir/$junktoday/"
     mv -fv "$storagedir/$basename"* "$storagedir/$junktoday/" || true
     cp -ivLp "$filename" "$storagedir/$newbasename"
     # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
-    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$newbasename" 
+    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$newbasename"
 
     echo sudo chown mythtv:mythtv "$storagedir/$newbasename"
     sudo chown mythtv:mythtv "$storagedir/$newbasename"
