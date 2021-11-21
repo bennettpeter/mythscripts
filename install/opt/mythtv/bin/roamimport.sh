@@ -1,6 +1,9 @@
 #!/bin/bash
 # Import database for roaming MythTV
 
+# Run from command line this way
+# run_opt.sh mythtv/prd roamimport.sh
+
 set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -9,6 +12,10 @@ scriptname=`basename "$scriptname" .sh`
 # exec 1>>$LOGDIR/${scriptname}.log
 # exec 2>&1
 # date
+
+# Removable drive is mounted on default location
+# and a link is in /srv/mythtv/video1
+# sudo ln -s /media/peter/mythroam /srv/mythtv/video1
 
 #restore
 backupdir=/srv/mythtv/video1/dbbackup
@@ -20,6 +27,7 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DB
 
 if [[ "$DBName" != mythdbroam ]] ; then
     echo "Incorrect Database name $DBName"
+    read test
     exit 2
 fi
 
