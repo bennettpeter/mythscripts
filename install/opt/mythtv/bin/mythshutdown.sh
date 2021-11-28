@@ -91,28 +91,28 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
 fi
 
 # if there are other encoders add them here
-encoders='HandBrakeCLI|ffmpeg|simplescreenrecorder|leanxdvr\.sh'
-if [[ "$CAN_TRANSCODE" == Y ]] ; then
-    # Check if multi_encode.sh script is running
-    if ps -ef|grep 'multi_encode.*\.sh'|grep -v "grep " ; then
-        echo $DATE "multi_encode is running, don't shut down for $CHECK_MINUTES min."
-        rc=1
-    elif ps -ef|egrep "$encoders"|egrep -v "grep " ; then
-        echo $DATE "encoders are running, don't shut down for $CHECK_MINUTES min."
-        rc=1
-    elif [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/mustrun_tcencode ]] ; then
+encoders='HandBrakeCLI ffmpeg'
+encoderscripts='leanxdvr\.sh|leanxvod\.sh|multi_encode\.sh'
+encoderunning=0
+if pidof $encoders ; then
+    echo $DATE "One of: $encoders Is running, don't shut down."
+    rc=1
+    encoderunning=1
+    echo $DATE > $DATADIR/checklogin
+elif ps -ef|egrep "$encoderscripts"|egrep -v "egrep " ; then
+    echo $DATE "One of $encoderscripts is running, don't shut down."
+    rc=1
+    encoderunning=1
+    echo $DATE > $DATADIR/checklogin
+fi
+if [[ "$CAN_TRANSCODE" == Y && "$encoderunning" == 0 ]] ; then
+    if [[ -f "$TCSTORAGEDIR/$TCSUBDIR"/mustrun_tcencode ]] ; then
         nohup "$scriptpath/tcencode.sh" >/dev/null 2>&1 &
-        echo $DATE "starting tcencode, don't shut down for $CHECK_MINUTES min."
+        echo $DATE "starting tcencode, don't shut down."
         rc=1
     fi
     # Experimental command for checking if HandBrake is in a loop
 #    ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
-else
-    if ps -ef|egrep "$encoders"|egrep -v "grep " ; then
-        echo $DATE "encoders are running, don't shut down for $CHECK_MINUTES min."
-        echo $DATE > $DATADIR/checklogin
-        rc=1
-    fi
 fi
 
 # Find unix id of SOFT_USER
