@@ -187,11 +187,6 @@ if [[ "$x_user" != "" && "$x_user" != "$SOFT_USER" && "$CAN_SUSPEND" == Y ]] ; t
     unset DISPLAY
 fi
 
-#if [[ `pidof k3b` != "" ]] ; then
-#    echo $DATE k3b is running, don\'t shut down!
-#    rc=1
-#fi
-
 #if [[ `pidof parec` != "" ]] ; then
 #    echo $DATE parec is running, don\'t shut down!
 #    rc=1
@@ -230,8 +225,8 @@ if ps -ef|grep roamexport.sh|grep -v grep ; then
 fi
 
 # xfburn
-if pidof xfburn ; then
-    echo $DATE "xfburn is running, don't shut down for $CHECK_MINUTES min."
+if pidof xfburn k3b ; then
+    echo $DATE "cd or dvd burning is running, don't shut down."
     rc=1
 fi
 
