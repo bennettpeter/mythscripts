@@ -336,14 +336,16 @@ if [[ "$preset" != "" ]] ; then
     esac
 fi
 
-# This gives MP3 but blank for AAC
-AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
-if [[ "$AudioCodec" == "" ]] ; then
-    # This gives AAC result
-    AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
+if [[ "$isDVD" == N ]] ; then
+    # This gives MP3 but blank for AAC
+    AudioCodec=`mediainfo '--Inform=Audio;%CodecID/Hint%' "$input"`
+    if [[ "$AudioCodec" == "" ]] ; then
+        # This gives AAC result
+        AudioCodec=`mediainfo '--Inform=Audio;%Format%' "$input"`
+    fi
+    SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
+    VideoFormat=`mediainfo '--Inform=Video;%Format%' "$input"`
 fi
-SamplingRate=`mediainfo '--Inform=Audio;%SamplingRate%' "$input"`
-VideoFormat=`mediainfo '--Inform=Video;%Format%' "$input"`
 
 if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
     if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
@@ -455,7 +457,7 @@ dname=`dirname "$input"`
 if [[ "$output" == "" ]] ; then
     if [[ "$isDVD" == Y ]] ; then
         # dname="$HOME/Video/Recordings/$encoder/$bname/$titlenum/$chapters/"
-        dname="$HOME/Video/Recordings/$encoder/$bname"
+        dname="$HOME/Videos/recordings/$encoder/$bname"
         mkdir -p "$dname"
         sep= ; if [[ "$chapters" != "" ]] ; then sep="_" ; fi
         output="$dname/${bname}_${titlenum}${sep}${chapters}".$extension
