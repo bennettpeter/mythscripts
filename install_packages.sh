@@ -2,7 +2,8 @@
 # Install packages needed for mythtv scripts
 
 # for x86/x86_64 only
-sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi
+sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
+  xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox
 
 # raspberry pi
 sudo apt install figlet gdebi-core dos2unix wakeonlan

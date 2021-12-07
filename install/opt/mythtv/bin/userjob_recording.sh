@@ -95,6 +95,18 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     if (( actualsecs < minsecs - 60 )) ; then
         "$scriptpath/notify.py" "$type failed" "$title $subtitle is $shortmins minutes short"
     fi
+    if (( actualsecs > 400 )) ; then
+        # Examine 1 minute of audio at 5 minutes in
+        # Returns "Mean    norm:          0.010537"
+        soxstat=($(ffmpeg -i "$fullfilename" \
+            -ss 00:05:00 -t 00:01:00.0 -vn -ac 2 -f au - 2>/dev/null \
+            | sox -t au - -t au /dev/null  stat |& grep norm:))
+        if [[ ${soxstat[2]} != ?.?????? ]] ; then
+            "$scriptpath/notify.py" "sox failed" "$title $subtitle - sox said ${soxstat[@]}"
+        elif [[ ${soxstat[2]} < 0.001000 ]] ; then
+            "$scriptpath/notify.py" "$type failed" "$title $subtitle has audio level ${soxstat[2]}"
+        fi
+    fi
     let maxsecs=expectsecs
     if (( db_expectsecs > maxsecs )) ; then
         let maxsecs=db_expectsecs
