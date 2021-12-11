@@ -101,6 +101,7 @@ if [[ "$error" == y || "$filename" == "" ]] ; then
     echo
     echo "If any field is blank - parse filename in format yymmdd S99E99 subtitle, with title  as"
     echo "  the file directory"
+    echo "Update requiers a match on title, subtitle and original air date"
     exit 2
 fi
 
