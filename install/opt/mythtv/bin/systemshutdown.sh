@@ -36,9 +36,12 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
         fi
     else
         echo "Suspending"
-        if [[ "$X11_DISABLE" != "" ]] ; then
-            for mon in $X11_DISABLE ; do 
-                xrandr  --output $mon --off
+        x_users=(`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
+        x_user="${x_users[0]}"
+        if [[ "$X11_DISABLE" != "" && "$x_user" != "" ]] ; then
+            for mon in $X11_DISABLE ; do
+                DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user \
+                    xrandr  --output $mon --off
             done
             sleep 1
         fi
@@ -47,11 +50,16 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
         else
             sudo /usr/sbin/pm-suspend
         fi
-        if [[ "$X11_DISABLE" != "" ]] ; then
+        if [[ "$X11_DISABLE" != ""  && "$x_user" != "" ]] ; then
             sleep 5
             for mon in $X11_DISABLE ; do 
-                xrandr  --output $mon --auto
+                DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user \
+                    xrandr  --output $mon --auto
             done
+        elif [[ $X11_RESUME_ENABLE == Y && "$x_user" != "" ]] ; then
+            sleep 7
+            DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user \
+                xrandr --auto
         fi
     fi
 else
