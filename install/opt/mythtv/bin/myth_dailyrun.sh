@@ -160,7 +160,24 @@ prev_transcode=
 if [[ -f $DATADIR/transcode_date ]] ; then
     prev_transcode=`cat $DATADIR/transcode_date`
 fi
+run_tc=0
 if [[ "$prev_transcode" != "$today" ]] ; then
+    run_tc=1
+    # This will return server name for an NFS mount,
+    # the string "UUID" for a local mount, empty for a mismatch
+    tcserver=`grep " $TCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
+    if [[ "$tcserver" != UUID ]] ; then
+        if ping -c 1 "$tcserver" ; then
+            # Avoid running tcdaily if office is up, office
+            # may be busy recording.
+            echo "postpone tcdaily because $tcserver is running" 
+            run_tc=0
+            # force dailyrun again later
+            true > $DATADIR/dailyrun_date
+        fi
+    fi
+fi
+if (( run_tc )) ; then
     # Start daily transcode run
     DATE=`date +%F\ %T\.%N`
     DATE=${DATE:0:23}
