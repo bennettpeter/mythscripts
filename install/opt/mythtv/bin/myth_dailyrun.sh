@@ -173,7 +173,9 @@ if [[ "$prev_transcode" != "$today" ]] ; then
             echo "postpone tcdaily because $tcserver is running" 
             run_tc=0
             # force dailyrun again later
-            true > $DATADIR/dailyrun_date
+            # problem - this causes backend to never shut down
+            # just trying tcdaily over and over
+            # true > $DATADIR/dailyrun_date
         fi
     fi
 fi
