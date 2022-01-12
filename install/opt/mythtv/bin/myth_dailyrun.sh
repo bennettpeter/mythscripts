@@ -168,19 +168,16 @@ if [[ "$prev_transcode" != "$today" ]] ; then
     tcserver=`grep " $TCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
     if [[ "$tcserver" != UUID ]] ; then
         if ping -c 1 "$tcserver" ; then
-            # Avoid running tcdaily if office is up, office
+            # Avoid running tcdaily if tcserver is up, tcserver
             # may be busy recording.
             echo "postpone tcdaily because $tcserver is running" 
             run_tc=0
-            # force dailyrun again later
-            # problem - this causes backend to never shut down
-            # just trying tcdaily over and over
-            # true > $DATADIR/dailyrun_date
         fi
     fi
 fi
 if (( run_tc )) ; then
     # Start daily transcode run
+    echo $today > $DATADIR/transcode_date
     DATE=`date +%F\ %T\.%N`
     DATE=${DATE:0:23}
     echo $DATE "Running tcdaily."
@@ -189,7 +186,6 @@ if (( run_tc )) ; then
     if [[ "$rc" != 0 ]] ; then
         "$scriptpath/notify.py" "Transcode daily run failed" "tcdaily.sh"
     fi
-    echo $today > $DATADIR/transcode_date
 fi
 
 # Check cable box once a day

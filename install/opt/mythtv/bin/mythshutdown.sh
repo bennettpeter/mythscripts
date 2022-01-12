@@ -63,31 +63,40 @@ fi
 # These checks only run on the machine that is specified in the mythtv.conf as
 # the MAINHOST
 if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
-
     now=`date +%H:%M:%S`
-
-    if [[ "$now" > "$WAKEUPTIME" || "$now" == "$WAKEUPTIME" ]] ; then
-
+    # Check if dailyrun is running
+    if ps -ef|grep myth_dailyrun.sh|grep -v grep ; then
+        echo $DATE "myth_dailyrun.sh is running, don't shut down for $CHECK_MINUTES min."
+        rc=1
+    elif [[ "$now" > "$WAKEUPTIME" || "$now" == "$WAKEUPTIME" ]] ; then
         # check for daily run
         prev_dailyrun=
         if [[ -f $DATADIR/dailyrun_date ]]; then
             prev_dailyrun=`cat $DATADIR/dailyrun_date`
         fi
         if [[ "$prev_dailyrun" != "$today" ]] ; then
-            nohup $scriptpath/myth_dailyrun.sh >> $LOGDIR/myth_dailyrun.log 2>&1 &
+            $scriptpath/myth_dailyrun.sh >> $LOGDIR/myth_dailyrun.log 2>&1 &
             echo $DATE "Starting dailyrun, don't shut down for $CHECK_MINUTES min."
             echo $today > $DATADIR/dailyrun_date
             rc=1
+        else
+            prev_transcode=
+            if [[ -f $DATADIR/transcode_date ]] ; then
+                prev_transcode=`cat $DATADIR/transcode_date`
+            fi
+            if [[ "$prev_transcode" != "$today" ]] ; then
+                # Only start dailyrun if tcserver is down, i.e. not busy
+                tcserver=`grep " $TCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
+                if [[ "$tcserver" != UUID ]] ; then
+                    if ! ping -c 1 "$tcserver" ; then
+                        $scriptpath/myth_dailyrun.sh >> $LOGDIR/myth_dailyrun.log 2>&1 &
+                        echo $DATE "Starting dailyrun, don't shut down for $CHECK_MINUTES min."
+                        rc=1
+                    fi
+                fi
+            fi
         fi
-
     fi
-
-    # Check if dailyrun is running
-    if ps -ef|grep myth_dailyrun.sh|grep -v grep ; then
-        echo $DATE "myth_dailyrun.sh is running, don't shut down for $CHECK_MINUTES min."
-        rc=1
-    fi
-
 fi
 
 # if there are other encoders add them here
