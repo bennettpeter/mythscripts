@@ -330,7 +330,28 @@ if [[ "$rc" == 0 && "$RUN_LEANXDVR" == Y ]] ; then
     # since the last leanxdvr start, we can start it.
     # 21600 sec = 6 hours, 64800 sec = 18 hours
     if (( now - prev_wakeup < 21600 && now - prev_leanxdvr > 64800 )) ; then
-        /opt/mythtv/leancap/leanxdvr.sh -n leancap1 -e "3 hours" &
+        default_maxtime="4 hours"
+        xdvr_endtime="$default_maxtime"
+        # If a mythtv encoder name is supplied, check for upcoming recordings
+        if [[ $LEANXDVR_ENC != "" ]] ; then
+            curl "http://localhost:6544/Dvr/GetUpcomingList" > $DATADIR/GetUpcomingList.xml
+            xmllint $DATADIR/GetUpcomingList.xml \
+              --xpath "//ProgramList/Programs/Program/Recording/EncoderName/text()" \
+              > $DATADIR/encoders.txt
+            xmllint $DATADIR/GetUpcomingList.xml \
+              --xpath "//ProgramList/Programs/Program/Recording/StartTs/text()" \
+              > $DATADIR/times.txt
+            lineno=$(grep -n  $LEANXDVR_ENC $DATADIR/encoders.txt | head -n 1 | sed "s/:.*//")
+            if [[ $lineno != "" ]] ; then
+                startts=$(head -n $DATADIR/$lineno times.txt | tail -n 1)
+                # Stop recording 5 min before that encoder will be needed by MythTV
+                xdvr_endtime="$startts - 5 min"
+                if (( $(date -d "$xdvr_endtime" +%s) > $(date -d "$default_maxtime" +%s) )) ; then
+                    xdvr_endtime="$default_maxtime"
+                fi
+            fi
+        fi
+        /opt/mythtv/leancap/leanxdvr.sh -n $LEANXDVR_RECNAME -e "$xdvr_endtime" &
         echo $DATE "Starting leanxdvr, don't shut down for $CHECK_MINUTES min."
         echo $now > $DATADIR/leanxdvr_time
         rc=1
