@@ -35,12 +35,12 @@ if [[ "$today" == Sat* ]]; then
         #    wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
         #fi
         echo $DATE "Running mythtv_db_backup."
+        echo $today > $DATADIR/dbbackup_date
         $scriptpath/mythtv_dbbackup.sh >> $LOGDIR/mythtv_dbbackup.log 2>&1
         rc=$?
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "Database Backup failed" "mythtv_dbbackup.sh"
         fi
-        echo $today > $DATADIR/dbbackup_date
         echo Running leancap_chanlist
         $LEANCAP/leancap_chanlist.sh leancap2
         rc=$?
@@ -56,25 +56,6 @@ if [[ "$today" == Sat* ]]; then
         fi
     fi
 fi
-# check for channelscan run
-#prev_channelscan=
-#if [[ -f $DATADIR/channelscan_date ]]; then
-#    prev_channelscan=`cat $DATADIR/channelscan_date`
-#fi
-#if [[ "$prev_channelscan" != "$today" ]] ; then
-#    echo $DATE "Running channelscan."
-#    $scriptpath/channelscan.sh >> $LOGDIR/channelscan.log 2>&1
-#    echo $today > $DATADIR/channelscan_date
-#    size=`cat $DATADIR/scte65scan.out | wc -l`
-#    if (( size < 50 )) ; then
-#        "$scriptpath/notify.py" "Channelscan failure" \
-#            "$DATADIR/scte65scan.out has only $size lines"
-#    fi
-#fi
-
-# Check for programs set to record on restricted channels
-# commented - Concern that access to web interface slows down ceton
-# $scriptpath/checkchannels.sh upcoming
 
 # Daily mythfilldatabase via script. Do not run it from the backend
 prev_mythfilldatabase=
@@ -85,6 +66,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     DATE=`date +%F\ %T\.%N`
     DATE=${DATE:0:23}
     echo $DATE "Running mythfilldatabase."
+    echo $today > $DATADIR/mythfilldatabase_date
     # run asynchronously - in error cases it can run 2 hours and hold up other stuff.
     (
         $scriptpath/mythfilldatabase.sh  --only-update-guide >/dev/null 2>&1
@@ -92,7 +74,6 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
         fi
-        echo $today > $DATADIR/mythfilldatabase_date
     ) &
 
     # Print 1 day's upcoming recordings
