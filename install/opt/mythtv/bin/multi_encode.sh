@@ -191,7 +191,6 @@ for file in $pattern ; do
                 echo "Encoding $file failed"
                 # mv -fv "$realfile" "${realfile}_failed"
                 mv -fv "$maindir/${file}" "$maindir/${file}_failed"
-                break
             fi
         ) &
         cd "$maindir"
