@@ -101,7 +101,7 @@ fi
 
 # if there are other encoders add them here
 encoders='HandBrakeCLI ffmpeg'
-encoderscripts='leanxdvr\.sh|leanxvod\.sh|multi_encode\.sh|leanpplus.sh'
+encoderscripts='leanxdvr\.sh|leanxvod\.sh|multi_encode\.sh|leanpplus\.sh'
 encoderunning=0
 if pidof $encoders ; then
     echo $DATE "One of: $encoders Is running, don't shut down."
