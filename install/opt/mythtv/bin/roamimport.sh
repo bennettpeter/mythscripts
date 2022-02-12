@@ -15,7 +15,10 @@ scriptname=`basename "$scriptname" .sh`
 
 # Removable drive is mounted on default location
 # and a link is in /srv/mythtv/video1
-# sudo ln -s /media/peter/mythroam /srv/mythtv/video1
+sudo mkdir -p /srv/mythtv
+sudo ln -fs /media/peter/mythroam /srv/mythtv/video1
+sudo mkdir -p /srv/mythtv/video3
+sudo ln -fs /media/peter/mythroam/videos /srv/mythtv/video3/videos
 
 #restore
 backupdir=/srv/mythtv/video1/dbbackup
@@ -41,6 +44,8 @@ $MYTHTVDIR/share/mythtv/mythconverg_restore.pl --verbose --filename "$backupfile
 
 echo "
 update recordedartwork set host = '$hostname';
+update recorded set hostname = '$hostname';
+update videometadata set host = '$hostname';
 update storagegroup set hostname = '$hostname';
 update videometadata set host = '$hostname';
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
