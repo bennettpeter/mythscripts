@@ -52,6 +52,10 @@ fi
 
 # dm-tool switch-to-greeter
 
+# Move mouse to middle of screen
+xdotool mousemove --polar 0 0
+sleep 0.1
+
 # This makes the suspend do a weekly shutdown
 /opt/mythtv/bin/systemshutdown.sh $shutparm
 #xrandr  --output HDMI-0 --off
