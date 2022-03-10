@@ -351,7 +351,7 @@ if [[ "$rc" == 0 && "$RUN_LEANXDVR" == Y ]] ; then
                 fi
             fi
         fi
-        /opt/mythtv/leancap/leanxdvr.sh -n $LEANXDVR_RECNAME -e "$xdvr_endtime" &
+        /opt/mythtv/leancap/leanxdvr.sh -n $LEANXDVR_RECNAME -e "$xdvr_endtime" --origdate &
         echo $DATE "Starting leanxdvr, don't shut down for $CHECK_MINUTES min."
         echo $now > $DATADIR/leanxdvr_time
         rc=1
