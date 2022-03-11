@@ -276,12 +276,13 @@ if [[ "$action" == I ]] ; then
     0,0,'DOWNLOAD',4,1,-3,0,0,0
     );"
 
-    cp -ivLp "$filename" "$storagedir/$basename"
-    # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
-    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$basename"
+    if [[ -f "$storagedir/$basename" ]] ; then
+        echo ERROR "$storagedir/$basename" already exists.
+        exit 2
+    fi
 
-    echo sudo chown mythtv "$storagedir/$basename"
-    sudo chown mythtv "$storagedir/$basename"
+    cp -nvL "$filename" "$storagedir/$basename"
+
     echo "$sql1"
     echo "$sql2"
     (
@@ -321,7 +322,6 @@ if [[ "$action" == U ]] ; then
     set -- `ls -l "$filename"`
     filesize=$5
 
-    # oldfile=`find "$VIDEODIR" -name $basename ! -path '*/junk*/*' 2>/dev/null` || true
     oldfile=`ls "$VIDEODIR"/video*/recordings/"$basename" 2>/dev/null` || true
     numfound=`echo "$oldfile"|wc -l`
     if (( numfound > 1 )) ; then
@@ -339,12 +339,14 @@ if [[ "$action" == U ]] ; then
     sql2="update recordedfile set basename = '$newbasename', filesize = $filesize, video_codec = 'H264' where basename = '$basename';"
     mkdir -p "$storagedir/$junktoday/"
     mv -fv "$storagedir/$basename"* "$storagedir/$junktoday/" || true
-    cp -ivLp "$filename" "$storagedir/$newbasename"
-    # ffmpeg -i "$filename" -acodec copy -vcodec copy -scodec copy \
-    #  -f mpeg -bsf:v h264_mp4toannexb "$storagedir/$newbasename"
 
-    echo sudo chown mythtv:mythtv "$storagedir/$newbasename"
-    sudo chown mythtv:mythtv "$storagedir/$newbasename"
+    if [[ -f "$storagedir/$basename" ]] ; then
+        echo ERROR "$storagedir/$basename" already exists.
+        exit 2
+    fi
+
+    cp -nvL "$filename" "$storagedir/$newbasename"
+
     echo "$sql1"
     echo "$sql2"
     (
