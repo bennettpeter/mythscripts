@@ -19,6 +19,7 @@ description=
 season=
 episode=
 action=
+cpopt=
 
 while (( "$#" >= 1 )) ; do
     case $1 in
@@ -78,6 +79,13 @@ while (( "$#" >= 1 )) ; do
                 shift||rc=$?
             fi
             ;;
+        -o)
+            if [[ "$2" == "" ]] ; then echo "ERROR Missing value for $1." ; error=y
+            else
+                cpopt="$2"
+                shift||rc=$?
+            fi
+            ;;
         *)
             echo "Invalid option $1"
             error=y
@@ -90,6 +98,7 @@ if [[ "$error" == y || "$filename" == "" ]] ; then
     echo "Import video as recording"
     echo "Options"
     echo "-i filename Input file, required."
+    echo "-o options cp options, e.g. -l to hard link files."
     echo "-t Title. Default is File directory."
     echo "-s Subtitle. Default is file name excluding leading date and leading SxxExx."
     echo "-a Original Air Date in any format accepted by date command, eg YYYYMMDD YYYY-MM-DD YY-MM-DD."
@@ -281,7 +290,7 @@ if [[ "$action" == I ]] ; then
         exit 2
     fi
 
-    cp -nvL "$filename" "$storagedir/$basename"
+    cp -nvL $cpopt "$filename" "$storagedir/$basename"
 
     echo "$sql1"
     echo "$sql2"
@@ -345,7 +354,7 @@ if [[ "$action" == U ]] ; then
         exit 2
     fi
 
-    cp -nvL "$filename" "$storagedir/$newbasename"
+    cp -nvL $cpopt "$filename" "$storagedir/$newbasename"
 
     echo "$sql1"
     echo "$sql2"
