@@ -49,7 +49,10 @@ if [[ -f $paramfile ]] ; then
         parsexml //Configuration LocalHostName         ; LocalHostName=$value
     fi
 fi
-if [[ "$LocalHostName" == "" || "$LocalHostName" == "my-unique-identifier-goes-here" ]]; then
+# Drop leading and trailing spaces
+LocalHostName=$(echo $LocalHostName)
+if [[ "$LocalHostName" == "" || "$LocalHostName" == "my-unique-identifier-goes-here" \
+    || "$LocalHostName" == "<"*">" ]]; then
     LocalHostName=`cat /etc/hostname`
 fi
 if [[ "$DBHostName" == "" ]] ; then
