@@ -33,7 +33,7 @@ if [[ $PROXY_RESTART != "" ]] ; then
     nowsecs=$(date +%s)
     let intval=shutsecs-nowsecs
     let intval=intval/60
-    echo sudo shutdown -r +$intval
+    sudo shutdown -r +$intval
 fi
 
 # Check if other DNS server is up
