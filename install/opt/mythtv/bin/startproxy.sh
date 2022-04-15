@@ -28,7 +28,7 @@ done
 date
 
 # Daily restart
-if [[ $PROXY_SHUTDOWN != "" ]] ; then
+if [[ $PROXY_RESTART != "" ]] ; then
     sudo shutdown -r $PROXY_SHUTDOWN
 fi
 
