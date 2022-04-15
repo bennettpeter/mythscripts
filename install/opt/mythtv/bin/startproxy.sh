@@ -18,39 +18,28 @@ until timedatectl show | grep "NTPSynchronized=yes" ; do
   sleep 1
   let count=count+1
   # Approx 12 hours
-  if (( count > 43200 )) ; then
+  if (( count > 300 )) ; then
     date
-    echo "Failed for 12 hours to get network time, shutting down now"
-    sudo shutdown -P now
-    exit 2
+    echo "ERROR: Tried for 5 minutes to get network time - failed"
+    "$scriptpath/notify.py" "Failed to get network time" \
+        "Tried for 5 minutes to get network time - failed"
   fi
 done
 date
 
-unset nextshutdown
-if [[ -f $DATADIR/nextshutdown ]] ; then
-    nextshutdown=`cat $DATADIR/nextshutdown`
-fi    
-now=`date +%s`
-if (( nextshutdown < now )) ; then
-  let nextshutdown=now+24*60*60-600
-  echo $nextshutdown > $DATADIR/nextshutdown
+# Daily restart
+if [[ $PROXY_SHUTDOWN != "" ]] ; then
+    sudo shutdown -r $PROXY_SHUTDOWN
 fi
-nextshutdownstr=`date +%H:%M --date=@$nextshutdown`
-# Time switch is left on standard time year round.
-# In winter it powers on at 2am, in summer at 3am.
-# Sanity check in case power is off for 24 hours.
-if [[ "$nextshutdownstr" < 01:30 || "$nextshutdownstr" > 03:30 ]] ; then
-  echo "Bad shutdown time of $nextshutdownstr, setting it to 01:30"
-  nextshutdownstr=01:30
-  nextshutdown=`date --date="01:30" +%s`
-  if (( nextshutdown < now )) ; then
-    nextshutdown=`date --date="tomorrow 01:30" +%s`
-  fi
-  echo $nextshutdown > $DATADIR/nextshutdown
+
+# Check if other DNS server is up
+if [[ $PROXY_CHECK != "" ]] ; then
+    if ! nc -z -v $PROXY_CHECK 53 ; then
+        echo "ERROR: DNS server $PROXY_CHECK is down"
+        "$scriptpath/notify.py" "DNS server $PROXY_CHECK is down" \
+            "Cannot connect DNS server $PROXY_CHECK port 53."
+    fi
 fi
-# use -P for poweroff, -r for restart
-sudo shutdown -r $nextshutdownstr
 
 # Daily IP address check
 if [[ -f $DATADIR/ipaddress.txt ]] ; then
