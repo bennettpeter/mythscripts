@@ -29,7 +29,11 @@ date
 
 # Daily restart
 if [[ $PROXY_RESTART != "" ]] ; then
-    sudo shutdown -r $PROXY_SHUTDOWN
+    shutsecs=$(date -d "tomorrow $PROXY_RESTART" +%s)
+    nowsecs=$(date +%s)
+    let intval=shutsecs-nowsecs
+    let intval=intval/60
+    echo sudo shutdown -r +$intval
 fi
 
 # Check if other DNS server is up
