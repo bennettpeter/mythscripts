@@ -45,7 +45,7 @@ if [[ "$today" == Sat* ]]; then
         $LEANCAP/leancap_chanlist.sh leancap2
         rc=$?
         if [[ "$rc" != 0 ]] ; then
-            "$scriptpath/notify.py" "Leancap Chanlist failed" "$LEANCAP/leancap_chanlist.sh leancap1"
+            "$scriptpath/notify.py" "Leancap Chanlist failed" "$LEANCAP/leancap_chanlist.sh leancap2"
         fi
         # Run roamexport to keep portable drive up to date.
         # This must be run here to ensure consistent with DB backup above
