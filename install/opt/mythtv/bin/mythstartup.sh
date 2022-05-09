@@ -4,8 +4,6 @@
 # Set up starting channel numbers
 # Prevent cable box turning on if not needed.
 
-set -e
-date
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
