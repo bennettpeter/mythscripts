@@ -84,6 +84,28 @@ date
 
 # Initialize HDMI recorders.
 # /opt/mythtv/bin/hdmirec_scan.sh
+LOCKBASEDIR=/run/lock/leancap
+LOGDATE='date +%Y-%m-%d_%H-%M-%S'
+count=0
+rc=90
+while (( rc != 0 )) ; do
+    let count++
+    if [[ -f $LOCKBASEDIR/scandate ]] ; then
+        rc=0
+    else
+        rc=99
+        # This count must be enough for all tuners to be scanned, since scandate is
+        # only created after all are scanned. 45 = 90 seconds
+        if (( count > 45 )) ; then
+            echo `$LOGDATE` "ERROR leancap_scan not yet run, tuners may be disabled"
+            $scriptpath/notify.py "Fire Stick Problem" \
+                "mythstartup: leancap_scan not yet run, tuners may be disabled" &
+            break
+        fi
+        echo `$LOGDATE` "leancap_scan not yet run, waiting 2 seconds"
+        sleep 2
+    fi
+done
 
 # set live tv start channel to a valid HD channel number
 # This avoids the problem of failing to open jump file buffer during live TV
@@ -103,5 +125,5 @@ date
 # $fwsetup
 # EOF
 
-echo "mythstartup.sh completed"
+echo `$LOGDATE` "mythstartup.sh completed"
 
