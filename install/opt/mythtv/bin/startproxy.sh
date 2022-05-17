@@ -17,12 +17,12 @@ until timedatectl show | grep "NTPSynchronized=yes" ; do
   echo -n .
   sleep 1
   let count=count+1
-  # Approx 12 hours
-  if (( count > 300 )) ; then
+  if (( count > 600 )) ; then
     date
-    echo "ERROR: Tried for 5 minutes to get network time - failed"
-    "$scriptpath/notify.py" "Failed to get network time" \
-        "Tried for 5 minutes to get network time - failed"
+    echo "ERROR: Tried for 10 minutes to get network time - failed"
+    # network down - restart system
+    sudo shutdown -r now
+    exit
   fi
 done
 date
