@@ -4,7 +4,7 @@
 # for x86/x86_64 only
 sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
   xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox \
-  xdotool
+  xdotool pyhton-is-python3
 
 # raspberry pi
 sudo apt install figlet gdebi-core dos2unix wakeonlan
@@ -22,7 +22,7 @@ sudo apt install fswebcam
 sudo apt install xmltv apache2 php php-mysql mysql-server
 
 # For firetv recorder on backend
-sudo apt install gocr tesseract-ocr imagemagick vlc obs-studio jp2a
+sudo apt install gocr tesseract-ocr imagemagick vlc obs-studio jp2a pv
 # Manuallt put latest adb in /usr/local/bin/adb
 
 if [[ `arch` == x86_64 ]] ; then
