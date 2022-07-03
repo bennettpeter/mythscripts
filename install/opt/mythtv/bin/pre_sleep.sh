@@ -11,6 +11,11 @@ chown mythtv:mythtv $DATADIR/checklogin
 killall mythfrontend
 # systemctl stop mythtv-backend.service
 
+arr=($(ps -ef | grep 'soffice.*Passwords\.odt'))
+if [[ "${arr[1]}" != "" ]] ; then
+    kill ${arr[1]}
+fi
+
 # Disable mouse wakeup
 # first check if mouse wakeup enabled
 # XHC	  S3	*enabled   pci:0000:00:14.0

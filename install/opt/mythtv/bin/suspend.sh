@@ -22,11 +22,23 @@ vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
 
 if pidof FreeFileSync_x86_64 ; then
-    zenity --error --no-wrap --text="ERROR FreefileSync is running."
+    zenity --error --no-wrap \
+    --text='<span font="32">ERROR FreefileSync is running.</span>' \
+      --width 1000 --height 100
     exit 2
 fi
+
 if pidof kmymoney ; then
-    zenity --error --no-wrap --text="ERROR KMyMoney is running."
+    zenity --error --no-wrap \
+    --text='<span font="32">ERROR KMyMoney is running.</span>' \
+      --width 1000 --height 100
+    exit 2
+fi
+
+if ps -ef | grep 'soffice.*Passwords\.odt' ; then
+    zenity --error --no-wrap \
+      --text='<span font="32">ERROR: Passwords is open</span>' \
+      --width 1000 --height 100
     exit 2
 fi
 

@@ -4,7 +4,7 @@
 # for x86/x86_64 only
 sudo apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
   xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox \
-  xdotool pyhton-is-python3
+  xdotool python-is-python3
 
 # raspberry pi
 sudo apt install figlet gdebi-core dos2unix wakeonlan
