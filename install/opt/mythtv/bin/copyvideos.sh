@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copy video files from main computer
+# Obsolete
 
 set -e
 . /etc/opt/mythtv/mythtv.conf
