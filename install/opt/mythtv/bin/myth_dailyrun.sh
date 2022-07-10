@@ -54,6 +54,11 @@ if [[ "$today" == Sat* ]]; then
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "roamexport failed" "roamexport.sh"
         fi
+        # Video cleanup
+        $scriptpath/videocleanup.sh >> $LOGDIR/videocleanup.log 2>&1
+        if [[ "$rc" != 0 ]] ; then
+            "$scriptpath/notify.py" "videocleanup failed" "videocleanup.sh"
+        fi
     fi
 fi
 

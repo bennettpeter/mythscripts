@@ -2,7 +2,6 @@
 # videodeletes.sh - delete watched videos
 
 . /etc/opt/mythtv/mythtv.conf
-. /etc/opt/mythtv/private.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
@@ -14,115 +13,134 @@ DATE=${DATE:0:23}
 today=`date "+%a %Y/%m/%d"`
 numdate=`date "+%Y%m%d"`
 
-BACKEND=backend
-# Number of days before lists are deleted
-STALEDAYS=27
-# Number of days after watched to delete files
-WAITDAYS=13
+BACKEND=localhost
+# You can run this script on a different host by setting BACKEND
+# to a different value, but then you must set DELETE_VIDEOS=N since
+# the videos will be on a different system and delete will fail.
+#~ BACKEND=backend
+#~ DELETE_VIDEOS=N
 
+set -e
 # To only select watched could use this
 # jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | select(.Watched == true) | .FileName'
 
 # List of video Filenames and watched indicators
 curl -H "Accept: application/json" "http://$BACKEND:6744/Video/GetVideoList" \
-| jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | {FileName,Watched} | join("/")' \
+| jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | {FileName,Watched} | join("\t")' \
 > $DATADIR/videos.txt
-sort < $DATADIR/videos.txt > $DATADIR/${numdate}_videos.srt
+rc=${PIPESTATUS[0]}
 
-# Remove video lists 28 or more days old
-staledate=$(date "+%Y%m%d" -d "$STALEDAYS days ago")
+if (( rc != 0 )) ; then
+    echo ERROR: curl failed
+    exit $rc
+fi
+
+LC_COLLATE=C sort < $DATADIR/videos.txt > $DATADIR/${numdate}_videos.srt
+
+staledate=$(date "+%Y%m%d" -d "$VIDEO_STALEDAYS days ago")
+procdate=$(date "+%Y%m%d" -d "$VIDEO_WAITDAYS days ago")
+selectedfile=
+latestfile=
 for file in $(cd $DATADIR; ls -1 *_videos.srt) ; do
-    if [[ "$file" < "${staledate}_videos.srt" ]] ; then
+    # Remove video lists 28 or more days old
+    if [[ ! "$file" > "${staledate}_videos.srt" ]] ; then
         rm -vf $DATADIR/$file
     fi
-done
-
-# Find latest video lists 14 or more days old
-procdate=$(date "+%Y%m%d" -d "$WAITDAYS days ago")
-for file in $(cd $DATADIR; ls -1 *_videos.srt) ; do
-    if [[ "$file" < "${procdate}_videos.srt" ]] ; then
+    # Find video list 14 or more days old
+    if [[ ! "$file" > "${procdate}_videos.srt" ]] ; then
         selectedfile=$DATADIR/$file
     fi
+    # Find latest video list
+    latestfile=$DATADIR/$file
 done
 
 # Clear out prior video deleted
 true > $DATADIR/video_deletes.sh
 
-if [[ "$selectedfile" == "" ]] ; then
+echo selected file: $selectedfile, latest file: $latestfile.
+
+if [[ "$selectedfile" == "" || "$latestfile" == "" ]] ; then
     echo "No file selected, terminating."
     exit
 fi
 
-echo selected file $selectedfile
+awk -v outfile=$DATADIR/video_deletes.sh \
+  -v numdate=$numdate -v latestfile=$latestfile \
+  -v videodir="$LOCALVIDEODIR" '
 
-awk -v "outfile=$DATADIR/video_deletes.sh" -v "videodir=$LOCALVIDEODIR" -v numdate=$numdate '
+function deletefile(filename) {
+    print "rm -fv \"" videodir "/" filename "\" " > outfile
+}
 
-function deletefile(filename, direct) {
-    if (direct != priordeldir) {
-        print "mkdir -p \"" junkdir direct "\""> outfile
-        priordeldir = direct
+function matchup() {
+    while (fn2 < fn && !eof2) {
+        eof2 = ! getline < latestfile
+        fn2=$1
+        watched2=$2
     }
-    print "mv -bv \"" videodir "/" filename "\" " junkdir direct > outfile
+    x = fn2<fn 
 }
 
 BEGIN {
-    FS = "/"
-    currdir = ""
-    dirwatched = 0
-    dirunwatched = 0
-    priorwatchedfn = ""
-    priordir = ""
-    junkdir = videodir "/../videojunk/" numdate "/"
-    priordeldir=""
+    FS = "\t"
+    fn=""
+    fn2=""
+    eof2=0
+    delcount=0
+    videocount=0
+    keepcount=0
 }
 
 {
-#    print $0
-    dir = ""
-    levels=0
-    for (i = 1 ; i < NF-1 ; i++) {
-        dir = dir $(i) "/"
-        levels++
-    }
-    if (levels < 1 || levels > 2 || $1 == "Music") {
-        print "Skipping " $0 " levels " levels
+    fn = $1
+    watched = $2
+    videocount++
+    if (match(fn,'"$VIDEO_PRESERVE"')) {
+        keepcount++
         next
     }
-    fn = dir $(i)
-    watched = $(i+1)
-#    print "dir:" dir " fn:" fn " watched:" watched
-#    print "watched:" dirwatched " unwatched:" dirunwatched
-    if (dir != currdir) {
-        if (dirunwatched == 0) {
-            if (priorwatchedfn != "")
-                deletefile(priorwatchedfn, priordir)
-        }
-        currdir = dir
-        dirwatched = 0
-        dirunwatched = 0
-        priorwatchedfn = ""
-        priordir = ""
-    }
-    if (watched == "true")
-        dirwatched++
-    else
-        dirunwatched++
     if (watched == "true") {
-        if (priorwatchedfn != "")
-            deletefile(priorwatchedfn, priordir)
-        priorwatchedfn = fn
-        priordir = dir
+        matchup()
+        if (fn == fn2) {
+            if (watched2 == "true") {
+                deletefile(fn)
+                delcount++
+            }
+        }
+        else
+            print "WARNING: File:" fn " has already been deleted."
     }
 }
 
 END {
-    if (dirunwatched == 0) {
-        if (priorwatchedfn != "") {
-            deletefile(priorwatchedfn, priordir)
-        }
-    }
+    print "Total number of videos: " videocount
+    print "Number of videos deleted: " delcount
+    print "Number of videos in preserved directories: " keepcount
 }
-' $DATADIR/videos.srt
+
+' $selectedfile
 
 chmod +x $DATADIR/video_deletes.sh
+
+if [[ "$DELETE_VIDEOS" == Y ]] ; then
+    echo "Deleting videos"
+    $DATADIR/video_deletes.sh
+    echo "Deleting empty directories"
+    find $LOCALVIDEODIR -type d -empty -delete -print
+    mythutil --scanvideos
+fi
+
+exit
+
+
+
+
+
+
+
+
+
+
+
+
 
