@@ -1,9 +1,6 @@
 # List of MAC values for wakeup
 
-panther-ux 00:11:11:bf:08:c6
-panther 00:11:11:bf:08:c6
-serenity 8c:89:a5:64:b3:c7
-cougar-ux 00:23:ae:e7:23:e3
-cougar 00:23:ae:e7:23:e3
 backend bc:5f:f4:f8:a8:a2
+backend.lan bc:5f:f4:f8:a8:a2
 office a8:a1:59:6e:38:fe
+office.lan a8:a1:59:6e:38:fe
