@@ -6,7 +6,8 @@
 
 reason=$1
 # Frequency of checks in minutes
-CHECK_MINUTES=1
+# note 1 is not enough, it can have the same nfs count after 60 seconds.
+CHECK_MINUTES=2
 X_IDLE_MINUTES=10
 FS_REPORT_PERCENTAGE=90
 
