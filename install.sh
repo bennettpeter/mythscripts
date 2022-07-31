@@ -231,6 +231,8 @@ cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 #sudoers
 cp install/etc/sudoers.d/10-peter /etc/sudoers.d/
+sudo chown root:root /etc/sudoers.d/10-peter
+sudo chmod 440 /etc/sudoers.d/10-peter
 
 #netmanager
 rm -f /etc/network/if-up.d/010addipaddress
