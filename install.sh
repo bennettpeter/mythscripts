@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 datetime=`date +%Y%m%d_%H%M`
@@ -230,6 +229,9 @@ fi
 #syslog
 cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
+#sudoers
+cp install/etc/sudoers.d/10-peter /etc/sudoers.d/
+
 #netmanager
 rm -f /etc/network/if-up.d/010addipaddress
 # ln -fs /opt/mythtv/bin/addipaddress.sh \
@@ -302,14 +304,22 @@ fi
 rm -f /lib/systemd/system-sleep/mythtv_sleep.sh
 
 # Check for presence of ccextractor
-if [[ "$CAN_TRANSCODE" == Y ]] ; then
-    if [[ ! -x /usr/local/bin/ccextractor ]] ; then
-        yes "XXXXXXXX PLEASE INSTALL /usr/local/bin/ccextractor XXXXXXXX" | head -5
-        exit 2
-    fi
-fi
+#~ if [[ "$CAN_TRANSCODE" == Y ]] ; then
+    #~ if [[ ! -x /usr/local/bin/ccextractor ]] ; then
+        #~ yes "XXXXXXXX PLEASE INSTALL /usr/local/bin/ccextractor XXXXXXXX" | head -5
+        #~ exit 2
+    #~ fi
+#~ fi
 
 # Disable guest logon (after next reboot)
 if [[ -d /etc/lightdm/lightdm.conf.d ]] ; then
     sh -c 'printf "[Seat:*]\nallow-guest=false\n" >/etc/lightdm/lightdm.conf.d/50-no-guest.conf'
+fi
+
+if [[ "$EMAIL1" != "" || "$EMAIL2" != "" ]] ; then
+    if [[ ! -f /etc/opt/mythtv/private.conf ]] ; then
+        echo XXXXX Please install private.conf
+        echo "[ default ]"
+        echo "SMTP_PASSWORD=xxxxxxxx"
+    fi
 fi

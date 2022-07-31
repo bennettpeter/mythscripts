@@ -1,0 +1,9 @@
+# MythTV sudoers
+# edit this file using visudo 10-peter so that the syntax is checked.
+
+%mythtv ALL = NOPASSWD: /sbin/shutdown, /opt/mythtv/bin/setwakeup.sh, /usr/sbin/iotop, \
+  (ALL:ALL) /usr/bin/xprintidle, /bin/chvt, /usr/sbin/service, \
+  /bin/systemctl, /usr/bin/smbstatus, /opt/mythtv/bin/setgovernor.sh, \
+  /usr/bin/nmcli, /sbin/ifup, /usr/bin/renice, /usr/bin/zenity, \
+  /usr/bin/xrandr
+
