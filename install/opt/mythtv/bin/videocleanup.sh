@@ -42,11 +42,11 @@ procdate=$(date "+%Y%m%d" -d "$VIDEO_WAITDAYS days ago")
 selectedfile=
 latestfile=
 for file in $(cd $DATADIR; ls -1 *_videos.srt) ; do
-    # Remove video lists 28 or more days old
+    # Remove old video lists
     if [[ ! "$file" > "${staledate}_videos.srt" ]] ; then
         rm -vf $DATADIR/$file
     fi
-    # Find video list 14 or more days old
+    # Find latest video first list old enough for deleting files
     if [[ ! "$file" > "${procdate}_videos.srt" ]] ; then
         selectedfile=$DATADIR/$file
     fi
