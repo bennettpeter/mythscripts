@@ -5,8 +5,8 @@ if [[ `arch` == x86_64 ]] ; then
     # for x86/x86_64 only
     apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
       xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox \
-      xdotool python-is-python3 openssh-server x11vnc screen
-    apt install mkvtoolnix handbrake-cli ffmpeg
+      xdotool python-is-python3 openssh-server x11vnc screen mkvtoolnix handbrake-cli ffmpeg \
+      nfs-common nfs-kernel-server
 fi
 
 apt install vim
@@ -14,17 +14,12 @@ update-alternatives --set editor /usr/bin/vim.basic
 
 if [[ `arch` == arm* ]] ; then
     # raspberry pi
-    apt install figlet gdebi-core dos2unix wakeonlan
+    apt install figlet gdebi-core dos2unix wakeonlan \
+        nfs-common nfs-kernel-server
 
     # raspberry pi proxy
     # apt install screen weechat
 
-    echo "Development raspberry pi machine? (Y|N)"
-    read -e ans
-    if [[ "$ans" == Y ]] ; then
-        # raspberry pi dev
-        apt install git ansible
-    fi
     # webcam
     # apt install fswebcam
 fi

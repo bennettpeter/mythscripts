@@ -1,0 +1,2 @@
+/home 192.168.0.0/16(rw,no_subtree_check,async,crossmnt)
+/media 192.168.0.0/16(rw,no_subtree_check,async,crossmnt)

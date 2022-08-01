@@ -59,9 +59,10 @@ create_dir /etc/opt/mythtv
 #~ create_dir /etc/rc_keymaps
 # create_dir $MOUNTDIR
 create_dir $LOGDIR 2775 mythtv:mythtv
-mkdir -p /var/log/mythtv
-chgrp adm /var/log/mythtv
-chmod 2775 /var/log/mythtv
+create_dir /var/log/mythtv 2775 mythtv:adm
+#~ mkdir -p /var/log/mythtv
+#~ chgrp adm /var/log/mythtv
+#~ chmod 2775 /var/log/mythtv
 
 if [[ "$IS_BACKEND" == true ]] ; then
     create_dir $VIDEODIR/video1 2775 mythtv:mythtv
@@ -86,6 +87,8 @@ if [[ -f /etc/opt/mythtv/mythtv.conf ]] ; then
         cp -p /etc/opt/mythtv/mythtv.conf $scriptpath/backup/${hostname}_${datetime}_mythtv.conf
     fi
 fi
+
+## mythtv config files
 pushd install/etc/opt/mythtv/
 # Remove old options files
 rm -f /etc/opt/mythtv/*.options
@@ -230,16 +233,20 @@ fi
 cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 #sudoers
-cp install/etc/sudoers.d/10-peter /etc/sudoers.d/
-sudo chown root:root /etc/sudoers.d/10-peter
-sudo chmod 440 /etc/sudoers.d/10-peter
+cp install/etc/sudoers.d/* /etc/sudoers.d/
+sudo chown root:root /etc/sudoers.d/*
+sudo chmod 440 /etc/sudoers.d/*
 
-#netmanager
-rm -f /etc/network/if-up.d/010addipaddress
-# ln -fs /opt/mythtv/bin/addipaddress.sh \
-#   /etc/network/if-up.d/010addipaddress
-# chown root:root /opt/mythtv/bin/10addipaddress.sh
-# chmod g-w /opt/mythtv/bin/10addipaddress.sh
+#exports
+create_dir /etc/exports.d 2775 root:root
+pushd install/etc/exports.d/
+found=0
+for file in `ls ${hostname}_* 2>/dev/null` ; do
+    cp -v "$file" /etc/exports.d/${file#*_}
+    found=1
+done
+popd
+if (( found )) ; then exportfs -rav ; fi
 
 if [[ "$daemonrestart" == Y ]] ; then
     systemctl restart rsyslog.service
@@ -268,6 +275,10 @@ mygroup=`id -ng`
 
 if [[ "$mygroup" != catch22 ]] ; then
     usermod -g catch22 $myuser
+fi
+
+if ! grep "^mythtv:.*$myuser" /etc/group ; then
+    adduser $myuser mythtv
 fi
 
 if [[ $ARCH == arm* ]] ; then
