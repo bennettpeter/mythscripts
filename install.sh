@@ -4,9 +4,14 @@ scriptpath=`dirname "$scriptname"`
 datetime=`date +%Y%m%d_%H%M`
 set -e
 
+if [[ "$SUDO_USER" == "" ]] ; then
+	echo "This must run under sudo"
+	exit 2
+fi
+
 if ! grep '^mythtv:' /etc/group ; then
     addgroup --gid 200 mythtv
-    adduser `id -nu` mythtv
+    adduser $SUDO_USER mythtv
 fi
 
 $scriptpath/fixpermissions.sh
@@ -270,15 +275,14 @@ if ! grep "^video:.*mythtv" /etc/group ; then
     adduser mythtv video
 fi
 
-myuser=`id -nu`
-mygroup=`id -ng`
+mygroup=`id -ng $SUDO_USER`
 
 if [[ "$mygroup" != catch22 ]] ; then
-    usermod -g catch22 $myuser
+    usermod -g catch22 $SUDO_USER
 fi
 
-if ! grep "^mythtv:.*$myuser" /etc/group ; then
-    adduser $myuser mythtv
+if ! grep "^mythtv:.*$SUDO_USER" /etc/group ; then
+    adduser $SUDO_USER mythtv
 fi
 
 if [[ $ARCH == arm* ]] ; then
