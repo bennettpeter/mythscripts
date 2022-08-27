@@ -80,7 +80,13 @@ else
                 # Sets wakeup to the default if one was provided
                 sudo $scriptpath/setwakeup.sh 1
             fi
-            setsid $scriptpath/systemshutdown.sh || true
+            # laptops must not reboot with lid closed. That causes
+            # startup without any screen output, not even text mode.
+            parm=
+            if [[ $(hostnamectl chassis) == laptop ]] ; then
+                parm=NOREBOOT
+            fi
+            setsid $scriptpath/systemshutdown.sh $parm || true
         fi
         if [[ "$BATTERY_CHECK" != "" ]] ; then
             if acpi -a|grep off-line ; then
