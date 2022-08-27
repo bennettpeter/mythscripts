@@ -13,7 +13,7 @@ for file in $gitbasedir/../patch/Peter/${project}_*.patch ; do
         # This is to make sure install does not try to build them again.
         filelist=`grep "^diff --git" "$file" | sed "s#diff --git ##;s#a/##;s# b/.*##"`
         pushd "$gitbasedir"
-        mkdir /tmp/build$$/
+        mkdir -p /tmp/build$$/
         cp -p $filelist /tmp/build$$
         rrc=0
         git apply --reverse $file || rrc=$?
