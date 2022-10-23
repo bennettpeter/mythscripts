@@ -6,7 +6,7 @@ if [[ `arch` == x86_64 ]] ; then
     apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
       xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox \
       xdotool python-is-python3 openssh-server x11vnc screen mkvtoolnix handbrake-cli ffmpeg \
-      nfs-common nfs-kernel-server
+      nfs-common nfs-kernel-server gnome-system-monitor
 fi
 
 apt install vim
@@ -28,7 +28,7 @@ echo "Backend machine? (Y|N)"
 read -e ans
 if [[ "$ans" == Y ]] ; then
     # These are for backend
-    apt install xmltv apache2 php php-mysql mysql-server
+    apt install xmltv apache2 php php-mysql mysql-server comskip
     echo "FireTV Recorder machine? (Y|N)"
     read -e ans
     if [[ "$ans" == Y ]] ; then
