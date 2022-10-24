@@ -42,9 +42,9 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     set -x
     nice comskip --ini="/etc/opt/mythtv/comskip_comcast.ini" --output="$output"  --output-filename="$pgm" \
         "$fullfilename" "$output" 2> "$output/$pgm.stderr"
+    set -
     echo Commercial breaks in seconds --
     cat "$output/$pgm.edl"
-    set -
     skip=
     while read -r start finish
     do
