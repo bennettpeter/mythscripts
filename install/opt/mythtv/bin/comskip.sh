@@ -42,6 +42,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     set -x
     nice comskip --ini="/etc/opt/mythtv/comskip_comcast.ini" --output="$output"  --output-filename="$pgm" \
         "$fullfilename" "$output" 2> "$output/$pgm.stderr"
+    echo Commercial breaks in seconds --
+    cat "$output/$pgm.edl"
     set -
     skip=
     while read -r start finish
@@ -58,6 +60,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     set -x
     mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
     set -
+    # clean up
+    rm -rfv "$output/$pgm".*
 fi
 
 date
