@@ -61,7 +61,7 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
     set -
     # clean up
-    rm -rfv "$output/$pgm".*
+    rm -fv "$output/$pgm".*
 fi
 
 date
