@@ -2,6 +2,7 @@
 # Commercial skip
 # command line - 
 # /opt/mythtv/bin/comskip.sh "%FILE%" %CHANID% %STARTTIMEUTC% "%RECGROUP%" "%TITLE%" "%SUBTITLE%"
+# for a Video, the filename must be a full file name relative to the videos directory and other parameters must be blank
 # 
 
 . /etc/opt/mythtv/mythtv.conf
@@ -33,11 +34,22 @@ ionice -c3 -p$$
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Find the recording file
-    fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null`
+    if [[ "$chanid" == "" ]] ; then
+        fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename" 2>/dev/null`
+    else
+        fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null`
+    fi
     echo Found file: $fullfilename .
     output=/tmp
-    pgm=${filename%.*}
-    rm -fv $output/$pgm.*
+    pgm=$(basename "$filename")
+    pgm=${pgm%.*}
+    rm -fv "$output/$pgm".*
+
+    # wait until there is no comskip running
+    while pidof comskip >/dev/null ; do
+        sleep 5
+    done
+
     echo running comskip
     set -x
     nice comskip --ini="/etc/opt/mythtv/comskip_comcast.ini" --output="$output"  --output-filename="$pgm" \
@@ -58,7 +70,11 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     echo Skiplist "$skip"
     echo running mythutil
     set -x
-    mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
+    if [[ "$chanid" == "" ]] ; then
+        mythutil --video "$filename" --setskiplist "$skip" -q
+    else
+        mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
+    fi
     set -
     # clean up
     rm -fv "$output/$pgm".*
