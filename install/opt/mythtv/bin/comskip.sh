@@ -62,12 +62,18 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     do
        if [[ "$start" == FILE ]] ; then continue ; fi
        if [[ "$start" == ---* ]] ; then continue ; fi
+       if (( finish - start < 5 )) ; then continue ; fi
        if [[ "$skip" != "" ]] ; then
           skip="$skip,"
        fi
        skip=${skip}${start}-${finish}
     done < "$output/$pgm.txt"
     echo Skiplist "$skip"
+    if [[ "$skip" == "" ]] ; then
+        echo Error - empty skip list
+        # to cause error and invokde errfunc
+        false
+    fi
     echo running mythutil
     set -x
     if [[ "$chanid" == "" ]] ; then
