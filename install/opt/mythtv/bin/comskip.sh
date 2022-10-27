@@ -24,7 +24,10 @@ title="$5"
 subtitle="$6"
 
 function errfunc {
-    "$scriptpath/notify.py" "commskip failed" "$title"
+    if [[ "$title" == "" ]] ; then
+        title="$filename"
+    fi
+    "$scriptpath/notify.py" "commskip failed" "$title" "$subtitle"
     exit 2
 }
 trap errfunc ERR
