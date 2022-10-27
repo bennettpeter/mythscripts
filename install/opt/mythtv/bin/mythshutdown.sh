@@ -302,19 +302,19 @@ if [[ "$IS_BACKEND" != true && "$reason" != powerbtn ]] ; then
 fi
 
 
-if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
-    # Reboot the ceton infinitv
-    if [[ "$USE_CETON" == true ]] ; then
-        find "$VIDEODIR"/video*/recordings -newer $DATADIR/last_ceton_reboot \
-          \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | tee /tmp/find$$
-        count=`cat /tmp/find$$ | wc -l`
-        if (( count > 0 )) ; then
-            echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')' 
-            wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
-            date > $DATADIR/last_ceton_reboot
-        fi
-    fi
-fi
+#~ if [[ "$MAINHOST" == "$LocalHostName" && "$rc" == 0 ]] ; then
+    #~ # Reboot the ceton infinitv
+    #~ if [[ "$USE_CETON" == true ]] ; then
+        #~ find "$VIDEODIR"/video*/recordings -newer $DATADIR/last_ceton_reboot \
+          #~ \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | tee /tmp/find$$
+        #~ count=`cat /tmp/find$$ | wc -l`
+        #~ if (( count > 0 )) ; then
+            #~ echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')' 
+            #~ wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
+            #~ date > $DATADIR/last_ceton_reboot
+        #~ fi
+    #~ fi
+#~ fi
 
 # Only run leanxdvr if all other tests say shutdown is OK
 if [[ "$rc" == 0 && "$RUN_LEANXDVR" == Y ]] ; then
