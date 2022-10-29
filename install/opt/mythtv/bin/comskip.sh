@@ -2,7 +2,11 @@
 # Commercial skip
 # command line - 
 # /opt/mythtv/bin/comskip.sh "%FILE%" %CHANID% %STARTTIMEUTC% "%RECGROUP%" "%TITLE%" "%SUBTITLE%"
-# for a Video, the filename must be a full file name relative to the videos directory and other parameters must be blank
+# or for a video:
+# /opt/mythtv/bin/comskip.sh "filename" [profile]
+# for a Video, the filename must be a full file name relative to the videos directory
+# profile is the name of the ccomskip ini, default is peacock
+# For a video parameters after profile must be blank
 # 
 
 . /etc/opt/mythtv/mythtv.conf
@@ -23,6 +27,19 @@ recgroup="$4"
 title="$5"
 subtitle="$6"
 
+if [[ "$starttime" == "" ]] ; then
+    if [[ "$chanid" == "" ]] ; then
+        inifile=peacock
+    else
+        inifile=$chanid
+        chanid=""
+    fi
+    echo "Video using $inifile"
+else
+    inifile=comcast
+    echo "Recording using $inifile"
+fi
+
 function errfunc {
     if [[ "$title" == "" ]] ; then
         title="$filename"
@@ -37,12 +54,16 @@ ionice -c3 -p$$
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Find the recording file
-    if [[ "$chanid" == "" ]] ; then
+    if [[ "$starttime" == "" ]] ; then
         fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename" 2>/dev/null`
     else
         fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null`
     fi
-    echo Found file: $fullfilename .
+    if [[ "$fullfilename" == "" ]] ; then
+        echo "ERROR: File $filename not found"
+        false
+    fi
+    echo "Found file: $fullfilename ."
     output=/tmp
     pgm=$(basename "$filename")
     pgm=${pgm%.*}
@@ -53,12 +74,13 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
         sleep 5
     done
 
-    echo running comskip
+    date
+    echo "Running comskip"
     set -x
-    nice comskip --ini="/etc/opt/mythtv/comskip_comcast.ini" --output="$output"  --output-filename="$pgm" \
+    nice comskip --ini="/etc/opt/mythtv/comskip_${inifile}.ini" --output="$output"  --output-filename="$pgm" \
         "$fullfilename" "$output" 2> "$output/$pgm.stderr"
     set -
-    echo Commercial breaks in seconds --
+    echo "Commercial breaks in seconds --"
     cat "$output/$pgm.edl"
     skip=
     while read -r start finish
@@ -71,20 +93,22 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
        fi
        skip=${skip}${start}-${finish}
     done < "$output/$pgm.txt"
-    echo Skiplist "$skip"
+    echo "Skiplist $skip"
     if [[ "$skip" == "" ]] ; then
-        echo Error - empty skip list
-        # to cause error and invokde errfunc
+        echo "Error - empty skip list"
+        # to cause error and invoke errfunc
         false
     fi
-    echo running mythutil
+    echo "Running mythutil"
+    if [[ "$starttime" == "" ]] ; then
     set -x
-    if [[ "$chanid" == "" ]] ; then
         mythutil --video "$filename" --setskiplist "$skip" -q
-    else
-        mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
-    fi
     set -
+    else
+    set -x
+        mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
+    set -
+    fi
     # clean up
     rm -fv "$output/$pgm".*
 fi
