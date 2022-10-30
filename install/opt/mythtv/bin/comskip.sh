@@ -7,18 +7,31 @@
 # for a Video, the filename must be a full file name relative to the videos directory
 # profile is the name of the ccomskip ini, default is peacock
 # For a video parameters after profile must be blank
-# 
+# set environment VERBOSE=n for debugging where n is verbose level, 0 is non debug.
+# Set temporarily in mythtv.conf or on command line
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
+
+if (( VERBOSE )) ; then
+    LOGDIR=/var/tmp/comskip_debug
+    mkdir -p $LOGDIR
+    output=$LOGDIR
+    extraparm="--verbose=$VERBOSE"
+else
+    output=/tmp
+    extraparm=
+fi
+
 exec 1>>$LOGDIR/${scriptname}.log
 exec 2>&1
 echo "------START------"
 date
 
 echo $0 $1 $2 $3 $4 $5 $6 $7
+echo "DEBUG_COMSKIP=$DEBUG_COMSKIP"
 
 filename="$1"
 chanid="$2"
@@ -64,7 +77,6 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
         false
     fi
     echo "Found file: $fullfilename ."
-    output=/tmp
     pgm=$(basename "$filename")
     pgm=${pgm%.*}
     rm -fv "$output/$pgm".*
@@ -78,7 +90,7 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     echo "Running comskip"
     set -x
     nice comskip --ini="/etc/opt/mythtv/comskip_${inifile}.ini" --output="$output"  --output-filename="$pgm" \
-        "$fullfilename" "$output" 2> "$output/$pgm.stderr"
+        $extraparm "$fullfilename" "$output" 2> "$output/$pgm.stderr"
     set -
     echo "Commercial breaks in seconds --"
     cat "$output/$pgm.edl"
@@ -110,7 +122,9 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     set -
     fi
     # clean up
-    rm -fv "$output/$pgm".*
+    if (( ! VERBOSE )) ; then
+        rm -fv "$output/$pgm".*
+    fi
 fi
 
 date
