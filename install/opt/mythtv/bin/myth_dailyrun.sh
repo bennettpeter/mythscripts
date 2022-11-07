@@ -172,6 +172,20 @@ if (( run_tc )) ; then
     fi
 fi
 
+prev_comskip=
+if [[ -f $DATADIR/comskip_date ]] ; then
+    prev_comskip=`cat $DATADIR/comskip_date`
+fi
+
+if [[ "$prev_comskip" != "$today" ]] ; then
+    # Start daily comskip run
+    echo $today > $DATADIR/comskip_date
+    DATE=`date +%F\ %T\.%N`
+    DATE=${DATE:0:23}
+    echo $DATE "Running comskip_daily."
+    $scriptpath/comskip_daily.sh
+fi
+
 # Check cable box once a day
 # $scriptpath/stb_poweron.sh
 
