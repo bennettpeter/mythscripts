@@ -64,6 +64,7 @@ trap errfunc ERR
 
 echo Set IO priority to -c3 idle
 ionice -c3 -p$$
+error=0
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Find the recording file
@@ -90,10 +91,12 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     echo "Running comskip"
     set -x
     nice comskip --ini="/etc/opt/mythtv/comskip_${inifile}.ini" --output="$output"  --output-filename="$pgm" \
-        $extraparm "$fullfilename" "$output" 2> "$output/$pgm.stderr"
+        $extraparm "$fullfilename" "$output" 2> "$output/$pgm.stderr" || echo error=$?
     set -
+    touch "$output/$pgm.edl"
     echo "Commercial breaks in seconds --"
     cat "$output/$pgm.edl"
+    touch "$output/$pgm.txt"
     skip=
     while read -r start finish
     do
@@ -108,8 +111,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     echo "Skiplist $skip"
     if [[ "$skip" == "" ]] ; then
         echo "Error - empty skip list"
-        # to cause error and invoke errfunc
-        false
+        skip="1-2"
+        error=1
     fi
     echo "Running mythutil"
     if [[ "$starttime" == "" ]] ; then
@@ -120,6 +123,10 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     set -x
         mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
     set -
+    fi
+    if (( error )) ; then
+        # to cause error and invoke errfunc
+        false
     fi
     # clean up
     if (( ! VERBOSE )) ; then
