@@ -1,6 +1,11 @@
 #!/bin/bash
 # Daily Commercial skip run
 # Make sure the oldest unwatched episodes of certain shows have been run
+# Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
+#~ # Shows for comskip_daily.sh
+#~ # r = recording, v = video
+#~ r Blue Bloods
+#~ v Sprung
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
