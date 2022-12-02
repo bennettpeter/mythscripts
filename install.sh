@@ -4,9 +4,9 @@ scriptpath=`dirname "$scriptname"`
 datetime=`date +%Y%m%d_%H%M`
 set -e
 
-if [[ "$SUDO_USER" == "" ]] ; then
-	echo "This must run under sudo"
-	exit 2
+if [[ "$SUDO_USER" == "" || "$SUDO_USER" == "root" ]] ; then
+    echo "This must run under sudo"
+    exit 2
 fi
 
 if ! grep '^mythtv:' /etc/group ; then
@@ -277,7 +277,7 @@ fi
 
 mygroup=`id -ng $SUDO_USER`
 
-if [[ "$mygroup" != catch22 ]] ; then
+if [[ "$mygroup" != catch22 && "$SUDO_USER" != root ]] ; then
     usermod -g catch22 $SUDO_USER
 fi
 
