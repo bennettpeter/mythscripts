@@ -309,7 +309,7 @@ else
     rm -f /home/$SOFT_USER/.asoundrc
 fi
 
-cp -avf install/home/bin $HOME/
+cp -avf install/home/bin /home/$SUDO_USER/
 
 # Remove automatic weekly db backup
 if [[ -f /etc/cron.weekly/mythtv-database ]] ; then
