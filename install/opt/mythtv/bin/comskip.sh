@@ -11,6 +11,13 @@
 # Set temporarily in mythtv.conf or on command line
 
 . /etc/opt/mythtv/mythtv.conf
+
+# These overrides enable running this for mythroam
+shortname=$(echo "$MYTHCONFDIR" | grep -o "[a-z]*$")
+if [[ -f /etc/opt/mythtv/mythtv-$shortname.conf ]] ; then
+    . /etc/opt/mythtv/mythtv-$shortname.conf
+fi
+
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
