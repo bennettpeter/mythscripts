@@ -39,8 +39,8 @@ EOF
         while IFS=$'\t' read -r basename chanid starttime recgroup title subtitle originalairdate done extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                echo /opt/mythtv/bin/comskip.sh "$basename" "$chanid" "$starttime" "$recgroup" "$title" "$subtitle"
-                /opt/mythtv/bin/comskip.sh "$basename" "$chanid" "$starttime" "$recgroup" "$title" "$subtitle"
+                echo $scriptpath/comskip.sh "$basename" "$chanid" "$starttime" "$recgroup" "$title" "$subtitle"
+                $scriptpath/comskip.sh "$basename" "$chanid" "$starttime" "$recgroup" "$title" "$subtitle"
             fi
         done < /tmp/comskip$$.csv
     fi
@@ -57,8 +57,8 @@ EOF
         while IFS=$'\t' read -r filename title subtitle done extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                echo /opt/mythtv/bin/comskip.sh "$filename"
-                /opt/mythtv/bin/comskip.sh "$filename"
+                echo $scriptpath/comskip.sh "$filename"
+                $scriptpath/comskip.sh "$filename"
             fi
         done < /tmp/comskip$$.csv
     fi
