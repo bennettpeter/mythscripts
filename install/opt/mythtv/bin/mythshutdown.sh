@@ -125,6 +125,33 @@ if [[ "$CAN_TRANSCODE" == Y && "$encoderunning" == 0 ]] ; then
 #    ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
 fi
 
+# On backend, if ffmpeg is running for a long time when mythshutdown is called
+# it indicates a bug with hanging mythbackend. In this case reboot.
+# This will check for 10 minutes before rebooting.
+
+if [[ "$IS_BACKEND" == true ]] ; then
+    pids=$(pidof ffmpeg)
+    if [[ "$pids" != "" ]] ; then
+        touch $DATADIR/ffmpeg_pids
+        ffmpeg_pids="$(cat $DATADIR/ffmpeg_pids)"
+        if [[ "$pids" == "$ffmpeg_pids" ]] ;then
+            touch $DATADIR/ffmpeg_count
+            ffmpeg_count="$(cat $DATADIR/ffmpeg_count)"
+            let ffmpeg_count++
+            if (( ffmpeg_count > 5 )) ; then
+                "$scriptpath/notify.py" "$LocalHostName extern recorder hang" \
+                "rebooting now"
+                echo sudo /sbin/shutdown -r now
+                echo exit 0
+            fi
+            echo "$ffmpeg_count" > $DATADIR/ffmpeg_count
+        else
+            echo "$pids" > $DATADIR/ffmpeg_pids
+            rm -f $DATADIR/ffmpeg_count
+        fi
+    fi
+fi
+
 # Find unix id of SOFT_USER
 soft_unix_id=`grep ^$SOFT_USER: /etc/passwd|cut -d : -s -f 3`
 if [[ "$soft_unix_id" == "" ]] ; then

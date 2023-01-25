@@ -105,6 +105,9 @@ while (( rc != 0 )) ; do
     fi
 done
 
+rm -f $DATADIR/ffmpeg_pids
+rm -f $DATADIR/ffmpeg_count
+
 # set live tv start channel to a valid HD channel number
 # This avoids the problem of failing to open jump file buffer during live TV
 # fesetup=
