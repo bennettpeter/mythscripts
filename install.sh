@@ -203,6 +203,19 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
 #        fi
 #    fi
 
+    # Core dumps
+    if [[ "$ENABLE_COREDUMPS" == Y ]] ; then
+        cp install/etc/sysctl.d/60-coredump /etc/sysctl.d/
+        if grep enabled=1 /etc/default/apport  ; then
+            sed -i s/enabled=1/enabled=0/ /etc/default/apport
+        fi
+    else
+        rm -f /etc/sysctl.d/60-coredump
+        if grep enabled=0 /etc/default/apport  ; then
+            sed -i s/enabled=0/enabled=1/ /etc/default/apport
+        fi
+    fi
+ 
     if [[ "$WEBCAM" == Y ]] ; then
         if ! diff install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service ; then
             cp install/etc/systemd/system/peter-webcam.service /etc/systemd/system/peter-webcam.service
