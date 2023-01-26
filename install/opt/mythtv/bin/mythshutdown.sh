@@ -143,8 +143,8 @@ if [[ "$IS_BACKEND" == true ]] ; then
                 "rebooting now"
                 # Shutdown after 2 minutes, to allow dump to be taken
                 sudo /sbin/shutdown -r +2
-                # kill with a dump
-                killall -s SIGQUIT mythbackend
+                # kill with a dump - does not work
+                # killall -s SIGQUIT mythbackend
                 exit 0
             fi
             echo "$ffmpeg_count" > $DATADIR/ffmpeg_count
