@@ -141,11 +141,13 @@ if [[ "$IS_BACKEND" == true ]] ; then
             if (( ffmpeg_count > 5 )) ; then
                 "$scriptpath/notify.py" "$LocalHostName extern recorder hang" \
                 "rebooting now"
-                # Shutdown after 2 minutes, to allow dump to be taken
-                sudo /sbin/shutdown -r +2
-                # kill with a dump - does not work
-                # killall -s SIGQUIT mythbackend
-                exit 0
+                # Shutdown after 1 minute, to allow dump to be taken
+                if [[ ! -f /run/systemd/shutdown/scheduled ]] ; then
+                    sudo /sbin/shutdown -r +1
+                    # kill with a dump - does not work
+                    # killall -s SIGQUIT mythbackend
+                fi
+                rc=1
             fi
             echo "$ffmpeg_count" > $DATADIR/ffmpeg_count
         else
