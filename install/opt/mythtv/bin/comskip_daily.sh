@@ -31,7 +31,7 @@ while read -r type stitle ; do
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT basename, recorded.chanid, recorded.starttime, recgroup, title, subtitle, originalairdate, MAX(type=4)
 FROM recordedmarkup right outer join recorded using (chanid, starttime)
-where recgroup != 'Deleted' and watched = 0 and title = '$stitle'
+where recgroup not in ('Deleted','Shorts') and watched = 0 and title = '$stitle'
 group by basename, recorded.chanid, recorded.starttime, recgroup, title, subtitle, originalairdate
 order by originalairdate
 limit 3;
