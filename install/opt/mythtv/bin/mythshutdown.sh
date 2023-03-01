@@ -138,14 +138,19 @@ if [[ "$IS_BACKEND" == true ]] ; then
             touch $DATADIR/ffmpeg_count
             ffmpeg_count="$(cat $DATADIR/ffmpeg_count)"
             let ffmpeg_count++
-            if (( ffmpeg_count > 5 )) ; then
+            if (( ffmpeg_count == 5 )) ; then
                 "$scriptpath/notify.py" "$LocalHostName extern recorder hang" \
                 "rebooting now"
                 # Shutdown after 1 minute, to allow dump to be taken
-                if [[ ! -f /run/systemd/shutdown/scheduled ]] ; then
-                    sudo /sbin/shutdown -r +1
-                    # kill with a dump - does not work
-                    # killall -s SIGQUIT mythbackend
+                #~ if [[ ! -f /run/systemd/shutdown/scheduled ]] ; then
+                    #~ sudo /sbin/shutdown -r +1
+                    #~ # kill with a dump - does not work
+                    #~ # killall -s SIGQUIT mythbackend
+                #~ fi
+                bepid=$(pidof mythbackend)
+                if [[ "$bepid" != "" ]] ; then
+                    logdate=$(date +%Y-%m-%d_%H-%M-%S)
+                    sudo gcore -o "/home/peter/${logdate}_core_${bepid}" $bepid
                 fi
                 rc=1
             fi
