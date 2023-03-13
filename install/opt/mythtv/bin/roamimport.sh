@@ -19,6 +19,7 @@ sudo mkdir -p /srv/mythtv
 sudo ln -fs /media/peter/mythroam /srv/mythtv/video1
 sudo mkdir -p /srv/mythtv/video3
 sudo ln -fs /media/peter/mythroam/videos /srv/mythtv/video3/videos
+sudo cp /media/peter/etc/comskip_shows.txt /etc/opt/mythtv/
 
 #restore
 backupdir=/srv/mythtv/video1/dbbackup

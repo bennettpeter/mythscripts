@@ -91,4 +91,8 @@ for subdir in $otherdirs ; do
     done
 done
 
+# Copy comskip parameters
+mkdir -p $ROAMDIR/etc
+cp -fv /etc/opt/mythtv/comskip_shows.txt $ROAMDIR/etc/
+
 umount -v $ROAMDIR || true
