@@ -3,7 +3,7 @@
 # Make sure the oldest unwatched episodes of certain shows have been run
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
 #~ # Shows for comskip_daily.sh
-#~ # r = recording, v = video
+#~ # r = recording, v = video, f = freevee video
 #~ r Blue Bloods
 #~ v Sprung
 
@@ -29,14 +29,14 @@ while read -r type stitle ; do
     if [[ "$type" == r  && "$stitle" != "" ]] ; then
         echo "Checking for recordings of $stitle"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
-SELECT basename, recorded.chanid, recorded.starttime, recgroup, title, subtitle, originalairdate, MAX(type=4)
+SELECT basename, recorded.chanid, recorded.starttime, recgroup, title, MAX(type=4), originalairdate, subtitle
 FROM recordedmarkup right outer join recorded using (chanid, starttime)
 where recgroup not in ('Deleted','Shorts') and watched = 0 and title = '$stitle'
 group by basename, recorded.chanid, recorded.starttime, recgroup, title, subtitle, originalairdate
 order by originalairdate
 limit 3;
 EOF
-        while IFS=$'\t' read -r basename chanid starttime recgroup title subtitle originalairdate done extra ; do
+        while IFS=$'\t' read -r basename chanid starttime recgroup title done originalairdate subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
                 echo $scriptpath/comskip.sh "$basename" "$chanid" "$starttime" "$recgroup" "$title" "$subtitle"
@@ -44,21 +44,25 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ "$type" == v  && "$stitle" != "" ]] ; then
+    if [[ ( "$type" == v || "$type" == f ) && "$stitle" != "" ]] ; then
+        inifile=
+        if [[ "$type" == f ]] ; then
+            inifile=freevee
+        fi
         echo "Checking for videos of $stitle"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
-SELECT filename, title, subtitle, MAX(type=4)
+SELECT filename, title, MAX(type=4), subtitle
 FROM filemarkup right outer join videometadata using (filename)
 WHERE watched = 0 AND title = '$stitle'
 group by filename, title, subtitle
 order by filename
 limit 3;
 EOF
-        while IFS=$'\t' read -r filename title subtitle done extra ; do
+        while IFS=$'\t' read -r filename title done subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                echo $scriptpath/comskip.sh "$filename"
-                $scriptpath/comskip.sh "$filename"
+                echo $scriptpath/comskip.sh "$filename" $inifile
+                $scriptpath/comskip.sh "$filename"  $inifile
             fi
         done < /tmp/comskip$$.csv
     fi
