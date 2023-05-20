@@ -278,7 +278,7 @@ if ! grep "^$SOFT_USER" /etc/passwd ; then
     adduser --ingroup catch22 $SOFT_USER
 fi
 if ! grep "^mythtv" /etc/passwd ; then
-    adduser --ingroup mythtv --system --uid 200 mythtv 
+    adduser --ingroup mythtv --system --uid 200 --home /home/mythtv mythtv 
 fi
 if ! grep "^mythtv:.*$SOFT_USER" /etc/group ; then
     adduser $SOFT_USER mythtv
