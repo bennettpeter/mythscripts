@@ -277,6 +277,11 @@ if pidof xfburn k3b ; then
     rc=1
 fi
 
+if pidof feh ; then
+    echo $DATE "slide show is running, don't shut down."
+    rc=1
+fi
+
 # Check if anybody is accessing my drives via nfs
 if [[ -f /usr/sbin/nfsstat && -f /proc/net/rpc/nfsd ]] ; then
     touch /tmp/${userid}_mythshutdown_nfs_count
@@ -346,7 +351,7 @@ fi
           #~ \( -name '*.ts' -o -name '*.tsx' \) 2>/dev/null | tee /tmp/find$$
         #~ count=`cat /tmp/find$$ | wc -l`
         #~ if (( count > 0 )) ; then
-            #~ echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')' 
+            #~ echo $DATE 'Rebooting Ceton Infinitv (last reboot was '`cat $DATADIR/last_ceton_reboot`')'
             #~ wget -q -t 1 -T 2 -O - --post-data "cmd=reboot" http://$CETON_IP/command.cgi||echo rc $?
             #~ date > $DATADIR/last_ceton_reboot
         #~ fi
