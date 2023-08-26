@@ -17,7 +17,7 @@ today=`date "+%a %Y/%m/%d"`
 opts="$1"
 
 # Note the --only-update-guide option does not work for SD only for XMLTV
-# Note the --remove-new-channels option does not in fact remove new channels, just prevents 
+# Note the --remove-new-channels option does not in fact remove new channels, just prevents
 # them being added when using SD
 #mythfilldatabase --dd-grab-all --remove-new-channels "$@"
 
@@ -64,7 +64,8 @@ do
       --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
       > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml
     mythfilldatabase --file --sourceid $sourceid \
-      --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts
+      --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts \
+      --do-channel-updates
 #    done
     set -
 done < $DATADIR/videosource.txt
