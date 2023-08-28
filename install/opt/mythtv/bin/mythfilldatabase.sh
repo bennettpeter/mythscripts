@@ -54,18 +54,18 @@ do
     grabber="/usr/local/bin/tv_grab_zz_sdjson_sqlite"
     userid=`id -un`
     rm -f /tmp/${userid}_tv_grab_$sourcename_off*.xml
-    "$grabber" --download-only \
-        --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf
+    #~ "$grabber" --download-only \
+        #~ --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf
     set -x
-    offset=0
+    #~ offset=0
 #    for (( offset = 0; offset < 20; offset += 3 )) ; do
 #    removed --days 3 --offset $offset
-    "$grabber"  --no-download  \
+    #~ "$grabber"  --no-download
+    "$grabber" \
       --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
       > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml
     mythfilldatabase --file --sourceid $sourceid \
-      --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts \
-      --do-channel-updates
+      --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts
 #    done
     set -
 done < $DATADIR/videosource.txt
