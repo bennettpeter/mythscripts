@@ -74,7 +74,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
     echo $today > $DATADIR/mythfilldatabase_date
     # run asynchronously - in error cases it can run 2 hours and hold up other stuff.
     (
-        $scriptpath/mythfilldatabase.sh  --only-update-guide >/dev/null 2>&1
+        $scriptpath/mythfilldatabase.sh >/dev/null 2>&1
         rc=$?
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "mythfilldatabase failed" "mythfilldatabase.sh"
@@ -154,7 +154,7 @@ if [[ "$prev_transcode" != "$today" ]] ; then
         if ping -c 1 "$tcserver" ; then
             # Avoid running tcdaily if tcserver is up, tcserver
             # may be busy recording.
-            echo "postpone tcdaily because $tcserver is running" 
+            echo "postpone tcdaily because $tcserver is running"
             run_tc=0
         fi
     fi
