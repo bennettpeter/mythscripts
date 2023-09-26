@@ -41,11 +41,13 @@ if [[ "$today" == Sat* ]]; then
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "Database Backup failed" "mythtv_dbbackup.sh"
         fi
-        echo Running leancap_chanlist
-        $LEANCAP/leancap_chanlist.sh leancap2
-        rc=$?
-        if [[ "$rc" != 0 ]] ; then
-            "$scriptpath/notify.py" "Leancap Chanlist failed" "$LEANCAP/leancap_chanlist.sh leancap2"
+        if [[ "$USE_LEANCAP" == true ]] ; then
+            echo Running leancap_chanlist
+            $LEANCAP/leancap_chanlist.sh leancap2
+            rc=$?
+            if [[ "$rc" != 0 ]] ; then
+                "$scriptpath/notify.py" "Leancap Chanlist failed" "$LEANCAP/leancap_chanlist.sh leancap2"
+            fi
         fi
         # Run roamexport to keep portable drive up to date.
         # This must be run here to ensure consistent with DB backup above

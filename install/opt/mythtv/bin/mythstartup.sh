@@ -86,24 +86,26 @@ LOCKBASEDIR=/run/lock/leancap
 LOGDATE='date +%Y-%m-%d_%H-%M-%S'
 count=0
 rc=90
-while (( rc != 0 )) ; do
-    let count++
-    if [[ -f $LOCKBASEDIR/scandate ]] ; then
-        rc=0
-    else
-        rc=99
-        # This count must be enough for all tuners to be scanned, since scandate is
-        # only created after all are scanned. 45 = 90 seconds
-        if (( count > 45 )) ; then
-            echo `$LOGDATE` "ERROR leancap_scan not yet run, tuners may be disabled"
-            $scriptpath/notify.py "Fire Stick Problem" \
-                "mythstartup: leancap_scan not yet run, tuners may be disabled" &
-            break
+if [[ "$USE_LEANCAP" == true ]] ; then
+    while (( rc != 0 )) ; do
+        let count++
+        if [[ -f $LOCKBASEDIR/scandate ]] ; then
+            rc=0
+        else
+            rc=99
+            # This count must be enough for all tuners to be scanned, since scandate is
+            # only created after all are scanned. 45 = 90 seconds
+            if (( count > 45 )) ; then
+                echo `$LOGDATE` "ERROR leancap_scan not yet run, tuners may be disabled"
+                $scriptpath/notify.py "Fire Stick Problem" \
+                    "mythstartup: leancap_scan not yet run, tuners may be disabled" &
+                break
+            fi
+            echo `$LOGDATE` "leancap_scan not yet run, waiting 2 seconds"
+            sleep 2
         fi
-        echo `$LOGDATE` "leancap_scan not yet run, waiting 2 seconds"
-        sleep 2
-    fi
-done
+    done
+fi
 
 rm -f $DATADIR/ffmpeg_pids
 rm -f $DATADIR/ffmpeg_count
