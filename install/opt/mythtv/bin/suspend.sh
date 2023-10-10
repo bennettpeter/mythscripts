@@ -28,6 +28,13 @@ if pidof FreeFileSync_x86_64 ; then
     exit 2
 fi
 
+if pidof fstrim ; then
+    zenity --error --no-wrap \
+    --text='<span font="32">ERROR fstrim is running. Wait 5 minutes and try again.</span>' \
+      --width 1000 --height 100
+    exit 2
+fi
+
 if pidof kmymoney ; then
     zenity --error --no-wrap \
     --text='<span font="32">ERROR KMyMoney is running.</span>' \
