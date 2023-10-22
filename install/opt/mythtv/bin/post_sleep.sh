@@ -28,6 +28,12 @@ if [[ "$RESTART_BLUETOOTH" == Y ]] ; then
     fi
 fi
 
+# Reset keyboard/mouse
+if [[ "$RESET_USB" != "" ]] ; then
+    sleep 1
+    usbreset $RESET_USB
+fi
+
 # systemctl restart transmission-daemon.service
 
 # hostname=`cat /etc/hostname`
