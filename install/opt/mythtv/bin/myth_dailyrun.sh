@@ -150,35 +150,36 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
         echo "$ipaddress" > $DATADIR/ipaddress.txt
     fi
 fi
-prev_transcode=
-if [[ -f $DATADIR/transcode_date ]] ; then
-    prev_transcode=`cat $DATADIR/transcode_date`
+
+prev_archive=
+if [[ -f $DATADIR/archive_date ]] ; then
+    prev_archive=`cat $DATADIR/archive_date`
 fi
-run_tc=0
-if [[ "$prev_transcode" != "$today" ]] ; then
-    run_tc=1
+run_arc=0
+if [[ "$prev_archive" != "$today" ]] ; then
+    run_arc=1
     # This will return server name for an NFS mount,
     # the string "UUID" for a local mount, empty for a mismatch
-    tcserver=`grep " $TCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
-    if [[ "$tcserver" != UUID ]] ; then
-        if ping -c 1 "$tcserver" ; then
-            # Avoid running tcdaily if tcserver is up, tcserver
+    arcserver=`grep " $ARCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
+    if [[ "$arcserver" != UUID ]] ; then
+        if ping -c 1 "$arcserver" ; then
+            # Avoid running mytharchive if arcserver is up, arcserver
             # may be busy recording.
-            echo "postpone tcdaily because $tcserver is running"
-            run_tc=0
+            echo "postpone mytharchive because $arcserver is running"
+            run_arc=0
         fi
     fi
 fi
-if (( run_tc )) ; then
-    # Start daily transcode run
-    echo $today > $DATADIR/transcode_date
+if (( run_arc )) ; then
+    # Start daily archive run
+    echo $today > $DATADIR/archive_date
     DATE=`date +%F\ %T\.%N`
     DATE=${DATE:0:23}
-    echo $DATE "Running tcdaily."
-    nice ionice -c3 $scriptpath/tcdaily.sh >/dev/null 2>&1
+    echo $DATE "Running mytharchive."
+    nice ionice -c3 $scriptpath/mytharchive.sh >/dev/null 2>&1
     rc=$?
     if [[ "$rc" != 0 ]] ; then
-        "$scriptpath/notify.py" "Transcode daily run failed" "tcdaily.sh"
+        "$scriptpath/notify.py" "Archive daily run failed" "mytharchive.sh"
     fi
 fi
 
