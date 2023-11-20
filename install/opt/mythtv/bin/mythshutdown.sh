@@ -81,11 +81,11 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
             echo $today > $DATADIR/dailyrun_date
             rc=1
         else
-            prev_transcode=
-            if [[ -f $DATADIR/transcode_date ]] ; then
-                prev_transcode=`cat $DATADIR/transcode_date`
+            prev_archive=
+            if [[ -f $DATADIR/archive_date ]] ; then
+                prev_archive=`cat $DATADIR/archive_date`
             fi
-            if [[ "$prev_transcode" != "$today" ]] ; then
+            if [[ "$prev_archive" != "$today" ]] ; then
                 # Only start dailyrun if tcserver is down, i.e. not busy
                 tcserver=`grep " $TCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
                 if [[ "$tcserver" != UUID ]] ; then

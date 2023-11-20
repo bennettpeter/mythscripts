@@ -158,6 +158,7 @@ fi
 run_arc=0
 if [[ "$prev_archive" != "$today" ]] ; then
     run_arc=1
+    echo $today > $DATADIR/archive_date
     # This will return server name for an NFS mount,
     # the string "UUID" for a local mount, empty for a mismatch
     arcserver=`grep " $ARCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
@@ -172,7 +173,6 @@ if [[ "$prev_archive" != "$today" ]] ; then
 fi
 if (( run_arc )) ; then
     # Start daily archive run
-    echo $today > $DATADIR/archive_date
     DATE=`date +%F\ %T\.%N`
     DATE=${DATE:0:23}
     echo $DATE "Running mytharchive."
