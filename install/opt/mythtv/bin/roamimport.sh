@@ -3,6 +3,8 @@
 
 # Run from command line this way
 # run_opt.sh mythtv/prd roamimport.sh
+# or
+# roamimport.sh
 
 set -e
 . /etc/opt/mythtv/mythtv.conf
@@ -63,7 +65,7 @@ insert into settings (value,data,hostname) values
   ('BackendServerAddr','$ROAM_IPADDRESS','$hostname'),
   ('MasterServerName','$hostname',null),
   ('ListenOnAllIps','1','$hostname'),
-  ('SecurityPin','0000','$hostname');
+  ('SecurityPin','frednurke','$hostname');
 select * from settings
 where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
 'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr');
