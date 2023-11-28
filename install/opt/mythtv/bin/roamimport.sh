@@ -15,13 +15,17 @@ scriptname=`basename "$scriptname" .sh`
 # exec 2>&1
 # date
 
+if [[ "$MYTHTVDIR" == "" ]]   ; then
+  MYTHTVDIR=/usr
+fi
+
 # Removable drive is mounted on default location
 # and a link is in /srv/mythtv/video1
 sudo mkdir -p /srv/mythtv
 sudo ln -fs /media/peter/mythroam /srv/mythtv/video1
 sudo mkdir -p /srv/mythtv/video3
 sudo ln -fs /media/peter/mythroam/videos /srv/mythtv/video3/videos
-sudo cp -fv /media/peter/etc/comskip_shows.txt /etc/opt/mythtv/
+#~ sudo cp -fv /media/peter/etc/comskip_shows.txt /etc/opt/mythtv/
 
 #restore
 backupdir=/srv/mythtv/video1/dbbackup
