@@ -4,3 +4,5 @@ backend bc:5f:f4:f8:a8:a2
 backend.lan bc:5f:f4:f8:a8:a2
 office a8:a1:59:6e:38:fe
 office.lan a8:a1:59:6e:38:fe
+raza 54:AB:3A:DF:D3:C0
+raza-e 54:AB:3A:DF:D3:C0
