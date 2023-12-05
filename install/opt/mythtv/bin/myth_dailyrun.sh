@@ -58,12 +58,12 @@ fi
 
 if [[ "$USE_LEANCAP" == true ]] ; then
     prev_chanlist=
-    if [[ -f $DATADIR/prev_chanlist_date ]]; then
-        prev_chanlist=`cat $DATADIR/prev_chanlist_date`
+    if [[ -f $DATADIR/chanlist_date ]]; then
+        prev_chanlist=`cat $DATADIR/chanlist_date`
     fi
     if [[ "$prev_chanlist" != "$today" ]] ; then
         echo Running leancap_chanlist
-        echo $today > $DATADIR/prev_chanlist_date
+        echo $today > $DATADIR/chanlist_date
         $LEANCAP/leancap_chanlist.sh leancap2
         rc=$?
         if [[ "$rc" != 0 ]] ; then
