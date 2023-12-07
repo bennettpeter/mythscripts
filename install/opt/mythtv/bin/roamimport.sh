@@ -43,11 +43,20 @@ fi
 
 hostname=$(cat /etc/hostname)
 
+now=$(date -u '+%Y=%m-%d %H:%M:$S')
+
 echo "drop database $DBName;
 create database $DBName;" | \
 sudo mysql
 
 $MYTHTVDIR/share/mythtv/mythconverg_restore.pl --verbose --filename "$backupfile"
+
+if [[ "$ROAM_GROUPS" != "" ]] ; then
+  sql1="delete from recorded where recgroup not in ($ROAM_GROUPS);"
+fi
+if [[ "$ROAM_LIVECHANS" != "" ]] ; then
+  sql2="update channel set deleted = '$now' where channum not in ($ROAM_LIVECHANS);"
+fi
 
 echo "
 update recordedartwork set host = '$hostname';
@@ -55,13 +64,18 @@ update recorded set hostname = '$hostname';
 update videometadata set host = '$hostname';
 update storagegroup set hostname = '$hostname';
 update videometadata set host = '$hostname';
+update capturecard set host = '$hostname';
+$sql1
+update record set inactive = 1;
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
 delete from settings where value = 'MasterServerIP' and hostname is null;
 delete from settings where value = 'BackendServerIP' and hostname = '$hostname';
 delete from settings where value = 'BackendServerAddr' and hostname = '$hostname';
 delete from settings where value = 'MasterServerName' and hostname is null;
 delete from settings where value = 'ListenOnAllIps' and hostname = '$hostname';
+delete from settings where value = 'AllowConnFromAll' and hostname = '$hostname';
 delete from settings where value = 'SecurityPin' and hostname = '$hostname';
+$sql2
 insert into settings (value,data,hostname) values
   ('DeletedMaxAge','-1',null),
   ('MasterServerIP','$ROAM_IPADDRESS',null),
@@ -69,6 +83,7 @@ insert into settings (value,data,hostname) values
   ('BackendServerAddr','$ROAM_IPADDRESS','$hostname'),
   ('MasterServerName','$hostname',null),
   ('ListenOnAllIps','1','$hostname'),
+  ('AllowConnFromAll','1','$hostname'),
   ('SecurityPin','frednurke','$hostname');
 select * from settings
 where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
