@@ -43,7 +43,7 @@ fi
 
 hostname=$(cat /etc/hostname)
 
-now=$(date -u '+%Y=%m-%d %H:%M:$S')
+now=$(date -u '+%Y=%m-%d %H:%M:%S')
 
 echo "drop database $DBName;
 create database $DBName;" | \
@@ -64,7 +64,7 @@ update recorded set hostname = '$hostname';
 update videometadata set host = '$hostname';
 update storagegroup set hostname = '$hostname';
 update videometadata set host = '$hostname';
-update capturecard set host = '$hostname';
+update capturecard set hostname = '$hostname';
 $sql1
 update record set inactive = 1;
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
