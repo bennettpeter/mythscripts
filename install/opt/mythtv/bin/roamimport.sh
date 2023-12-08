@@ -67,6 +67,7 @@ update videometadata set host = '$hostname';
 update capturecard set hostname = '$hostname';
 $sql1
 update record set inactive = 1;
+update record set inactive = 0, filter = 0 where type = 11 and category= 'Default';
 delete from settings where value = 'DeletedMaxAge' and hostname is null;
 delete from settings where value = 'MasterServerIP' and hostname is null;
 delete from settings where value = 'BackendServerIP' and hostname = '$hostname';
