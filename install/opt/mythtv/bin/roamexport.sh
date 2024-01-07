@@ -20,8 +20,8 @@ fi
 mount -v $ROAMDIR || true
 sleep 1
 if ! mountpoint $ROAMDIR ; then
-    echo WARNING Unable to mount $ROAMDIR
-    exit 0
+    echo "ERROR Unable to mount $ROAMDIR"
+    exit 2
 fi
 
 if [[ ! -d "$LINKSDIR" ]] ; then
