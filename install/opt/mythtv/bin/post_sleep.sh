@@ -30,7 +30,7 @@ fi
 
 # Reset keyboard/mouse
 if [[ "$RESET_USB" != "" ]] ; then
-    sleep 3
+    sleep 5
     usbreset $RESET_USB
 fi
 
