@@ -30,6 +30,7 @@ extra_handbrake=
 handbrake=
 crop=0:0:0:0
 detelecine=
+reencode=n
 
 while (( "$#" >= 1 )) ; do
     case $1 in
@@ -179,6 +180,9 @@ while (( "$#" >= 1 )) ; do
         --detelecine)
             detelecine=y
            ;;
+        --reencode)
+            reencode=y
+            ;;
         --x264-preset)
             if [[ "$2" == "" || "$2" == -* ]] ; then echo "ERROR Missing value for --x264-preset." ; error=y 
             else 
@@ -282,6 +286,7 @@ if [[ "$error" == y ]] ; then
     echo "--x264-preset xxx"
     echo "  x264-preset. Default is faster"
     echo "  Valid values ultrafast superfast veryfast faster fast medium slow slower veryslow placebo"
+    echo "--reencode - Always reencode the file, even if it is already in the correct format"
     echo "Any option that occurs more than once takes the last value"
     echo "Output goes to a log file"
     echo "This should be run with nohup and & except when called from multi_encode.sh"
@@ -347,21 +352,24 @@ if [[ "$isDVD" == N ]] ; then
     VideoFormat=`mediainfo '--Inform=Video;%Format%' "$input"`
 fi
 
-if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
-    if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
-        audio=copy
-    fi
-fi
+if [[ "$reencode" == n ]] ; then
 
-if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
-    if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
-        audio=copy
+    if [[ ( "$audio" == lame || "$audio" == mp3 ) && "$isDVD" == N ]] ; then
+        if [[ "$AudioCodec" == MP3 && "$SamplingRate" == "$audiorate" ]] ; then
+            audio=copy
+        fi
     fi
-fi
 
-if [[ "$Height" == "" || "$Height" == "$orgHeight" ]] ; then
-    if [[ "$audio" == copy && "$encoder" == x264 && "$VideoFormat" == AVC && "$morph" == "" ]] ; then
-        encoder=copy
+    if [[ ( "$audio" == aac || "$audio" == av_aac ) && "$isDVD" == N ]] ; then
+        if [[ "$AudioCodec" == AAC && "$SamplingRate" == "$audiorate" ]] ; then
+            audio=copy
+        fi
+    fi
+
+    if [[ "$Height" == "" || "$Height" == "$orgHeight" ]] ; then
+        if [[ "$audio" == copy && "$encoder" == x264 && "$VideoFormat" == AVC && "$morph" == "" ]] ; then
+            encoder=copy
+        fi
     fi
 fi
 
