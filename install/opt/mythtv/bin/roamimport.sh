@@ -55,7 +55,7 @@ if [[ "$ROAM_GROUPS" != "" ]] ; then
   sql1="delete from recorded where recgroup not in ($ROAM_GROUPS);"
 fi
 if [[ "$ROAM_LIVECHANS" != "" ]] ; then
-  sql2="update channel set deleted = '$now' where channum not in ($ROAM_LIVECHANS);"
+  sql2="update channel set visible = 0 where channum not in ($ROAM_LIVECHANS);"
 fi
 
 echo "
