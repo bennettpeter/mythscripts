@@ -50,6 +50,7 @@ if [[ "$today" == Sat* ]]; then
         fi
         # Video cleanup
         $scriptpath/videocleanup.sh >> $LOGDIR/videocleanup.log 2>&1
+        rc=$?
         if [[ "$rc" != 0 ]] ; then
             "$scriptpath/notify.py" "videocleanup failed" "videocleanup.sh"
         fi
