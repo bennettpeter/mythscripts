@@ -73,13 +73,6 @@ fi
 xdotool mousemove --polar 0 0
 sleep 0.1
 
-# embassy suites '172\.20\.5\.'
-# home '192\.168\.1\.'
-# if not at home require a password to unlock
-if ! ip address | grep '192\.168\.1\.' ; then
-    dm-tool switch-to-greeter
-fi
-
 # This makes the suspend do a weekly shutdown
 /opt/mythtv/bin/systemshutdown.sh $shutparm
 #xrandr  --output HDMI-0 --off

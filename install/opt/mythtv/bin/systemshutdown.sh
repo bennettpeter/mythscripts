@@ -38,6 +38,13 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
         echo "Suspending"
         x_users=(`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
         x_user="${x_users[0]}"
+        # if not at home require a password to unlock
+        if [[ "$x_user" != "" ]]; then
+            if ! ip address | grep '192\.168\.1\.' ; then
+                XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0 \
+                    dm-tool switch-to-greeter
+            fi
+        fi
         if [[ "$X11_DISABLE" != "" && "$x_user" != "" ]] ; then
             for mon in $X11_DISABLE ; do
                 DISPLAY=:0 XAUTHORITY=/home/$x_user/.Xauthority sudo -u $x_user \
