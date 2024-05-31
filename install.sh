@@ -116,11 +116,6 @@ if [[ -d $ver ]] ; then
 fi
 #~ chgrp mythtv /opt/mythtv/bin/*
 cd $scriptpath/
-# xmltv
-rm -f /usr/local/bin/tv_grab_zz_sdjson_sqlite
-# Need to move this not link it so it is not in the path twice
-mv -f /opt/mythtv/bin/tv_grab_zz_sdjson_sqlite \
-  /usr/local/bin/tv_grab_zz_sdjson_sqlite
 daemonrestart=N
 if [[ "$IS_BACKEND" == true ]] ; then
     if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
