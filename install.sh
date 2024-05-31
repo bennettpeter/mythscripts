@@ -58,6 +58,7 @@ if [[ "$IS_BACKEND" == true ]] ; then
     create_dir $VIDEODIR 2775 mythtv:mythtv
 fi
 create_dir $DATADIR 2775 mythtv:mythtv
+create_dir /var/log/mythtv_scripts 2775 mythtv:mythtv
 create_dir /opt/mythtv
 create_dir /opt/mythtv/bin
 create_dir /etc/opt/mythtv
