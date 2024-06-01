@@ -174,8 +174,8 @@ if [[ "$mythtv_unix_id" == "" ]] ; then
     mythtv_unix_id=NONE
 fi
 
-ssh_users=`w -h -s|egrep -v "^$SOFT_USER | :0| tty7 " | wc -l`
-x_user=`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`
+ssh_users=`who -s|egrep -v "^$SOFT_USER | :0| tty7 " | wc -l`
+x_user=`who -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`
 # sometimes there are duplicate entries (e.g. peter peter)
 # this fixes it to just take the first
 set -- $x_user
