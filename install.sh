@@ -244,6 +244,7 @@ else
 fi
 
 #syslog
+mkdir -p /etc/rsyslog.d/
 cp install/etc/rsyslog.d/10-peter.conf /etc/rsyslog.d/10-peter.conf
 
 #sudoers
