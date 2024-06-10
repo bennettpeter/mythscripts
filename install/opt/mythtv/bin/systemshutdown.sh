@@ -36,7 +36,7 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
         fi
     else
         echo "Suspending"
-        x_users=(`w -h -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
+        x_users=(`who -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
         x_user="${x_users[0]}"
         # if not at home require a password to unlock
         if [[ "$x_user" != "" ]]; then

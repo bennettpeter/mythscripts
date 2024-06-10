@@ -195,7 +195,7 @@ fi
 
 if [[ "$reason" != powerbtn && "$ssh_users" != 0 ]] ; then
     echo $DATE Somebody is still logged in via ssh, see below, don\'t shut down!
-    w -h -s|egrep -v "^$SOFT_USER | :0| tty7 "
+    who -s|egrep -v "^$SOFT_USER | :0| tty7 "
     echo $DATE > $DATADIR/checklogin
     rc=1
 fi
