@@ -51,7 +51,7 @@ while read -r sourceid sourcename
 do
     echo Processing $sourcename with id $sourceid
     # There are two grabbers that work - tv_grab_zz_sdjson_sqlite and tv_grab_sd_json
-    grabber="/usr/local/bin/tv_grab_zz_sdjson_sqlite"
+    grabber="tv_grab_zz_sdjson_sqlite"
     userid=`id -un`
     rm -f /tmp/${userid}_tv_grab_$sourcename_off*.xml
     #~ "$grabber" --download-only \
