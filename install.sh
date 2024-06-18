@@ -236,6 +236,10 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         echo "HandlePowerKey=ignore" | tee -a /etc/systemd/logind.conf
         daemonrestart=Y
     fi
+    
+    mkdir -p /etc/apport/report-ignore
+    cp install/etc/apport/report-ignore/* /etc/apport/report-ignore/
+    
 else
     cp install/etc/pm/sleep.d/* /etc/pm/sleep.d/
     if [[ -d /etc/acpi/events/ ]] ; then
