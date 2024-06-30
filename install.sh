@@ -347,6 +347,9 @@ if [[ -d /etc/lightdm/lightdm.conf.d ]] ; then
     sh -c 'printf "[Seat:*]\nallow-guest=false\n" >/etc/lightdm/lightdm.conf.d/50-no-guest.conf'
 fi
 
+# Setup wake on lan
+/opt/mythtv/bin/setupwol.sh
+
 if [[ "$EMAIL1" != "" || "$EMAIL2" != "" ]] ; then
     if [[ ! -f /etc/opt/mythtv/private.conf ]] ; then
         echo XXXXX Please install private.conf
