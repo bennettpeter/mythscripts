@@ -42,6 +42,9 @@ if [ "$startuptime" != 0 ] ; then
         . /etc/default/rcS
     fi
     now=`date +%s`
+    if [[ "$WAKEUPTIME" == "" ]] ; then
+        WAKEUPTIME=01:00:00
+    fi
     # If this is run after midnight on Saturday at end of DST it sets wakeup to 4 AM instead of 5 AM
     nextdw=`date --date "today $WAKEUPTIME" +%s`
     if [ $nextdw -lt $now ] ; then
