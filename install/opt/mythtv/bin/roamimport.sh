@@ -45,7 +45,7 @@ hostname=$(cat /etc/hostname)
 
 now=$(date -u '+%Y=%m-%d %H:%M:%S')
 
-echo "drop database $DBName;
+echo "drop database if exists $DBName;
 create database $DBName;" | \
 sudo mysql
 
