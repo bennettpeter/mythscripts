@@ -36,11 +36,11 @@ mkdir -p "$LINKSDIR"/roam
 . $scriptpath/getconfig.sh
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
 
-# ROAM_CATEGORIES - example "'Peter','Default','Chicago'"
+# ROAM_GROUPS - example "'Peter','Default','Chicago'"
 echo "SELECT basename FROM recorded
         inner join recgroups 
         on recorded.recgroupid = recgroups.recgroupid
-        where recgroups.recgroup in ($ROAM_CATEGORIES);" | \
+        where recgroups.recgroup in ($ROAM_GROUPS);" | \
         $mysqlcmd > /tmp/files$$.txt
 
 # NOTE THIS ONLY WORKS IF RECORDING DIRECTORIES AND FILES HAVE NO SPACES IN THE NAMES
