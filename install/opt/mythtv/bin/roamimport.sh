@@ -19,13 +19,20 @@ if [[ "$MYTHTVDIR" == "" ]]   ; then
   MYTHTVDIR=/usr
 fi
 
+if [[ "$MYTHCONFDIR" == "" ]] ; then
+    export MYTHCONFDIR=$HOME/.mythtv
+fi
+
 # Removable drive is mounted on default location
 # and a link is in /srv/mythtv/video4
 sudo mkdir -p /srv/mythtv
 sudo ln -fs /media/peter/mythroam /srv/mythtv/video4
 sudo mkdir -p /srv/mythtv/video3
 sudo ln -fs /media/peter/mythroam/videos /srv/mythtv/video3/videos
-#~ sudo cp -fv /media/peter/etc/comskip_shows.txt /etc/opt/mythtv/
+mkdir -p $MYTHCONFDIR/channels
+cp /media/peter/mythroam/channels/* $MYTHCONFDIR/channels/
+
+sudo cp -fv /media/peter/mythroam/etc/comskip_shows.txt /etc/opt/mythtv/
 
 #restore
 backupdir=/srv/mythtv/video4/dbbackup
@@ -65,6 +72,7 @@ update videometadata set host = '$hostname';
 update storagegroup set hostname = '$hostname';
 update videometadata set host = '$hostname';
 update capturecard set hostname = '$hostname';
+update settings set data = '0' where value = 'idleTimeoutSecs' and hostname is null;
 $sql1
 update record set inactive = 1;
 update record set inactive = 0, filter = 0 where type = 11 and category= 'Default';
