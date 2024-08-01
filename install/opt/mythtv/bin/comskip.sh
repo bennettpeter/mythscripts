@@ -76,9 +76,9 @@ error=0
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     # Find the recording file
     if [[ "$starttime" == "" ]] ; then
-        fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename" 2>/dev/null`
+        fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
     else
-        fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename" 2>/dev/null`
+        fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename"`
     fi
     if [[ "$fullfilename" == "" ]] ; then
         echo "ERROR: File $filename not found"
