@@ -44,10 +44,12 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ ( "$type" == v || "$type" == f ) && "$stitle" != "" ]] ; then
+    if [[ ( "$type" == v || "$type" == f || "$type" == R  ) && "$stitle" != "" ]] ; then
         inifile=
         if [[ "$type" == f ]] ; then
             inifile=freevee
+        elif [[ "$type" == R ]] ; then
+            inifile=comcast
         fi
         echo "Checking for videos of $stitle"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
