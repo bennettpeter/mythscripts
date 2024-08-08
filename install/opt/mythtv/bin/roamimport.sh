@@ -25,14 +25,15 @@ fi
 
 # Removable drive is mounted on default location
 # and a link is in /srv/mythtv/video4
+mount /srv/mythroam
 sudo mkdir -p /srv/mythtv
-sudo ln -fs /media/peter/mythroam /srv/mythtv/video4
+sudo ln -fs /srv/mythroam /srv/mythtv/video4
 sudo mkdir -p /srv/mythtv/video3
-sudo ln -fs /media/peter/mythroam/videos /srv/mythtv/video3/videos
+sudo ln -fs /srv/mythroam/videos /srv/mythtv/video3/videos
 mkdir -p $MYTHCONFDIR/channels
-cp /media/peter/mythroam/channels/* $MYTHCONFDIR/channels/
+cp /srv/mythroam/channels/* $MYTHCONFDIR/channels/
 
-sudo cp -fv /media/peter/mythroam/etc/comskip_shows.txt /etc/opt/mythtv/
+sudo cp -fv /srv/mythroam/etc/comskip_shows.txt /etc/opt/mythtv/
 
 #restore
 backupdir=/srv/mythtv/video4/dbbackup
