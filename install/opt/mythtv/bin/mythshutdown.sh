@@ -2,7 +2,9 @@
 # Check to see if we can shut down. Return zero if can and 1 if not.
 # Also perform some shut down tasks.
 # Turn off cable box
-# Parameter 1 - optional - powerbtn to indicate called from power button
+# Parameter 1 - optional
+# - powerbtn to indicate called from power button
+# - monitor to indicate called from monitor.sh
 
 reason=$1
 # Frequency of checks in minutes
@@ -323,8 +325,8 @@ if [[ "$canshut" == 0 ]] ; then
     rc=1
 fi
 
-if [[ "$IS_BACKEND" != true && "$reason" != powerbtn ]] ; then
-    # If backend running then this is a roaming system
+if [[ "$reason" == monitor ]] ; then
+    # If backend running then this is a test or roam system
     # In that case do not shut down.
     if  pidof mythbackend ; then
         echo "$DATE mythbackend running - don't shut down"

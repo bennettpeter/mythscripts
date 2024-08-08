@@ -16,7 +16,7 @@ date
 while true ; do
     # note sleep 60 is not enough, it can have the same nfs count after 60 seconds.
     sleep 120
-    if  $scriptpath/mythshutdown.sh ; then
+    if  $scriptpath/mythshutdown.sh monitor; then
         if [[ "$WAKEUPTIME" != "" ]] ; then
             # Sets wakeup to the default if one was provided
             sudo $scriptpath/setwakeup.sh 1
