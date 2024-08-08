@@ -43,7 +43,7 @@ create_dir() {
     if [[ "$perm" == "" ]] ; then
         perm=775
     fi
-    mkdir -pv "$1" || echo $rc
+    if ! mkdir -pv "$1" ; then return ; fi
     if [[ "$3" != "" ]] ; then
         chown "$3" "$1" || true
     fi

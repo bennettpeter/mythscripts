@@ -25,7 +25,9 @@ fi
 
 # Removable drive is mounted on default location
 # and a link is in /srv/mythtv/video4
-mount /srv/mythroam
+if ! mountpoint /srv/mythroam ; then
+    mount /srv/mythroam
+fi
 sudo mkdir -p /srv/mythtv
 sudo ln -fs /srv/mythroam /srv/mythtv/video4
 sudo mkdir -p /srv/mythtv/video3
