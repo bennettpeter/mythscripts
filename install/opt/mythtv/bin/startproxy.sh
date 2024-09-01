@@ -46,24 +46,7 @@ if [[ $PROXY_CHECK != "" ]] ; then
 fi
 
 # Daily IP address check
-if [[ -f $DATADIR/ipaddress.txt ]] ; then
-    oldipaddress=`cat $DATADIR/ipaddress.txt`
-fi
-
-rc=999
-retries=0
-while (( rc != 0 && retries < 10 )) ; do
-    sleep 2
-    set +e
-    ipaddress=`curl -s -S 'https://api.ipify.org'`; rc=$?
-    set -e
-    let retries=retries+1
-done
-echo IP Address $ipaddress
-if [[ "$ipaddress" != "$oldipaddress" ]] ; then
-    "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
-    echo "$ipaddress" > $DATADIR/ipaddress.txt
-fi
+$scriptpath/checkipaddress.sh
 
 if [[ "$TRANSMISSION" == Y ]] ; then
     #Start Transmission

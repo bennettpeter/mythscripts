@@ -2,7 +2,6 @@
 # Daily runs that happen at the start of day
 
 . /etc/opt/mythtv/mythtv.conf
-. /etc/opt/mythtv/private.conf
 LEANCAP=/opt/mythtv/leancap
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
@@ -131,25 +130,7 @@ if [[ "$prev_mythfilldatabase" != "$today" ]] ; then
           )
     fi
     # Daily IP address check
-    if [[ -f $DATADIR/ipaddress.txt ]] ; then
-        oldipaddress=`cat $DATADIR/ipaddress.txt`
-    fi
-    # ipaddress=`wget http://automation.whatismyip.com/n09230945.asp -O - -q`
-    # pushd $DATADIR
-    # rm -f index.html
-    # wget http://wakeonlan.me
-    # ipaddress=`grep 'Your IP' index.html | sed 's/.*Your IP *//' | sed 's/,.*//'`
-    # New method
-    # rm -f ipaddress.json
-    # wget -O ipaddress.json http://www.realip.info/api/p/realip.php
-    # Note here eval gets rid of the inverted commas around the ip address
-    # eval ipaddress=`jq .IP ipaddress.json`
-    # popd
-    ipaddress=`curl -m 30 'https://api.ipify.org'`
-    if [[ "$ipaddress" != "$oldipaddress" ]] ; then
-        "$scriptpath/notify.py" "IP Address Change" "$ipaddress"
-        echo "$ipaddress" > $DATADIR/ipaddress.txt
-    fi
+    $scriptpath/checkipaddress.sh
 fi
 
 prev_archive=
