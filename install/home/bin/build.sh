@@ -10,7 +10,7 @@ case $PROJNAME in
     android)
         build_android.sh "$@"
         ;;
-    backend)
+    backend|frontend)
         npm run build
         ;;
     *)
