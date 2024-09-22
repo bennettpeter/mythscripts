@@ -9,7 +9,7 @@ if [[ `arch` == x86_64 ]] ; then
       nfs-common nfs-kernel-server gnome-system-monitor
 fi
 
-apt install vim
+apt install vim xfce4-genmon-plugin
 update-alternatives --set editor /usr/bin/vim.basic
 
 if [[ `arch` == arm* ]] ; then
