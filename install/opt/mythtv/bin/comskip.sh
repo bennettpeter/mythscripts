@@ -72,13 +72,18 @@ trap errfunc ERR
 echo Set IO priority to -c3 idle
 ionice -c3 -p$$
 error=0
+use_txt=0
+use_edl=0
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
-    # Find the recording file
     if [[ "$starttime" == "" ]] ; then
+        # Video File
         fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
+        use_edl=1
     else
+        # Find the recording file
         fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename"`
+        use_txt=1
     fi
     if [[ "$fullfilename" == "" ]] ; then
         echo "ERROR: File $filename not found"
@@ -105,16 +110,37 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     cat "$output/$pgm.edl"
     touch "$output/$pgm.txt"
     skip=
-    while read -r start finish
-    do
-       if [[ "$start" == FILE ]] ; then continue ; fi
-       if [[ "$start" == ---* ]] ; then continue ; fi
-       if (( finish - start < 5 )) ; then continue ; fi
-       if [[ "$skip" != "" ]] ; then
-          skip="$skip,"
-       fi
-       skip=${skip}${start}-${finish}
-    done < "$output/$pgm.txt"
+    if (( use_txt )) ; then
+        # txt file has times in frame numbers
+        while read -r start finish
+        do
+           if [[ "$start" == FILE ]] ; then continue ; fi
+           if [[ "$start" == ---* ]] ; then continue ; fi
+           if (( finish - start < 5 )) ; then continue ; fi
+           if [[ "$skip" != "" ]] ; then
+              skip="$skip,"
+           fi
+           skip=${skip}${start}-${finish}
+        done < "$output/$pgm.txt"
+    elif (( use_edl )) ; then
+        # edl file has times in seconds
+        fps=$(ffprobe  "$fullfilename" |& grep -o '[0-9.]* fps'|sed s/fps//)
+        if [[ "$fps" == "" ]] ; then
+            echo "Error - cannot find fps"
+            skip="1-2"
+            error=1
+        else
+            while read -r secs1 secs2 extra
+            do
+               if [[ "$skip" != "" ]] ; then
+                  skip="$skip,"
+               fi
+               start=$(bc <<< "scale=0; $secs1*$fps/1")
+               finish=$(bc <<< "scale=0; $secs2*$fps/1")
+               skip=${skip}${start}-${finish}
+            done < "$output/$pgm.edl"
+        fi
+    fi
     echo "Skiplist $skip"
     if [[ "$skip" == "" ]] ; then
         echo "Error - empty skip list"
