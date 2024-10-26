@@ -2,7 +2,7 @@
 
 # Run a version of software from /opt/<project>/<branch>
 # run_opt.sh <location> <program> [params]
-# e.g. run_opt.sh mythtv/master mythfrontend -O IgnoreSchemaVerMismatch=1
+# e.g. run_opt.sh mythtv/prd mythfrontend --logpath /tmp
 
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
