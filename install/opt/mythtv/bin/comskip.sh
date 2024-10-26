@@ -122,13 +122,14 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
         # FILE PROCESSING COMPLETE 107324 FRAMES AT  2997
         txthead=$(head -1 "$output/$pgm.txt")
         fps=$(grep -o "[0-9]*$" <<< $txthead)0
+        sqlfn=$(sed "s/'/''/g"<<<$filename)
         # sanity check
         if (( fps > 10000 )) ; then
             $mysqlcmd << EOF
                 delete from filemarkup
-                    where filename = '$filename' and type=32;
+                    where filename = '$sqlfn' and type=32;
                 insert into filemarkup (filename,mark,type,offset)
-                    values ('$filename',1,32,$fps);
+                    values ('$sqlfn',1,32,$fps);
 EOF
         fi
     fi
