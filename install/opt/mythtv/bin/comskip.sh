@@ -47,6 +47,11 @@ recgroup="$4"
 title="$5"
 subtitle="$6"
 
+# Get DB password
+. $scriptpath/getconfig.sh
+
+mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName --batch --column-names=FALSE $DBName"
+
 if [[ "$starttime" == "" ]] ; then
     if [[ "$chanid" == "" ]] ; then
         inifile=peacock
@@ -74,12 +79,14 @@ ionice -c3 -p$$
 error=0
 use_txt=0
 use_edl=0
+extract_fps=0
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     if [[ "$starttime" == "" ]] ; then
         # Video File
         fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
-        use_edl=1
+        use_txt=1
+        extract_fps=1
     else
         # Find the recording file
         fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename"`
@@ -110,22 +117,40 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     cat "$output/$pgm.edl"
     touch "$output/$pgm.txt"
     skip=
+    if (( extract_fps)) ; then
+        # First line of file has this -
+        # FILE PROCESSING COMPLETE 107324 FRAMES AT  2997
+        txthead=$(head -1 "$output/$pgm.txt")
+        fps=$(grep -o "[0-9]*$" <<< $txthead)0
+        # sanity check
+        if (( fps > 10000 )) ; then
+            $mysqlcmd << EOF
+                delete from filemarkup
+                    where filename = '$filename' and type=32;
+                insert into filemarkup (filename,mark,type,offset)
+                    values ('$filename',1,32,$fps);
+EOF
+        fi
+    fi
+
     if (( use_txt )) ; then
         # txt file has times in frame numbers
         while read -r start finish
         do
-           if [[ "$start" == FILE ]] ; then continue ; fi
-           if [[ "$start" == ---* ]] ; then continue ; fi
-           if (( finish - start < 5 )) ; then continue ; fi
-           if [[ "$skip" != "" ]] ; then
-              skip="$skip,"
-           fi
+            # First line of file has this -
+            # FILE PROCESSING COMPLETE 107324 FRAMES AT  2997
+            if [[ "$start" == FILE ]] ; then continue ; fi
+            if [[ "$start" == ---* ]] ; then continue ; fi
+            if (( finish - start < 5 )) ; then continue ; fi
+            if [[ "$skip" != "" ]] ; then
+                skip="$skip,"
+            fi
            skip=${skip}${start}-${finish}
         done < "$output/$pgm.txt"
     elif (( use_edl )) ; then
         # edl file has times in seconds
-        fps=$(ffprobe  "$fullfilename" |& grep -o '[0-9.]* fps'|sed s/fps//)
-        if [[ "$fps" == "" ]] ; then
+        # fps is in milliseconds
+        if (( ! fps )) ; then
             echo "Error - cannot find fps"
             skip="1-2"
             error=1
@@ -135,8 +160,8 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
                if [[ "$skip" != "" ]] ; then
                   skip="$skip,"
                fi
-               start=$(bc <<< "scale=0; $secs1*$fps/1")
-               finish=$(bc <<< "scale=0; $secs2*$fps/1")
+               start=$(bc <<< "scale=0; $secs1*$fps/1000")
+               finish=$(bc <<< "scale=0; $secs2*$fps/1000")
                skip=${skip}${start}-${finish}
             done < "$output/$pgm.edl"
         fi
