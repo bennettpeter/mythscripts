@@ -33,7 +33,7 @@ SELECT basename, recorded.chanid, recorded.starttime, recgroup, title, MAX(type=
 FROM recordedmarkup right outer join recorded using (chanid, starttime)
 where recgroup not in ('Deleted','Shorts') and watched = 0 and title = '$stitle'
 group by basename, recorded.chanid, recorded.starttime, recgroup, title, subtitle, originalairdate
-order by if (originalairdate < "1920-01-01", recorded.starttime, originalairdate)
+order by if (originalairdate < "1920-01-01", recorded.starttime, originalairdate), season, episode
 limit 3;
 EOF
         while IFS=$'\t' read -r basename chanid starttime recgroup title done originalairdate subtitle extra ; do
