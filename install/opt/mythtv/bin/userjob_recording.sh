@@ -118,20 +118,20 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     fi
 
     # Check if it is x264 file and if so rename to tsx extension
-    videoformat=`mediainfo '--Inform=Video;%Format%' "$fullfilename"`
-    echo "Episode: $fullfilename. Video Format $videoformat"
-    if [[ "$videoformat" == "AVC" && "$extension" == "ts" ]] ; then
-        # rename file to tsx extension
-        mv -v "$fullfilename" "${fullfilename}x"
-        sql1="update recorded set basename = '${filename}x' where basename = '$filename';"
-        sql2="update recordedfile set basename = '${filename}x' where basename = '$filename';"
-        echo "$sql1"
-        echo "$sql2"
-        (
-          echo "$sql1"
-          echo "$sql2"
-        ) |  $mysqlcmd
-    fi
+    #~ videoformat=`mediainfo '--Inform=Video;%Format%' "$fullfilename"`
+    #~ echo "Episode: $fullfilename. Video Format $videoformat"
+    #~ if [[ "$videoformat" == "AVC" && "$extension" == "ts" ]] ; then
+        #~ # rename file to tsx extension
+        #~ mv -v "$fullfilename" "${fullfilename}x"
+        #~ sql1="update recorded set basename = '${filename}x' where basename = '$filename';"
+        #~ sql2="update recordedfile set basename = '${filename}x' where basename = '$filename';"
+        #~ echo "$sql1"
+        #~ echo "$sql2"
+        #~ (
+          #~ echo "$sql1"
+          #~ echo "$sql2"
+        #~ ) |  $mysqlcmd
+    #~ fi
 fi
 
 
