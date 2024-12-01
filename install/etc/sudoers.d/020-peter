@@ -7,3 +7,4 @@
   /usr/bin/nmcli, /sbin/ifup, /usr/bin/renice, /usr/bin/zenity, \
   /usr/bin/xrandr, /usr/bin/gcore, /usr/bin/chvt
 
+%mythtv ALL = NOPASSWD:SETENV: /usr/bin/dm-tool

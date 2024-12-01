@@ -70,7 +70,7 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
             sleep 1
             if (( ! at_home )) ; then
                 XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0 \
-                    dm-tool switch-to-greeter
+                    sudo -u $x_user -E dm-tool switch-to-greeter
             fi
         fi
 
