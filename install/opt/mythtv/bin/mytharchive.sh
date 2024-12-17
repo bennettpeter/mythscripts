@@ -49,7 +49,7 @@ function wakeup_server {
 function exitfunc {
     if [[ "$mounted" == Y ]] ; then
         if [[ "$arcserver" != UUID ]] ; then
-            umount "$ARCMOUNTDIR" || true
+            umount -l "$ARCMOUNTDIR" || true
         fi
         mounted=N
     fi
