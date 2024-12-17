@@ -5,7 +5,7 @@
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 set -e
-arr=($(nmcli c show | grep -w ethernet))
+arr=($(nmcli c show | grep -w ethernet | head -1))
 len=${#arr[@]}
 let words=len-3
 device=${arr[@]:0:$words}
