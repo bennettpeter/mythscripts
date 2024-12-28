@@ -103,7 +103,7 @@ if [[ "$MAINHOST" == "$LocalHostName" ]] ; then
 fi
 
 # if there are other encoders add them here
-encoders='HandBrakeCLI ffmpeg'
+encoders='HandBrakeCLI ffmpeg feh vlc'
 encoderscripts='leanxdvr\.sh|leanxvod\.sh|multi_encode\.sh|leanpplus\.sh'
 encoderunning=0
 if pidof $encoders ; then
