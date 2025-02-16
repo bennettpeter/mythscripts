@@ -11,7 +11,7 @@ reason=$1
 # note 1 is not enough, it can have the same nfs count after 60 seconds.
 CHECK_MINUTES=2
 X_IDLE_MINUTES=10
-FS_REPORT_PERCENTAGE=91
+FS_REPORT_PERCENTAGE=90
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -53,6 +53,9 @@ if [[ "$fscheck_date" != "$today" ]] ; then
         while true ; do
             read perc path
             if [[ "$perc" == "" ]] ; then break; fi
+            bname=$(basename $path)
+            # Ignore efivars file system
+            if [[ "$path" == efivars ]]; then continue ; fi
             usage=${perc%\%}
             if (( usage > FS_REPORT_PERCENTAGE )) ; then
                 "$scriptpath/notify.py" "$LocalHostName Disk $perc full" \
