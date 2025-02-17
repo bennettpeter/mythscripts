@@ -55,7 +55,7 @@ if [[ "$fscheck_date" != "$today" ]] ; then
             if [[ "$perc" == "" ]] ; then break; fi
             bname=$(basename $path)
             # Ignore efivars file system
-            if [[ "$path" == efivars ]]; then continue ; fi
+            if [[ "$bname" == efivars ]]; then continue ; fi
             usage=${perc%\%}
             if (( usage > FS_REPORT_PERCENTAGE )) ; then
                 "$scriptpath/notify.py" "$LocalHostName Disk $perc full" \
