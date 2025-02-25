@@ -106,12 +106,12 @@ $mysqlcmd
 
 # move index.html to <phone-number>.html to prevent snooping
 if [[ -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html ]] ; then
-    mv -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html
+    sudo mv -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html
 fi
 # Remove old passwords
-rm -f $MYTHTVDIR/share/mythtv/html/*([0-9]).html
+sudo rm -f $MYTHTVDIR/share/mythtv/html/*([0-9]).html
 # Add new password
-cp -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
+sudo cp -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
 
 echo "Check results. Enter to exit."
 read test
