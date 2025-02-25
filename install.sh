@@ -357,3 +357,8 @@ if [[ "$EMAIL1" != "" || "$EMAIL2" != "" ]] ; then
         echo "SMTP_PASSWORD=xxxxxxxx"
     fi
 fi
+
+if [[  -f /etc/opt/mythtv/private.conf ]] ; then
+    chmod 660 /etc/opt/mythtv/private.conf
+    chown $MYTHTVUSER:$MYTHTVGROUP /etc/opt/mythtv/private.conf
+fi
