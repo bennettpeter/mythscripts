@@ -104,14 +104,15 @@ where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
 " | \
 $mysqlcmd
 
-# move index.html to <phone-number>.html to prevent snooping
-if [[ -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html ]] ; then
-    sudo mv -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html
+if [[ "$HTML_PASSWORD" != "" ]] ; then
+    # move index.html to <phone-number>.html to prevent snooping
+    if [[ -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html ]] ; then
+        sudo mv -f $MYTHTVDIR/share/mythtv/html/apps/backend/index.html $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html
+    fi
+    # Remove old passwords
+    sudo rm -f $MYTHTVDIR/share/mythtv/html/*([0-9]).html
+    # Add new password
+    sudo cp -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
 fi
-# Remove old passwords
-sudo rm -f $MYTHTVDIR/share/mythtv/html/*([0-9]).html
-# Add new password
-sudo cp -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
-
 echo "Check results. Enter to exit."
 read test
