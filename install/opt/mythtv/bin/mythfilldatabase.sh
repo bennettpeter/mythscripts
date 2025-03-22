@@ -63,7 +63,12 @@ do
     #~ "$grabber"  --no-download
     "$grabber" \
       --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
-      > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml
+      > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml 2> /tmp/mythfilldb_$$.err
+    cat /tmp/mythfilldb_$$.err
+    if grep "Unexpected error when obtaining programs:" /tmp/mythfilldb_$$.err ; then
+        exit 2
+    fi
+    rm -f /tmp/mythfilldb_$$.err
     mythfilldatabase --file --sourceid $sourceid \
       --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts
 #    done
