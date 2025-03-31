@@ -5,6 +5,6 @@
   (ALL:ALL) /usr/bin/xprintidle, /bin/chvt, /usr/sbin/service, \
   /bin/systemctl, /usr/bin/smbstatus, /opt/mythtv/bin/setgovernor.sh, \
   /usr/bin/nmcli, /sbin/ifup, /usr/bin/renice, /usr/bin/zenity, \
-  /usr/bin/xrandr, /usr/bin/gcore, /usr/bin/chvt
+  /usr/bin/xrandr, /usr/bin/gcore, /usr/bin/chvt, /usr/bin/dm-tool
 
 %mythtv ALL = NOPASSWD:SETENV: /usr/bin/dm-tool
