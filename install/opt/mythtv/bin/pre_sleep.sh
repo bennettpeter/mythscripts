@@ -38,10 +38,10 @@ fi
 timeout 5s umount -a -l -f -t nfs,nfs4
 
 # unmount encrypted file systems
-set -- `findmnt -n -t fuse.encfs -o TARGET`
-if [[ "$1" != "" ]] ; then
-    umount -l -f "$@"
-fi
+#~ set -- `findmnt -n -t fuse.encfs -o TARGET`
+#~ if [[ "$1" != "" ]] ; then
+    #~ umount -l -f "$@"
+#~ fi
 # systemctl stop transmission-daemon.service
 
 exit 0

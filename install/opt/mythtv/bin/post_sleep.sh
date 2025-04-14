@@ -41,4 +41,13 @@ fi
 #    pacmd set-default-sink "alsa_output.pci-0000_00_03.0.hdmi-stereo-extra1"
 #fi
 
+sleep 30
+if ! ip address | grep '192\.168\.1\.' ; then
+    # if not at home, unmount encrypted file systems
+    set -- `findmnt -n -t fuse.encfs -o TARGET`
+    if [[ "$1" != "" ]] ; then
+        umount -l -f "$@"
+    fi
+fi
+
 exit 0
