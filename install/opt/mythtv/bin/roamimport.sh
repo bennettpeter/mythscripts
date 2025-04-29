@@ -97,7 +97,7 @@ insert into settings (value,data,hostname) values
   ('MasterServerName','$hostname',null),
   ('ListenOnAllIps','1','$hostname'),
   ('AllowConnFromAll','1','$hostname'),
-  ('SecurityPin','frednurke','$hostname');
+  ('SecurityPin','rocinante','$hostname');
 select * from settings
 where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
 'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr');
@@ -112,7 +112,7 @@ if [[ "$HTML_PASSWORD" != "" ]] ; then
     # Remove old passwords
     sudo rm -f $MYTHTVDIR/share/mythtv/html/*([0-9]).html
     # Add new password
-    sudo cp -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
+    sudo mv -f $MYTHTVDIR/share/mythtv/html/apps/backend/index-xxx.html $MYTHTVDIR/share/mythtv/html/$HTML_PASSWORD.html
 fi
 echo "Check results. Enter to exit."
 read test
