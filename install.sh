@@ -202,11 +202,15 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
     # Core dumps
     if [[ "$ENABLE_COREDUMPS" == Y ]] ; then
         cp install/etc/sysctl.d/60-coredump /etc/sysctl.d/
+        sudo systemctl disable apport.service
+        sudo systemctl stop apport.service
         if grep enabled=1 /etc/default/apport  ; then
             sed -i s/enabled=1/enabled=0/ /etc/default/apport
         fi
     else
         rm -f /etc/sysctl.d/60-coredump
+        sudo systemctl enable apport.service
+        sudo systemctl start apport.service
         if grep enabled=0 /etc/default/apport  ; then
             sed -i s/enabled=0/enabled=1/ /etc/default/apport
         fi

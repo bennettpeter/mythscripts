@@ -24,10 +24,20 @@ set -e
 # To only select watched could use this
 # jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | select(.Watched == true) | .FileName'
 
+auth=
+if [[ "$API_USER" != "" && "$API_PASSWD" != "" ]] ; then
+    # Login to the API
+    auth=$(curl -s -S -X POST -H "Accept: application/json" \
+        "http://$API_IPADDRESS:6544/Myth/LoginUser?UserName=$API_USER&Password=$API_PASSWD" \
+        | jq -r '.String')
+fi
+
 # List of video Filenames and watched indicators
-curl -H "Accept: application/json" "http://$BACKEND:6744/Video/GetVideoList" \
-| jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | {FileName,Watched} | join("\t")' \
-> $DATADIR/videos.txt
+curl  -s -S -H "Accept: application/json" \
+    -H "Authorization: $auth" \
+    "http://$API_IPADDRESS:6744/Video/GetVideoList" \
+    | jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | {FileName,Watched} | join("\t")' \
+    > $DATADIR/videos.txt
 rc=${PIPESTATUS[0]}
 
 if (( rc != 0 )) ; then

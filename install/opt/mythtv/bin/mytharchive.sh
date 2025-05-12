@@ -56,10 +56,18 @@ function exitfunc {
 }
 trap 'exitfunc' EXIT
 
+auth=
+if [[ "$API_USER" != "" && "$API_PASSWD" != "" ]] ; then
+    # Login to the API
+    auth=$(curl -s -S -X POST -H "Accept: application/json" \
+        "http://$API_IPADDRESS:6544/Myth/LoginUser?UserName=$API_USER&Password=$API_PASSWD" \
+        | jq -r '.String')
+fi
 
 # Get a recording list
-curl -H "Accept: application/json" \
-    "http://$backend:6544/Dvr/GetRecordedList?IgnoreDeleted=true&Sort=recgroup,title,starttime" \
+curl  -s -S -H "Accept: application/json" \
+    -H "Authorization: $auth" \
+    "http://$API_IPADDRESS:6544/Dvr/GetRecordedList?IgnoreDeleted=true&Sort=recgroup,title,starttime" \
     > $DATADIR/recorded.json
 # Using smiley face 😃 as a delimiter ($'\U1F603')
 jq -r '.ProgramList.Programs[] | {a: .Recording.RecGroup, b: .Title,
@@ -133,7 +141,8 @@ while IFS='😃' read group title StartTs airdate season episode subtitle filena
         mkdir -p "$newdir"
         mkvmerge -o "$newfile" "$oldfile"
         #~ cp -fv "$oldfile" "$newfile"
-        curl -H "Accept: application/json" -X  POST \
+        curl  -s -S -H "Accept: application/json" -X  POST \
+            -H "Authorization: $auth" \
             -H 'Content-Type: application/json' \
             "http://$backend:6544/Dvr/UpdateRecordedMetadata" \
             --data-raw "{\"RecordedId\":\"$recordedid\", \"RecGroup\":\"$newgroup\", \"Description\":\"$description Archived.\"}" \
