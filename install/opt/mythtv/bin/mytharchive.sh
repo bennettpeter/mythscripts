@@ -3,6 +3,7 @@
 set -e
 
 . /etc/opt/mythtv/mythtv.conf
+. /etc/opt/mythtv/private.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 scriptname=`basename "$scriptname" .sh`
