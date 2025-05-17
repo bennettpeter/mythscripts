@@ -36,7 +36,7 @@ fi
 # List of video Filenames and watched indicators
 curl  -s -S -H "Accept: application/json" \
     -H "Authorization: $auth" \
-    "http://$API_IPADDRESS:6744/Video/GetVideoList" \
+    "http://$API_IPADDRESS:6544/Video/GetVideoList" \
     | jq -r '.VideoMetadataInfoList.VideoMetadataInfos[] | {FileName,Watched} | join("\t")' \
     > $DATADIR/videos.txt
 rc=${PIPESTATUS[0]}
