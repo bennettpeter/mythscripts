@@ -56,23 +56,33 @@ do
     rm -f /tmp/${userid}_tv_grab_$sourcename_off*.xml
     #~ "$grabber" --download-only \
         #~ --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf
-    set -x
     #~ offset=0
 #    for (( offset = 0; offset < 20; offset += 3 )) ; do
 #    removed --days 3 --offset $offset
     #~ "$grabber"  --no-download
-    "$grabber" \
-      --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
-      > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml 2> /tmp/mythfilldb_$$.err
-    cat /tmp/mythfilldb_$$.err
-    if grep "Unexpected error when obtaining programs:" /tmp/mythfilldb_$$.err ; then
-        exit 2
-    fi
+    # 2 attempts in case of HTTP error
+    for (( try=0 ; try<2 ; try++ )) ; do
+        set -x
+        "$grabber" \
+          --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
+          > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml 2> /tmp/mythfilldb_$$.err
+        set +x
+        cat /tmp/mythfilldb_$$.err
+        if grep "Unexpected error when obtaining programs:" /tmp/mythfilldb_$$.err ; then
+            "$scriptpath/notify.py" "grabber fail, retrying" "mythfilldatabase.sh"
+            if (( try > 0 )) ; then
+                exit 2
+            fi
+        else
+            try=99
+        fi
+    done
     rm -f /tmp/mythfilldb_$$.err
+    set -x
     mythfilldatabase --file --sourceid $sourceid \
       --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts
+    set +x
 #    done
-    set -
 done < $DATADIR/videosource.txt
 
 # other way
