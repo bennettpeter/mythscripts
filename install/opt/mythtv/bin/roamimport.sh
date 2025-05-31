@@ -88,6 +88,7 @@ delete from settings where value = 'MasterServerName' and hostname is null;
 delete from settings where value = 'ListenOnAllIps' and hostname = '$hostname';
 delete from settings where value = 'AllowConnFromAll' and hostname = '$hostname';
 delete from settings where value = 'SecurityPin' and hostname = '$hostname';
+delete from settings where value = 'APIAuthReqd' and hostname = '$hostname';
 $sql2
 insert into settings (value,data,hostname) values
   ('DeletedMaxAge','-1',null),
@@ -97,10 +98,12 @@ insert into settings (value,data,hostname) values
   ('MasterServerName','$hostname',null),
   ('ListenOnAllIps','1','$hostname'),
   ('AllowConnFromAll','1','$hostname'),
-  ('SecurityPin','rocinante','$hostname');
+  ('SecurityPin','rocinante','$hostname'),
+  ('APIAuthReqd', 'REMOTE', '$hostname');
 select * from settings
 where value in ('DeletedMaxAge','MasterServerIP','MasterServerName',
-'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr');
+'ListenOnAllIps','SecurityPin','BackendServerIP','BackendServerAddr',
+'AllowConnFromAll','APIAuthReqd');
 " | \
 $mysqlcmd
 
