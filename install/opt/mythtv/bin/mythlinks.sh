@@ -8,6 +8,8 @@
 param="$1"
 
 set -e
+scriptname=`readlink -e "$0"`
+scriptpath=`dirname "$scriptname"`
 
 if [[ "$MYTHTVDIR" == "" ]] ; then
     MYTHTVDIR=/usr
@@ -29,12 +31,12 @@ fi
 if [[ "$param" == airdate ]] ; then
     # By Air Date
     rm -rf "$LINKSDIR"/airdate
-    $MYTHTVDIR/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
+    $scriptpath/mythlink.pl \
       --dest "$LINKSDIR/airdate" --format "%U/%T/%y%m%d-%H%i %oy%om%od S%ssE%ep %S"
 else
     # By Title with orig date
     rm -rf "$LINKSDIR"/origdate
-    $MYTHTVDIR/share/doc/mythtv-backend/contrib/user_jobs/mythlink.pl \
+    $scriptpath/mythlink.pl \
       --link "$LINKSDIR/origdate" --format "%U/%T/%oy%om%od S%ssE%ep %S"
 fi
 
