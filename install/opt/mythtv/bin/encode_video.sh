@@ -239,7 +239,7 @@ if [[ "$error" == y ]] ; then
     echo "-s subtitles: BURN, NONE, n. Default is first subtitle (1)"
     echo "-o filename Output file."
     echo "  Default is a file in directory encode, located where the input file is."
-    echo "  For a DVD default is HOME/Video/Recordings/ENCODER/DVD_NAME/TITLENUM"
+    echo "  For a DVD default is HOME/Videos/recordings/x264/media/username/dvd_dir/media/username"
     echo "--morph Aspect conversion - default is same as input"
     echo "  LB = crop Letterbox input if 4x3 into 16x9"
     echo "  SQ = stretched picture squeeze 16x9 picture vertically into 4x3" 
