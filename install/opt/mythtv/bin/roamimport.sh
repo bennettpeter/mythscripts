@@ -30,8 +30,10 @@ if ! mountpoint /srv/mythroam ; then
     mount /srv/mythroam
 fi
 sudo mkdir -p /srv/mythtv
+sudo rm -f /srv/mythtv/video4
 sudo ln -fs /srv/mythroam /srv/mythtv/video4
 sudo mkdir -p /srv/mythtv/video3
+sudo rm -f /srv/mythtv/video3/videos
 sudo ln -fs /srv/mythroam/videos /srv/mythtv/video3/videos
 mkdir -p $MYTHCONFDIR/channels
 cp /srv/mythroam/channels/* $MYTHCONFDIR/channels/
