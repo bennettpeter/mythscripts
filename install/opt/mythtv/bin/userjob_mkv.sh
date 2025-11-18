@@ -34,6 +34,11 @@ title="$5"
 subtitle="$6"
 chanid="$7"
 
+# Get DB password from config.xml
+. $scriptpath/getconfig.sh
+
+mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName $DBName"
+
 wkday=`date +%a`
 junktoday=junk$wkday
 
@@ -62,15 +67,16 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
         exit 2
     fi
     # Extract Closed captions 
-    subtfile=/tmp/userjob_mkv$$.srt
-    nice ccextractor "$fullfilename" -o $subtfile
+    #~ subtfile=/tmp/userjob_mkv$$.srt
+    #~ nice ccextractor "$fullfilename" -o $subtfile
     bname="${fullfilename%.*}"
-    if [[ ! -f $subtfile ]] ; then
-        subtfile=
-    fi
+    #~ if [[ ! -f $subtfile ]] ; then
+        #~ subtfile=
+    #~ fi
     # Convert to mkv
-    nice mkvmerge -o "$bname".mkv "$fullfilename" --default-track 0:0 $subtfile || rc=$?
-    echo RC = $rc
+    #~ nice mkvmerge -o "$bname".mkv "$fullfilename" $subtfile || rc=$?
+    nice ffmpeg -i "$fullfilename" -acodec copy -vcodec copy -scodec copy "$bname".mkv
+    #~ echo RC = $rc
     #if [[ $? != 0 ]] ; then
     #    "$scriptpath/notify.py" "mkv conversion failed" "$title"
     #    exit 2
@@ -78,12 +84,23 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     storagedir=`dirname "$fullfilename"`
     mkdir -p "$storagedir/$junktoday/"
     mv -v "$fullfilename" "$storagedir/$junktoday/" || true
-    mv -fv "$bname".mkv "$fullfilename"
+    #~ mv -fv "$bname".mkv "$fullfilename"
     #if [[ $? != 0 ]] ; then
     #    "$scriptpath/notify.py" "file rename failed" "$title"
     #    exit 2
     #fi
-    nice mythcommflag --rebuild  --chanid "$chanid" --starttime "$starttime" || echo Return Code is $?
+    nice mythutil --clearseektable  --chanid "$chanid" --starttime "$starttime" || echo Return Code is $?
+    # rename file to mkv extension
+    #~ mv -v "$fullfilename" "${fullfilename%.*}.mkv"
+    sql1="update recorded set basename = '${filename%.*}.mkv' where basename = '$filename';"
+    sql2="update recordedfile set basename = '${filename%.*}.mkv' where basename = '$filename';"
+    echo "$sql1"
+    echo "$sql2"
+    (
+      echo "$sql1"
+      echo "$sql2"
+    ) |  $mysqlcmd
+
 fi
 
 date
