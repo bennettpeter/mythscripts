@@ -16,5 +16,5 @@ hostname=`cat /etc/hostname`
 if [[ "$hostname" == viper || "$hostname" == proxy ]] ; then
     wakeonlan $MAC
 else
-    ssh -i $HOME/.ssh/id_viper_rsa viper wakeonlan $MAC
+    ssh -i $HOME/.ssh/id_viper_rsa peter@viper wakeonlan $MAC
 fi
