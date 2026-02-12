@@ -143,15 +143,15 @@ if [[ "$prev_archive" != "$today" ]] ; then
     echo $today > $DATADIR/archive_date
     # This will return server name for an NFS mount,
     # the string "UUID" for a local mount, empty for a mismatch
-    arcserver=`grep " $ARCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
-    if [[ "$arcserver" != UUID ]] ; then
-        if ping -c 1 "$arcserver" ; then
-            # Avoid running mytharchive if arcserver is up, arcserver
-            # may be busy recording.
-            echo "postpone mytharchive because $arcserver is running"
-            run_arc=0
-        fi
-    fi
+    #~ arcserver=`grep " $ARCMOUNTDIR" /etc/fstab|sed 's/:.*//;s/=.*//'`
+    #~ if [[ "$arcserver" != UUID ]] ; then
+        #~ if ping -c 1 "$arcserver" ; then
+            #~ # Avoid running mytharchive if arcserver is up, arcserver
+            #~ # may be busy recording.
+            #~ echo "postpone mytharchive because $arcserver is running"
+            #~ run_arc=0
+        #~ fi
+    #~ fi
 fi
 if (( run_arc )) ; then
     # Start daily archive run
