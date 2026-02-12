@@ -12,4 +12,9 @@ if [[ "$machine" == "" || "$MAC" == "" ]] ; then
     exit 2
 fi 
 
-wakeonlan $MAC
+hostname=`cat /etc/hostname`
+if [[ "$hostname" == viper || "$hostname" == proxy ]] ; then
+    wakeonlan $MAC
+else
+    ssh -i $HOME/.ssh/id_viper_rsa viper wakeonlan $MAC
+fi
