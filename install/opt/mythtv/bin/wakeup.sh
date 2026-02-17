@@ -4,6 +4,7 @@ scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
 
 machine="$1"
+opt="$2"
 set -- `grep "^$machine "  /etc/opt/mythtv/wakeup_macs.txt`
 MAC="$2"
 
@@ -13,7 +14,7 @@ if [[ "$machine" == "" || "$MAC" == "" ]] ; then
 fi 
 
 hostname=`cat /etc/hostname`
-if [[ "$hostname" == viper || "$hostname" == proxy ]] ; then
+if [[ "$hostname" == viper || "$hostname" == proxy || "$opt" == "-o" ]] ; then
     wakeonlan $MAC
 else
     ssh -i $HOME/.ssh/id_viper_rsa peter@viper wakeonlan $MAC
