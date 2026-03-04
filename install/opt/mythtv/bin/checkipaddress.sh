@@ -21,12 +21,17 @@ while (( rc != 0 && retries < 10 )) ; do
 done
 echo IP Address $ipaddress
 ipv6=($(ip address | grep 'inet6 2.*/128' | sed 's!/128.*!!'))
-echo IPV6 Address ${ipv6[1]}
-if [[ "$ipaddress" != "$IPV4ADDRESS" || "${ipv6[1]}" != "$IPV6ADDRESS" ]] ; then
+ip6addr="${ipv6[1]}"
+echo IPV6 Address $ip6addr
+if [[ $ip6addr == "" ]] ; then
+    ip6addr="$IPV6ADDRESS"
+fi
+
+if [[ "$ipaddress" != "$IPV4ADDRESS" || "$ip6addr" != "$IPV6ADDRESS" ]] ; then
     "$scriptpath/notify.py" "IP Address Change" \
     "
 $IPV4ADDRESS -> $ipaddress 
-$IPV6ADDRESS -> ${ipv6[1]}"
+$IPV6ADDRESS -> $ip6addr"
 fi
 echo "IPV4ADDRESS=$ipaddress" > $DATADIR/ipaddress.txt
-echo "IPV6ADDRESS=${ipv6[1]}" >> $DATADIR/ipaddress.txt
+echo "IPV6ADDRESS=$ip6addr" >> $DATADIR/ipaddress.txt
