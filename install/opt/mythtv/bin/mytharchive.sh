@@ -1,6 +1,5 @@
 #!/bin/bash
 # Daily recording export
-set -e
 
 . /etc/opt/mythtv/mythtv.conf
 . /etc/opt/mythtv/private.conf
