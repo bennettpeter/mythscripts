@@ -84,7 +84,9 @@ rc=0
 count=0
 archived=0
 # Using smiley face 😃 as a delimiter ($'\U1F603')
-while IFS='😃' read group title StartTs airdate season episode subtitle filename recordedid description rest  ;  do
+# use FD 3 instead of default 0 because some command in the script eats up the remaining file from STDIN
+# when a file is archived
+while IFS='😃' read -u 3 group title StartTs airdate season episode subtitle filename recordedid description rest  ;  do
     if [[ "$rest" != "" ]] ; then
         echo ERROR parsing $group $title $StartTs $airdate \
             $season $episode $subtitle $filename $recordedid $description $rest
@@ -159,7 +161,7 @@ while IFS='😃' read group title StartTs airdate season episode subtitle filena
         echo Archived $newfile
         let archived=archived+1
     fi
-done  < $DATADIR/recordedfix.txt
+done  3< $DATADIR/recordedfix.txt
 
 echo "$count recording(s) found"
 echo "$archived recording(s) archived"
