@@ -85,7 +85,9 @@ for subdir in $otherdirs ; do
                 echo ERROR Duplicate directories $subdir
                 exit 99
             fi
-            rsync -vrpt --size-only --chmod=g+w --delete-before --exclude 'Movies' \
+            #~ to leave out a directory, do this plus delete from DB
+            #~ --exclude 'Movies' --delete-excluded
+            rsync -vrpt --size-only --chmod=g+w --delete-before  \
                 "$dirname"/ $ROAMDIR/$subdir/
             found=Y
         fi
