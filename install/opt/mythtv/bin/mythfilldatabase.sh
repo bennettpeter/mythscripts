@@ -1,7 +1,7 @@
 #!/bin/bash
 # Wrapper for mythfilldatabase
 
-set -e
+#~ set -e
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
 scriptpath=`dirname "$scriptname"`
@@ -47,6 +47,7 @@ echo "select sourceid, name from videosource where xmltvgrabber = 'tv_grab_zz_sd
 
 # expect names comcast and ota
 
+rc=0
 while read -r sourceid sourcename
 do
     echo Processing $sourcename with id $sourceid
@@ -66,8 +67,12 @@ do
         "$grabber" \
           --config-file $HOME/.xmltv/tv_grab_zz_sdjson_sqlite_$sourcename.conf \
           > /tmp/${userid}_tv_grab_$sourcename_off$offset.xml 2> /tmp/mythfilldb_$$.err
+        rc=$?
         set +x
         cat /tmp/mythfilldb_$$.err
+        if [[ $rc != 0 ]] ; then
+            exit $rc
+        fi
         if grep "Unexpected error when obtaining programs:" /tmp/mythfilldb_$$.err ; then
             "$scriptpath/notify.py" "grabber fail, retrying" "mythfilldatabase.sh"
             if (( try > 0 )) ; then
@@ -81,10 +86,11 @@ do
     set -x
     mythfilldatabase --file --sourceid $sourceid \
       --xmlfile /tmp/${userid}_tv_grab_$sourcename_off$offset.xml $opts
+    rc=$?
     set +x
 #    done
 done < $DATADIR/videosource.txt
-
+exit $rc
 # other way
 # mythfilldatabase --no-allatonce --refresh all --only-update-guide --max-days 25
 # Old datadirect method
