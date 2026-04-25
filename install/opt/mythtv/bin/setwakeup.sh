@@ -45,11 +45,17 @@ if [ "$startuptime" != 0 ] ; then
     if [[ "$WAKEUPTIME" == "" ]] ; then
         WAKEUPTIME=01:00:00
     fi
-    # If this is run after midnight on Saturday at end of DST it sets wakeup to 4 AM instead of 5 AM
+
     nextdw=`date --date "today $WAKEUPTIME" +%s`
     if [ $nextdw -lt $now ] ; then
         nextdw=`date --date "tomorrow $WAKEUPTIME" +%s`
     fi
+
+    # calculate number of days since Jan 1 1970
+    let daynum=(${nextdw}/86400)%2
+    # add 15 minutes on odd numbered days
+    let nextdw+=daynum*900
+    
     echo $logdate nextdw \"$nextdw\"
     if [ $startuptime -lt $now -o $startuptime -gt $nextdw ] ; then
         startuptime=$nextdw
