@@ -28,7 +28,7 @@ echo "Backend machine? (Y|N)"
 read -e ans
 if [[ "$ans" == Y ]] ; then
     # These are for backend
-    apt install xmltv mysql-server comskip
+    apt install xmltv mysql-server
 #    apt install xmltv apache2 php php-mysql mysql-server comskip
     echo "FireTV Recorder machine? (Y|N)"
     read -e ans
