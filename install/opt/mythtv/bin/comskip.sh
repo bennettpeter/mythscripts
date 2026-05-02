@@ -78,7 +78,6 @@ echo Set IO priority to -c3 idle
 ionice -c3 -p$$
 error=0
 use_txt=0
-use_edl=0
 extract_fps=0
 
 if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
@@ -90,7 +89,6 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     else
         # Find the recording file
         fullfilename=`ls "$VIDEODIR"/video*/recordings/"$filename"`
-        use_txt=1
     fi
     if [[ "$fullfilename" == "" ]] ; then
         echo "ERROR: File $filename not found"
@@ -101,30 +99,59 @@ if [[ "$recgroup" != "Deleted" && "$recgroup" != "LiveTV" ]] ; then
     pgm=${pgm%.*}
     rm -fv "$output/$pgm".*
 
-    # wait until there is no comskip running
-    while pidof comskip >/dev/null ; do
+    # wait until there is no mythcommflag running
+    while pidof mythcommflag >/dev/null ; do
         sleep 5
     done
 
     date
-    echo "Running comskip"
+    echo "Running mythcommflag"
     set -x
-    nice comskip --ini="/etc/opt/mythtv/comskip_${inifile}.ini" --output="$output"  --output-filename="$pgm" \
-        $extraparm "$fullfilename" "$output" 2> "$output/$pgm.stderr" || echo error=$?
-    set -
-    touch "$output/$pgm.edl"
+    if [[ "$starttime" == "" ]] ; then
+        # Video file
+        nice mythcommflag -f "$fullfilename"  --outputmethod essentials \
+            --outputfile "$output/$pgm.txt" --skipdb -q --noprogress || echo error=$?
+    else
+        nice mythcommflag --chanid $chanid --starttime "$starttime"  \
+            --outputmethod essentials --outputfile "$output/$pgm.txt" -q --noprogress || echo error=$?
+    fi
+    set +x
     echo "Commercial breaks in seconds --"
-    cat "$output/$pgm.edl"
     touch "$output/$pgm.txt"
-    skip=
+    cat "$output/$pgm.txt"
     if (( extract_fps)) ; then
-        # First line of file has this -
-        # FILE PROCESSING COMPLETE 107324 FRAMES AT  2997
-        txthead=$(head -1 "$output/$pgm.txt")
-        fps=$(grep -o "[0-9]*$" <<< $txthead)0
-        sqlfn=$(sed "s/'/''/g"<<<$filename)
+        framerate=`mediainfo '--Inform=Video;%FrameRate%' "$fullfilename"`
+        fps=$(bc <<< "$framerate*1000/1")
+        # Alternate method of calculating framerate
+        if (( fps < 20000 )) ; then
+            # Second line of file has this -
+            # totalframecount: 108251
+            fcline=$(grep "totalframecount:" "$output/$pgm.txt")
+            framecount=$(grep -o "[0-9]*$" <<< $fcline)
+            durationmilli=`mediainfo '--Inform=Video;%Duration%' "$fullfilename"`
+            durationmilli=${durationmilli%.*}
+            let fps=${framecount}000000/${durationmilli}
+            # sanity check
+            fps_values="23976 24000 25000 29970 30000 48000 50000 59940 60000"
+            prior=0
+            for rate in $fps_values ; do
+                if (( fps == rate )) ; then break; fi
+                if (( fps < rate )) ; then
+                    let pdiff=fps-prior
+                    let cdiff=rate-fps
+                    if (( cdiff < pdiff )) ; then
+                        fps=$rate
+                    else
+                        fps=$prior
+                    fi
+                    break
+                fi
+                prior=$rate
+            done
+        fi
         # sanity check
-        if (( fps > 10000 )) ; then
+        if (( fps > 20000 )) ; then
+            sqlfn=$(sed "s/'/''/g"<<<$filename)
             $mysqlcmd << EOF
                 delete from filemarkup
                     where filename = '$sqlfn' and type=32;
@@ -135,57 +162,66 @@ EOF
     fi
 
     if (( use_txt )) ; then
-        # txt file has times in frame numbers
-        while read -r start finish
+        skip=
+        # txt file has lines like this
+        # framenum: 16747	marktype: 4
+        # framenum: 22147	marktype: 5
+        start=
+        finish=
+        while read -r tag1 value tag2 type
         do
-            # First line of file has this -
-            # FILE PROCESSING COMPLETE 107324 FRAMES AT  2997
-            if [[ "$start" == FILE ]] ; then continue ; fi
-            if [[ "$start" == ---* ]] ; then continue ; fi
-            if (( finish - start < 5 )) ; then continue ; fi
-            if [[ "$skip" != "" ]] ; then
-                skip="$skip,"
+            if [[ $tag1 == 'framenum:' && $tag2 == 'marktype:' ]] ; then
+                if [[ $type == 4 ]] ; then
+                    start=$value
+                elif [[ $type == 5 ]] ; then
+                    finish=$value
+                fi
             fi
-           skip=${skip}${start}-${finish}
+            if [[ $start != '' && $finish != '' ]] ; then
+                if (( finish - start > 5 )) ; then
+                    if [[ "$skip" != "" ]] ; then
+                        skip="$skip,"
+                    fi
+                    skip=${skip}${start}-${finish}
+                    start=
+                    finish=
+                fi
+            fi
         done < "$output/$pgm.txt"
-    elif (( use_edl )) ; then
-        # edl file has times in seconds
-        # fps is in milliseconds
-        if (( ! fps )) ; then
-            echo "Error - cannot find fps"
+
+        echo "Skiplist $skip"
+        if [[ "$skip" == "" ]] ; then
+            echo "Error - empty skip list"
             skip="1-2"
             error=1
-        else
-            while read -r secs1 secs2 extra
-            do
-               if [[ "$skip" != "" ]] ; then
-                  skip="$skip,"
-               fi
-               start=$(bc <<< "scale=0; $secs1*$fps/1000")
-               finish=$(bc <<< "scale=0; $secs2*$fps/1000")
-               skip=${skip}${start}-${finish}
-            done < "$output/$pgm.edl"
         fi
-    fi
-    echo "Skiplist $skip"
-    if [[ "$skip" == "" ]] ; then
-        echo "Error - empty skip list"
-        skip="1-2"
-        error=1
-    fi
-    echo "Running mythutil"
-    if [[ "$starttime" == "" ]] ; then
-    set -x
-        mythutil --video "$filename" --setskiplist "$skip" -q
-    set -
+        echo "Running mythutil"
+        if [[ "$starttime" == "" ]] ; then
+            set -x
+            mythutil --video "$filename" --setskiplist "$skip" -q
+            set +x
+        else
+            set -x
+            mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
+            set +x
+        fi
+        if (( error )) ; then
+            # to cause error and invoke errfunc
+            false
+        fi
     else
-    set -x
-        mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
-    set -
-    fi
-    if (( error )) ; then
-        # to cause error and invoke errfunc
-        false
+        if [[ "$starttime" != "" ]] ; then
+            test=$(mythutil --getskiplist --chanid $chanid --starttime "$starttime" -q)
+            if ! echo "$test" | grep - ; then
+                echo $test
+                echo "Error - empty skip list"
+                skip="1-2"
+                set -x
+                mythutil --chanid "$chanid" --starttime "$starttime" --setskiplist "$skip" -q
+                set +x
+                false
+             fi
+         fi
     fi
     # clean up
     if (( ! VERBOSE )) ; then
