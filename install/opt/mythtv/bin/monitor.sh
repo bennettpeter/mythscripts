@@ -30,7 +30,7 @@ while true ; do
         setsid $scriptpath/systemshutdown.sh $parm || true
     fi
     if [[ "$BATTERY_CHECK" != "" ]] ; then
-        if acpi -a|grep off-line ; then
+        if acpi -a|grep off-line >/dev/null ; then
             batt=$(acpi -b|grep -o [0-9]*%)
             for bat in $batt ; do
                 if [[ "$bat" != "0%" ]] ; then break ; fi
