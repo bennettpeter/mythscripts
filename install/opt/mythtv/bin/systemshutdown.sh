@@ -19,8 +19,18 @@ fi
 
 s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
 #priorreboot=`cat $DATADIR/reboot_date`
+# format of priorreboot = 2026-05-03
 resp=($(who -b))
-priorreboot=${resp[2]}
+if [[ $resp == "" ]]  ; then
+    updays=0
+    if res=($(uptime|grep -o "up .* day")) ;  then
+        updays=${res[1]}
+    fi
+    echo "Last reboot $updays ago"
+    priorreboot=$(date -d " $updays days ago" "+%Y-%m-%d")
+else
+    priorreboot=${resp[2]}
+fi
 echo "Last reboot was $priorreboot"
 vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
@@ -40,7 +50,12 @@ if [[ "$CAN_SUSPEND" == Y ]] ; then
             at_home=1
         fi
         echo "Suspending"
-        x_users=(`who -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
+        if who --version | grep 'Joseph Arceneaux' ;  then
+            who=who
+        else
+            who='w -h'
+        fi
+        x_users=(`$who -s|egrep  " tty7 | :0 |--session-child"|cut -f 1 -d ' '`)
         x_user="${x_users[0]}"
         if [[ "$X11_DISABLE" != "" && "$x_user" != "" ]] ; then
             for mon in $X11_DISABLE ; do

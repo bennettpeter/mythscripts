@@ -39,7 +39,14 @@ while true ; do
             if (( bat < $BATTERY_CHECK )) ; then
                 echo "Battery low ${bat}%"
                 rc=0
-                x_users=(`who -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`)
+                # who version in ubuntu 26.04 doesn't work, so use w instead
+                # who in ubuntu 26.04 does not include the author name in --version
+                if who --version | grep 'Joseph Arceneaux' ;  then
+                    who=who
+                else
+                    who='w -h'
+                fi
+                x_users=(`$who -s|egrep  " tty7 | :0 |--session-child"|cut -f 1 -d ' '`)
                 DISPLAY=:0 sudo -u ${x_users[0]} zenity --warning --no-wrap \
                 --icon-name=dialog-warning \
                 --width 1000 --height 500 --timeout=15 \

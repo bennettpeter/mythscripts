@@ -15,8 +15,18 @@ fi
 
 s7daysago=`date --date="$REBOOT_DAYS days ago" +%F`
 # priorreboot=`cat $DATADIR/reboot_date`
+# format of priorreboot = 2026-05-03
 resp=($(who -b))
-priorreboot=${resp[2]}
+if [[ $resp == "" ]]  ; then
+    updays=0
+    if res=($(uptime|grep -o "up .* day")) ;  then
+        updays=${res[1]}
+    fi
+    echo "Last reboot $updays ago"
+    priorreboot=$(date -d " $updays days ago" "+%Y-%m-%d")
+else
+    priorreboot=${resp[2]}
+fi
 echo "Last reboot was $priorreboot"
 vbox=`pidof VirtualBox; pidof VBoxHeadless`
 if [[ "$vbox" != "" ]] ; then echo "Virtualbox is active $vbox" ]] ; fi
