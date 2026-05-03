@@ -179,8 +179,16 @@ if [[ "$mythtv_unix_id" == "" ]] ; then
     mythtv_unix_id=NONE
 fi
 
-ssh_users=`who -s|egrep -v "^$SOFT_USER | :0| tty7 " | wc -l`
-x_user=`who -s|egrep  " tty7 | :0 "|cut -f 1 -d ' '`
+# who version in ubuntu 26.04 doesn't work, so use w instead
+# who in ubuntu 26.04 does not include the author name in --version
+if who --version | grep 'Joseph Arceneaux' ;  then
+    who=who
+else
+    who='w -h'
+fi
+
+ssh_users=`$who -s|egrep -v "^$SOFT_USER | :0| tty7 |--session-child" | wc -l`
+x_user=`$who -s|egrep  " tty7 | :0 |--session-child"|cut -f 1 -d ' '`
 # sometimes there are duplicate entries (e.g. peter peter)
 # this fixes it to just take the first
 set -- $x_user
@@ -200,7 +208,7 @@ fi
 
 if [[ "$reason" != powerbtn && "$ssh_users" != 0 ]] ; then
     echo $DATE Somebody is still logged in via ssh, see below, don\'t shut down!
-    who -s|egrep -v "^$SOFT_USER | :0| tty7 "
+    $who -s|egrep -v "^$SOFT_USER | :0| tty7 |--session-child"
     echo $DATE > $DATADIR/checklogin
     rc=1
 fi
