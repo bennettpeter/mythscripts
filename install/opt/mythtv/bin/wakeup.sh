@@ -13,9 +13,13 @@ if [[ "$machine" == "" || "$MAC" == "" ]] ; then
     exit 2
 fi 
 
-hostname=`cat /etc/hostname`
-if [[ "$hostname" == viper || "$hostname" == proxy || "$opt" == "-o" ]] ; then
-    wakeonlan $MAC
-else
-    ssh -i $HOME/.ssh/id_viper_rsa peter@viper wakeonlan $MAC
-fi
+wakeonlan $MAC
+
+# Code for when it was not working in ubuntu 24.04
+
+#~ hostname=`cat /etc/hostname`
+#~ if [[ "$hostname" == viper || "$hostname" == proxy || "$opt" == "-o" ]] ; then
+    #~ wakeonlan $MAC
+#~ else
+    #~ ssh -i $HOME/.ssh/id_viper_rsa peter@viper wakeonlan $MAC
+#~ fi
