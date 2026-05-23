@@ -45,6 +45,14 @@ if pidof fstrim ; then
     exit 2
 fi
 
+if ps -ef|grep [f]ilesync.sh ; then
+    zenity --error --no-wrap \
+    --text='<span font="32">ERROR filesync is running. Wait 5 minutes and try again.</span>' \
+      --width 1000 --height 100
+    exit 2
+fi
+
+
 if pidof kmymoney ; then
     zenity --error --no-wrap \
     --text='<span font="32">ERROR KMyMoney is running.</span>' \

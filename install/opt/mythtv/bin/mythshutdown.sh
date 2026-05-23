@@ -130,6 +130,12 @@ if [[ "$CAN_TRANSCODE" == Y && "$encoderunning" == 0 ]] ; then
 #    ps -C HandBrakeCLI -o pid=,comm=,%cpu=,etimes=
 fi
 
+if ps -ef|grep [f]ilesync.sh ; then
+    echo $DATE "filesync.sh Is running, don't shut down."
+    rc=1
+    echo $DATE > $DATADIR/checklogin
+fi
+
 # On backend, if ffmpeg is running for a long time when mythshutdown is called
 # it indicates a bug with hanging mythbackend. In this case reboot.
 # This will check for 10 minutes before rebooting.
