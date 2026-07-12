@@ -188,31 +188,23 @@ if [[ `ps -p1 -o comm --no-headers` == systemd ]] ; then
         systemctl enable peter-resume.service
     fi
 
-#    os=`cat /etc/issue|sed "s/ .*//"`
-#    if [[ "$os" == Raspbian ]] ; then
-#        if ! diff install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service ; then
-#            cp install/etc/systemd/system/peter-addips.service /etc/systemd/system/peter-addips.service
-#            daemonrestart=Y
-#        fi
-#        if ! systemctl is-enabled peter-addips.service ; then
-#            systemctl enable peter-addips.service
-#        fi
-#    fi
 
     # Core dumps
-    if [[ "$ENABLE_COREDUMPS" == Y ]] ; then
-        cp install/etc/sysctl.d/60-coredump /etc/sysctl.d/
-        sudo systemctl disable apport.service
-        sudo systemctl stop apport.service
-        if grep enabled=1 /etc/default/apport  ; then
-            sed -i s/enabled=1/enabled=0/ /etc/default/apport
-        fi
-    else
-        rm -f /etc/sysctl.d/60-coredump
-        sudo systemctl enable apport.service
-        sudo systemctl start apport.service
-        if grep enabled=0 /etc/default/apport  ; then
-            sed -i s/enabled=0/enabled=1/ /etc/default/apport
+    if grep '^ID=ubuntu'  /etc/os-release ; then
+        if [[ "$ENABLE_COREDUMPS" == Y ]] ; then
+            cp install/etc/sysctl.d/60-coredump /etc/sysctl.d/
+            sudo systemctl disable apport.service
+            sudo systemctl stop apport.service
+            if grep enabled=1 /etc/default/apport  ; then
+                sed -i s/enabled=1/enabled=0/ /etc/default/apport
+            fi
+        else
+            rm -f /etc/sysctl.d/60-coredump
+            sudo systemctl enable apport.service
+            sudo systemctl start apport.service
+            if grep enabled=0 /etc/default/apport  ; then
+                sed -i s/enabled=0/enabled=1/ /etc/default/apport
+            fi
         fi
     fi
  
@@ -272,7 +264,7 @@ popd
 if (( found )) ; then exportfs -rav ; fi
 
 if [[ "$daemonrestart" == Y ]] ; then
-    systemctl restart rsyslog.service
+    systemctl restart rsyslog.service || echo rc=$?
     systemctl daemon-reload
 fi
 

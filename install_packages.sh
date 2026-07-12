@@ -6,10 +6,10 @@ if [[ `arch` == x86_64 ]] ; then
     apt install jq mediainfo libiec61883-dev wakeonlan libxml2-utils curl \
       xprintidle sysstat mysql-client figlet python3-natsort gdebi-core dos2unix acpi sox \
       xdotool python-is-python3 openssh-server x11vnc screen mkvtoolnix handbrake-cli ffmpeg \
-      nfs-common nfs-kernel-server gnome-system-monitor xbindkeys retext
+      nfs-common nfs-kernel-server gnome-system-monitor xbindkeys retext util-linux-extra
 fi
 
-apt install vim xfce4-genmon-plugin
+apt install vim
 update-alternatives --set editor /usr/bin/vim.basic
 
 if [[ `arch` == arm* ]] ; then
