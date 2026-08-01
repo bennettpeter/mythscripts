@@ -72,7 +72,8 @@ rm -rf "$tempdir"
 mkdir -p "$tempdir"
 
 # for testing to limit to 5 minutes : -t 00:05:00
-nice ffmpeg -hide_banner -loglevel fatal -y -i "$fullfilename" -vf "fps=1/$samplerate" "$tempdir"/frame_%05d.$exten
+nice ffmpeg -hide_banner -loglevel fatal -y -i "$fullfilename" \
+    -vf "fps=1/$samplerate" "$tempdir"/frame_%05d.$exten < /dev/null
 
 skip=
 adstart=
