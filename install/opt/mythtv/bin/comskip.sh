@@ -53,16 +53,9 @@ subtitle="$6"
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName --batch --column-names=FALSE $DBName"
 
 if [[ "$starttime" == "" ]] ; then
-    if [[ "$chanid" == "" ]] ; then
-        inifile=peacock
-    else
-        inifile=$chanid
-        chanid=""
-    fi
-    echo "Video using $inifile"
+    echo "Video"
 else
-    inifile=comcast
-    echo "Recording using $inifile"
+    echo "Recording"
 fi
 
 function errfunc {

@@ -2,10 +2,8 @@
 # Daily Commercial skip run
 # Make sure the oldest unwatched episodes of certain shows have been run
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
-#~ # Shows for comskip_daily.sh
-#~ # r = recording, v = video, f = freevee video
-#~ r Blue Bloods
-#~ v Sprung
+# r = recording, v = video
+# T = tubi recording in video directory
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -44,13 +42,7 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ ( "$type" == v || "$type" == f || "$type" == R  ) && "$stitle" != "" ]] ; then
-        inifile=
-        if [[ "$type" == f ]] ; then
-            inifile=freevee
-        elif [[ "$type" == R ]] ; then
-            inifile=comcast
-        fi
+    if [[ ( "$type" == v || "$type" == T ) && "$stitle" != "" ]] ; then
         echo "Checking for videos of $stitle"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT filename, title, MAX(type=4), subtitle
@@ -63,8 +55,13 @@ EOF
         while IFS=$'\t' read -r filename title done subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                echo $scriptpath/comskip.sh "$filename" $inifile
-                $scriptpath/comskip.sh "$filename"  $inifile
+                if [[ "$type" == T ]] ; then
+                    echo $scriptpath/comskip_tubi.sh "$filename"
+                    $scriptpath/comskip_tubi.sh "$filename"
+                else
+                    echo $scriptpath/comskip.sh "$filename"
+                    $scriptpath/comskip.sh "$filename"
+                fi
             fi
         done < /tmp/comskip$$.csv
     fi
