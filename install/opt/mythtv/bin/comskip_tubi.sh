@@ -49,7 +49,8 @@ exten=jpg
 CROP="-gravity NorthWest -crop 30%x15%"
 NEGATE='-channel RGB -negate +channel'
 MAX_AD_LEN=240
-MIN_AD_LEN=15
+MIN_AD_LEN=12
+EXTRA_SECS=2
 frameratex1000=60000
 samplerate=1
 
@@ -57,8 +58,8 @@ tempdir=${fullfilename%.*}_tmp
 
 function adstring {
     if (( adend - adstart > MIN_AD_LEN )) ; then
-        let fseq1=adstart*60
-        let fseq2=adend*60
+        let fseq1=adstart*60-EXTRA_SECS*60
+        let fseq2=adend*60+EXTRA_SECS*60
         if [[ "$skip" != "" ]] ; then
             skip="$skip,"
         fi
