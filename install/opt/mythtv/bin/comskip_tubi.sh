@@ -59,6 +59,9 @@ tempdir=${fullfilename%.*}_tmp
 function adstring {
     if (( adend - adstart > MIN_AD_LEN )) ; then
         let fseq1=adstart*60-EXTRA_SECS*60
+        if (( fseq1 < 60 )) ; then
+            let fseq1=60
+        fi
         let fseq2=adend*60+EXTRA_SECS*60
         if [[ "$skip" != "" ]] ; then
             skip="$skip,"
