@@ -2,8 +2,11 @@
 # Commercial skip for tubi recordings
 # command line - 
 # for a video:
-# /opt/mythtv/bin/comskip_tubi.sh "filename"
+# /opt/mythtv/bin/comskip_tubi.sh "filename" "option"
 # the filename must be a full file name relative to the videos directory
+# option: "peacock", "tubi", "roku"
+# default tubi
+
 
 . /etc/opt/mythtv/mythtv.conf
 
@@ -28,6 +31,11 @@ filename="$1"
 # Video File
 fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
 
+option="$2"
+if [[ "$option" == "" ]] ; then
+    option=tubi
+fi
+
 # Get DB password
 . $scriptpath/getconfig.sh
 
@@ -37,7 +45,8 @@ function errfunc {
     if [[ "$title" == "" ]] ; then
         title="$filename"
     fi
-    "$scriptpath/notify.py" "commskip_tubi failed" "$title" "$subtitle"
+### TEST
+    #~ "$scriptpath/notify.py" "commskip_tubi failed" "$title" "$subtitle"
     exit 2
 }
 trap errfunc ERR
@@ -46,15 +55,61 @@ echo Set IO priority to -c3 idle
 ionice -c3 -p$$
 error=0
 exten=jpg
-CROP="-gravity NorthWest -crop 30%x15%"
+tempdir=${fullfilename%.*}_tmp
 NEGATE='-channel RGB -negate +channel'
 MAX_AD_LEN=240
-MIN_AD_LEN=12
+MIN_AD_LEN=10
 EXTRA_SECS=2
-frameratex1000=60000
 samplerate=1
 
-tempdir=${fullfilename%.*}_tmp
+vidwidth=$(mediainfo "--Inform=Video;%Width%" "$fullfilename")
+vidheight=$(mediainfo "--Inform=Video;%Height%" "$fullfilename")
+framerate=$(mediainfo "--Inform=Video;%FrameRate%" "$fullfilename")
+frameratex1000=$(echo "$framerate * 1000 / 1" | bc)
+
+# parameters width, height, xoffset, yoffset in a 1280x720 picture
+function setcrop {
+    let cwidth=${1}*vidwidth/1280
+    let cheight=${2}*vidheight/720
+    let xoff=${3}*vidwidth/1280
+    let yoff=${4}*vidheight/720
+    CROP="-crop ${cwidth}x${cheight}+${xoff}+${yoff}"
+}
+
+function TESSERACT {
+    tesseract -c page_separator= "$tempdir/temp.$exten" -
+}
+
+function GOCR {
+    gocr -C 0-9 "$tempdir/temp.$exten"
+}
+
+case $option in
+    peacock)
+        setcrop 40 20 65 646
+        CONTRAST="-brightness-contrast 0x40"
+        OCR=GOCR
+        TEST='^[0-9].*$'
+        ;;
+    tubi)
+        setcrop 260 36 54 54
+        CONTRAST="-brightness-contrast 0x90"
+        OCR=TESSERACT
+        TEST='Ad *[1-9]'
+        ;;
+    roku)
+        setcrop 120 26 54 54
+        CONTRAST="-brightness-contrast 0x90"
+        OCR=TESSERACT
+        TEST='Ad *[1-9]'
+        ;;
+    *)
+        echo Unknown option: $option
+        # to cause error and invoke errfunc
+        false
+        ;;
+esac
+
 
 function adstring {
     if (( adend - adstart > MIN_AD_LEN )) ; then
@@ -82,14 +137,14 @@ nice ffmpeg -hide_banner -loglevel fatal -y -i "$fullfilename" \
 skip=
 adstart=
 adend=
+
 for file in "$tempdir"/frame_*.$exten ; do
     seq=${file: -9}
     seq=${seq:0:5}
     seq=${seq##+(0)}
     let seq=seq*$samplerate
-    convert "$file" $CROP $NEGATE -brightness-contrast 0x40 "$tempdir"/temp.$exten
-    if tesseract -c page_separator="" "$tempdir"/temp.$exten - 2>/dev/null \
-        | egrep "Ad|0:[0-1]" >/dev/null 2>&1; then
+    convert "$file" $CROP $NEGATE $CONTRAST "$tempdir"/temp.$exten
+    if $OCR 2>/dev/null | egrep "$TEST" >/dev/null 2>&1; then
         if [[ $adstart == "" ]] ; then
             adstart=$seq
         else

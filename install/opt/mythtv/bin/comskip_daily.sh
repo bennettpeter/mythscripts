@@ -4,6 +4,7 @@
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
 # r = recording, v = video
 # T = tubi recording in video directory
+# R = Roku, P = Peacock
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -42,8 +43,8 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ ( "$type" == v || "$type" == T ) && "$stitle" != "" ]] ; then
-        echo "Checking for videos of $stitle"
+    if [[ ( "$type" == v || "$type" == T  || "$type" == R || "$type" == P ) && "$stitle" != "" ]] ; then
+        echo "Checking for videos of $stitle type $type"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT filename, title, MAX(type=4), subtitle
 FROM filemarkup right outer join videometadata using (filename)
@@ -55,9 +56,13 @@ EOF
         while IFS=$'\t' read -r filename title done subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
+                set -x
                 if [[ "$type" == T ]] ; then
-                    echo $scriptpath/comskip_tubi.sh "$filename"
-                    $scriptpath/comskip_tubi.sh "$filename"
+                    $scriptpath/comskip_tubi.sh "$filename" tubi
+                elif [[ "$type" == R ]] ; then
+                    $scriptpath/comskip_tubi.sh "$filename" roku
+                elif [[ "$type" == P ]] ; then
+                    $scriptpath/comskip_tubi.sh "$filename" peacock
                 else
                     echo $scriptpath/comskip.sh "$filename"
                     $scriptpath/comskip.sh "$filename"
