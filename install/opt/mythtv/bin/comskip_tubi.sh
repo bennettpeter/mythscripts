@@ -45,8 +45,7 @@ function errfunc {
     if [[ "$title" == "" ]] ; then
         title="$filename"
     fi
-### TEST
-    #~ "$scriptpath/notify.py" "commskip_tubi failed" "$title" "$subtitle"
+    "$scriptpath/notify.py" "commskip_tubi failed" "$title" "$subtitle"
     exit 2
 }
 trap errfunc ERR
