@@ -4,7 +4,7 @@
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
 # r = recording, v = video
 # T = tubi recording in video directory
-# R = Roku, P = Peacock
+# R = Roku, P = Peacock, D = disney
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -63,6 +63,8 @@ EOF
                     $scriptpath/comskip_tubi.sh "$filename" roku
                 elif [[ "$type" == P ]] ; then
                     $scriptpath/comskip_tubi.sh "$filename" peacock
+                elif [[ "$type" == D ]] ; then
+                    $scriptpath/comskip_tubi.sh "$filename" disney
                 else
                     echo $scriptpath/comskip.sh "$filename"
                     $scriptpath/comskip.sh "$filename"

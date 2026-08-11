@@ -4,9 +4,7 @@
 # for a video:
 # /opt/mythtv/bin/comskip_tubi.sh "filename" "option"
 # the filename must be a full file name relative to the videos directory
-# option: "peacock", "tubi", "roku"
-# default tubi
-
+# option: "peacock", "tubi", "roku", "disney"
 
 . /etc/opt/mythtv/mythtv.conf
 
@@ -80,7 +78,7 @@ function TESSERACT {
 }
 
 function GOCR {
-    gocr -C 0-9 "$tempdir/temp.$exten"
+    gocr -C 0-9: "$tempdir/temp.$exten"
 }
 
 case $option in
@@ -101,6 +99,13 @@ case $option in
         CONTRAST="-brightness-contrast 0x90"
         OCR=TESSERACT
         TEST='Ad *[1-9]'
+        ;;
+    disney)
+        # with Ad 74 34 1146 40
+        setcrop 36 34 1176 40
+        CONTRAST="-brightness-contrast 0x40"
+        OCR=GOCR
+        TEST='^[0-9]+:[0-9][0-9]$'
         ;;
     *)
         echo Unknown option: $option
