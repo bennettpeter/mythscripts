@@ -5,6 +5,8 @@
 # r = recording, v = video
 # T = tubi recording in video directory
 # R = Roku, P = Peacock, D = disney
+# comskip_shows.txt must have double apostrophe is there are showa with
+# apostrophe in the title
 
 . /etc/opt/mythtv/mythtv.conf
 scriptname=`readlink -e "$0"`
@@ -43,7 +45,7 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ ( "$type" == v || "$type" == T  || "$type" == R || "$type" == P ) && "$stitle" != "" ]] ; then
+    if [[ "$type" != r  && "$stitle" != "" ]] ; then
         echo "Checking for videos of $stitle type $type"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT filename, title, MAX(type=4), subtitle
@@ -56,7 +58,6 @@ EOF
         while IFS=$'\t' read -r filename title done subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                set -x
                 if [[ "$type" == T ]] ; then
                     $scriptpath/comskip_tubi.sh "$filename" tubi
                 elif [[ "$type" == R ]] ; then
@@ -65,7 +66,7 @@ EOF
                     $scriptpath/comskip_tubi.sh "$filename" peacock
                 elif [[ "$type" == D ]] ; then
                     $scriptpath/comskip_tubi.sh "$filename" disney
-                else
+                elif [[ "$type" == v ]] ; then
                     echo $scriptpath/comskip.sh "$filename"
                     $scriptpath/comskip.sh "$filename"
                 fi
