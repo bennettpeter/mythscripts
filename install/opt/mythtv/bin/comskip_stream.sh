@@ -1,8 +1,8 @@
 #!/bin/bash
-# Commercial skip for tubi recordings
+# Commercial skip for streamed recordings
 # command line - 
 # for a video:
-# /opt/mythtv/bin/comskip_tubi.sh "filename" "option"
+# /opt/mythtv/bin/comskip_stream.sh "filename" "option"
 # the filename must be a full file name relative to the videos directory
 # option: "peacock", "tubi", "roku", "disney"
 
@@ -30,9 +30,6 @@ filename="$1"
 fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
 
 option="$2"
-if [[ "$option" == "" ]] ; then
-    option=tubi
-fi
 
 # Get DB password
 . $scriptpath/getconfig.sh
@@ -43,7 +40,7 @@ function errfunc {
     if [[ "$title" == "" ]] ; then
         title="$filename"
     fi
-    "$scriptpath/notify.py" "commskip_tubi failed" "$title" "$subtitle"
+    "$scriptpath/notify.py" "commskip_stream failed" "$title" "$subtitle"
     exit 2
 }
 trap errfunc ERR
@@ -56,7 +53,7 @@ tempdir=${fullfilename%.*}_tmp
 NEGATE='-channel RGB -negate +channel'
 MAX_AD_LEN=240
 MIN_AD_LEN=10
-EXTRA_SECS=2
+EXTRA_SECS=1
 samplerate=1
 
 vidwidth=$(mediainfo "--Inform=Video;%Width%" "$fullfilename")

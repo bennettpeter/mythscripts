@@ -2,10 +2,9 @@
 # Daily Commercial skip run
 # Make sure the oldest unwatched episodes of certain shows have been run
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
-# r = recording, v = video
-# T = tubi recording in video directory
-# R = Roku, P = Peacock, D = disney
-# comskip_shows.txt must have double apostrophe is there are showa with
+# r = recording, v = video recorded from TV
+# T = tubi, R = Roku, P = Peacock, D = disney recording in video directory
+# comskip_shows.txt must have double apostrophe if there are shows with
 # apostrophe in the title
 
 . /etc/opt/mythtv/mythtv.conf
@@ -59,16 +58,17 @@ EOF
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
                 if [[ "$type" == T ]] ; then
-                    $scriptpath/comskip_tubi.sh "$filename" tubi
+                    $scriptpath/comskip_stream.sh "$filename" tubi
                 elif [[ "$type" == R ]] ; then
-                    $scriptpath/comskip_tubi.sh "$filename" roku
+                    $scriptpath/comskip_stream.sh "$filename" roku
                 elif [[ "$type" == P ]] ; then
-                    $scriptpath/comskip_tubi.sh "$filename" peacock
+                    $scriptpath/comskip_stream.sh "$filename" peacock
                 elif [[ "$type" == D ]] ; then
-                    $scriptpath/comskip_tubi.sh "$filename" disney
+                    $scriptpath/comskip_stream.sh "$filename" disney
                 elif [[ "$type" == v ]] ; then
-                    echo $scriptpath/comskip.sh "$filename"
                     $scriptpath/comskip.sh "$filename"
+                else
+                    "$scriptpath/notify.py" "commskip_daily invalid code $type for $title"
                 fi
             fi
         done < /tmp/comskip$$.csv
