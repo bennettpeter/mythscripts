@@ -2,9 +2,10 @@
 # Commercial skip for streamed recordings
 # command line - 
 # for a video:
-# /opt/mythtv/bin/comskip_stream.sh "filename" "option"
+# /opt/mythtv/bin/comskip_stream.sh "filename" "service" option 
 # the filename must be a full file name relative to the videos directory
-# option: "peacock", "tubi", "roku", "disney"
+# service: "peacock", "tubi", "roku", "disney"
+# option: keep
 
 . /etc/opt/mythtv/mythtv.conf
 
@@ -29,7 +30,8 @@ filename="$1"
 # Video File
 fullfilename=`ls "$VIDEODIR"/video*/videos/"$filename"`
 
-option="$2"
+service="$2"
+option="$3"
 
 # Get DB password
 . $scriptpath/getconfig.sh
@@ -78,7 +80,7 @@ function GOCR {
     gocr -C 0-9: "$tempdir/temp.$exten"
 }
 
-case $option in
+case $service in
     peacock)
         setcrop 40 20 65 646
         CONTRAST="-brightness-contrast 0x40"
@@ -89,23 +91,22 @@ case $option in
         setcrop 260 36 54 54
         CONTRAST="-brightness-contrast 0x90"
         OCR=TESSERACT
-        TEST='Ad *[1-9]'
+        TEST='Ad *[1-9it]'
         ;;
     roku)
         setcrop 120 26 54 54
         CONTRAST="-brightness-contrast 0x90"
         OCR=TESSERACT
-        TEST='Ad *[1-9]'
+        TEST='Ad *[1-9it] *of *[1-9it]'
         ;;
     disney)
-        # with Ad 74 34 1146 40
         setcrop 36 34 1176 40
         CONTRAST="-brightness-contrast 0x40"
         OCR=GOCR
         TEST='^[0-9]+:[0-9][0-9]$'
         ;;
     *)
-        echo Unknown option: $option
+        echo Unknown service: $service
         # to cause error and invoke errfunc
         false
         ;;
@@ -159,7 +160,9 @@ for file in "$tempdir"/frame_*.$exten ; do
 done
 adstring
 
-rm -rf "$tempdir"
+if [[ "$option" != keep ]] ; then
+    rm -rf "$tempdir"
+fi
 
 echo "Skiplist $skip"
 if [[ "$skip" == "" ]] ; then
