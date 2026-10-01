@@ -82,28 +82,45 @@ function GOCR {
 
 case $service in
     peacock)
+        # Number of seconds in a black circle bottom left of picture
+        # Check on number of seconds 0-999
         setcrop 40 20 65 646
         CONTRAST="-brightness-contrast 0x40"
         OCR=GOCR
         TEST='^[0-9].*$'
         ;;
     tubi)
-        setcrop 260 36 54 54
+        # Top Left: Ad 1 of 2. This ad will end in 0:23
+        # the number of seconds has a black background
+
+        # Check on text unreliable as it has picture background
+        #~ setcrop 260 36 54 54
+        #~ CONTRAST="-brightness-contrast 0x90"
+        #~ OCR=TESSERACT
+        #~ TEST='Ad *[1-9it]'
+
+        # Check on time e.g. 0:23
+        setcrop 54 30 316 56
         CONTRAST="-brightness-contrast 0x90"
-        OCR=TESSERACT
-        TEST='Ad *[1-9it]'
+        OCR=GOCR
+        TEST='[0-5]:[0-5][0-9]'
         ;;
     roku)
+        # top Left: Ad 1 of 3 on picture background
         setcrop 120 26 54 54
         CONTRAST="-brightness-contrast 0x90"
         OCR=TESSERACT
         TEST='Ad *[1-9it] *of *[1-9it]'
         ;;
     disney)
-        setcrop 36 34 1176 40
+        # top right: Ad 0:30
+        #~ setcrop 36 34 1176 40
+        # This OCRs as "Ad\n\n0:30"
+        setcrop 76 34 1136 46
         CONTRAST="-brightness-contrast 0x40"
-        OCR=GOCR
-        TEST='^[0-9]+:[0-9][0-9]$'
+        OCR=TESSERACT
+        #~ TEST='^[0-9]+:[0-9][0-9]$'
+        TEST='^Ad$'
         ;;
     *)
         echo Unknown service: $service
