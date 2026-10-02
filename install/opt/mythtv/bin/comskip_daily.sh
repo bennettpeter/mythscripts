@@ -28,7 +28,7 @@ mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName --b
 #  where xxx is the service:  "peacock", "tubi", "roku", "disney", "paramount"
 #  xxx is "recording" for default Mythtv comskip
 while read -r type stitle ; do
-    if [[ "$type" == "#" ]] ; then continue ; fi
+    if [[ "$type" == "#" || "$type" == "" ]] ; then continue ; fi
     if [[ "$type" == r ]] ; then
         if [[ "$stitle" == "" ]] ; then echo Missing Title ; continue ; fi
         echo "Checking for recordings of $stitle"
