@@ -2,8 +2,8 @@
 # Daily Commercial skip run
 # Make sure the oldest unwatched episodes of certain shows have been run
 # Set up /etc/opt/mythtv/comskip_shows.txt as follows, one line per title
-# r = recording, v = video recorded from TV
-# T = tubi, R = Roku, P = Peacock, D = disney recording in video directory
+# r = recording, other = video with service name used by comskip_stream
+#     recording = recording in video directory
 # comskip_shows.txt must have double apostrophe if there are shows with
 # apostrophe in the title
 
@@ -23,10 +23,14 @@ date
 mysqlcmd="mysql --user=$DBUserName --password=$DBPassword --host=$DBHostName --batch --column-names=FALSE $DBName"
 
 # Format of comskip_shows.txt
-# v Video Title
 # r Recording title
+# xxx Video Title
+#  where xxx is the service:  "peacock", "tubi", "roku", "disney", "paramount"
+#  xxx is "recording" for default Mythtv comskip
 while read -r type stitle ; do
-    if [[ "$type" == r  && "$stitle" != "" ]] ; then
+    if [[ "$type" == "#" ]] ; then continue ; fi
+    if [[ "$type" == r ]] ; then
+        if [[ "$stitle" == "" ]] ; then echo Missing Title ; continue ; fi
         echo "Checking for recordings of $stitle"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT basename, recorded.chanid, recorded.starttime, recgroup, title, MAX(type=4), originalairdate, subtitle
@@ -44,7 +48,8 @@ EOF
             fi
         done < /tmp/comskip$$.csv
     fi
-    if [[ "$type" != r  && "$stitle" != "" ]] ; then
+    if [[ "$type" != r ]] ; then
+        if [[ "$stitle" == "" ]] ; then  echo Missing Title ; continue ; fi
         echo "Checking for videos of $stitle type $type"
         $mysqlcmd << EOF > /tmp/comskip$$.csv
 SELECT filename, title, MAX(type=4), subtitle
@@ -57,18 +62,10 @@ EOF
         while IFS=$'\t' read -r filename title done subtitle extra ; do
             echo "Found $title - $subtitle, skip done = $done"
             if [[ "$done" != 1 ]] ; then
-                if [[ "$type" == T ]] ; then
-                    $scriptpath/comskip_stream.sh "$filename" tubi
-                elif [[ "$type" == R ]] ; then
-                    $scriptpath/comskip_stream.sh "$filename" roku
-                elif [[ "$type" == P ]] ; then
-                    $scriptpath/comskip_stream.sh "$filename" peacock
-                elif [[ "$type" == D ]] ; then
-                    $scriptpath/comskip_stream.sh "$filename" disney
-                elif [[ "$type" == v ]] ; then
+                if [[ "$type" == recording ]] ; then
                     $scriptpath/comskip.sh "$filename"
                 else
-                    "$scriptpath/notify.py" "commskip_daily invalid code $type for $title"
+                    $scriptpath/comskip_stream.sh "$filename" "$type"
                 fi
             fi
         done < /tmp/comskip$$.csv
