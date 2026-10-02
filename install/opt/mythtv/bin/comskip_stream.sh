@@ -4,8 +4,8 @@
 # for a video:
 # /opt/mythtv/bin/comskip_stream.sh "filename" "service" option 
 # the filename must be a full file name relative to the videos directory
-# service: "peacock", "tubi", "roku", "disney"
-# option: keep
+# service: "peacock", "tubi", "roku", "disney", "paramount"
+# optional: keep
 
 . /etc/opt/mythtv/mythtv.conf
 
@@ -82,6 +82,7 @@ function GOCR {
 
 case $service in
     peacock)
+        # Example: Columbo: S1968E01 Prescription Murder
         # Number of seconds in a black circle bottom left of picture
         # Check on number of seconds 0-999
         setcrop 40 20 65 646
@@ -90,6 +91,7 @@ case $service in
         TEST='^[0-9].*$'
         ;;
     tubi)
+        # Example: Columbo: S1977E01 The Bye-bye Sky High I.Q. Murder Case
         # Top Left: Ad 1 of 2. This ad will end in 0:23
         # the number of seconds has a black background
 
@@ -106,6 +108,7 @@ case $service in
         TEST='[0-5]:[0-5][0-9]'
         ;;
     roku)
+        # Example: Benson
         # top Left: Ad 1 of 3 on picture background
         setcrop 120 26 54 54
         CONTRAST="-brightness-contrast 0x90"
@@ -113,6 +116,7 @@ case $service in
         TEST='Ad *[1-9it] *of *[1-9it]'
         ;;
     disney)
+        # Example: Deadpool & Wolverine
         # top right: Ad 0:30
         #~ setcrop 36 34 1176 40
         # This OCRs as "Ad\n\n0:30"
@@ -121,6 +125,15 @@ case $service in
         OCR=TESSERACT
         #~ TEST='^[0-9]+:[0-9][0-9]$'
         TEST='^Ad$'
+        ;;
+    paramount)
+        # Example: Star Trek Deep Space Nine: S01E01
+        # top left: Number in a circle followed by "Advertisement"
+        # Picture background
+        setcrop 200 26 70 87
+        CONTRAST="-brightness-contrast 0x40"
+        OCR=TESSERACT
+        TEST='^[0-9]|Advertisement'
         ;;
     *)
         echo Unknown service: $service
