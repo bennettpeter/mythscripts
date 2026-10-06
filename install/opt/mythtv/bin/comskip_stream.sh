@@ -57,6 +57,9 @@ MAX_AD_LEN=240
 MIN_AD_LEN=10
 EXTRA_SECS=1
 samplerate=1
+# Number of blank snapshots to mark end of an ad
+# Also this number of blanks will negate a false detection
+ENDBLANKS=10
 
 vidwidth=$(mediainfo "--Inform=Video;%Width%" "$fullfilename")
 vidheight=$(mediainfo "--Inform=Video;%Height%" "$fullfilename")
@@ -144,7 +147,9 @@ esac
 
 
 function adstring {
-    if (( adend - adstart > MIN_AD_LEN )) ; then
+    if (( adend - adstart > MAX_AD_LEN )) ; then
+        echo "ERROR: Max ad length $MAX_AD_LENGTH exceeded: $adstart - $adend. Ad ignored" 
+    else if (( adend - adstart > MIN_AD_LEN )) ; then
         let fseq1=adstart*60-EXTRA_SECS*60
         if (( fseq1 < 60 )) ; then
             let fseq1=60
@@ -169,6 +174,7 @@ nice ffmpeg -hide_banner -loglevel fatal -y -i "$fullfilename" \
 skip=
 adstart=
 adend=
+blanks=
 
 for file in "$tempdir"/frame_*.$exten ; do
     seq=${file: -9}
@@ -177,13 +183,15 @@ for file in "$tempdir"/frame_*.$exten ; do
     let seq=seq*$samplerate
     convert "$file" $CROP $NEGATE $CONTRAST "$tempdir"/temp.$exten
     if $OCR 2>/dev/null | egrep "$TEST" >/dev/null 2>&1; then
+        blanks=
         if [[ $adstart == "" ]] ; then
             adstart=$seq
         else
             adend=$seq
         fi
     else
-        if (( seq - adstart > MAX_AD_LEN )) ; then
+        let blanks++
+        if (( adstart > 0 && blanks > ENDBLANKS )) ; then
             adstring
         fi
     fi
