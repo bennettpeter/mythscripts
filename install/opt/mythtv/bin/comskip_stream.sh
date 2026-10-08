@@ -113,6 +113,7 @@ case $service in
     roku)
         # Example: Benson
         # top Left: Ad 1 of 3 on picture background
+        # Unreliable due to background
         setcrop 120 26 54 54
         CONTRAST="-brightness-contrast 0x90"
         OCR=TESSERACT
@@ -137,6 +138,14 @@ case $service in
         CONTRAST="-brightness-contrast 0x40"
         OCR=TESSERACT
         TEST='^[0-9]|Advertisement'
+        ;;
+    amazon)
+        # Example: Hyperdrive: S01E01
+        # top right: Ad 0:42 on black background
+        setcrop 80 26 1126 54
+        CONTRAST="-brightness-contrast 0x40"
+        OCR=TESSERACT
+        TEST='^Ad *[0-9]'
         ;;
     *)
         echo Unknown service: $service
