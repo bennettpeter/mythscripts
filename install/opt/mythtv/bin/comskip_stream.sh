@@ -158,7 +158,7 @@ esac
 function adstring {
     if (( adend - adstart > MAX_AD_LEN )) ; then
         echo "ERROR: Max ad length $MAX_AD_LENGTH exceeded: $adstart - $adend. Ad ignored" 
-    else if (( adend - adstart > MIN_AD_LEN )) ; then
+    elif (( adend - adstart > MIN_AD_LEN )) ; then
         let fseq1=adstart*60-EXTRA_SECS*60
         if (( fseq1 < 60 )) ; then
             let fseq1=60
