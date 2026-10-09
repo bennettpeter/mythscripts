@@ -159,11 +159,11 @@ function adstring {
     if (( adend - adstart > MAX_AD_LEN )) ; then
         echo "ERROR: Max ad length $MAX_AD_LENGTH exceeded: $adstart - $adend. Ad ignored" 
     elif (( adend - adstart > MIN_AD_LEN )) ; then
-        let fseq1=adstart*60-EXTRA_SECS*60
+        let fseq1=adstart*60-EXTRA_SECS*60,1
         if (( fseq1 < 60 )) ; then
             let fseq1=60
         fi
-        let fseq2=adend*60+EXTRA_SECS*60
+        let fseq2=adend*60+EXTRA_SECS*60,1
         if [[ "$skip" != "" ]] ; then
             skip="$skip,"
         fi
@@ -189,7 +189,7 @@ for file in "$tempdir"/frame_*.$exten ; do
     seq=${file: -9}
     seq=${seq:0:5}
     seq=${seq##+(0)}
-    let seq=seq*$samplerate
+    let seq=seq*$samplerate,1
     convert "$file" $CROP $NEGATE $CONTRAST "$tempdir"/temp.$exten
     if $OCR 2>/dev/null | egrep "$TEST" >/dev/null 2>&1; then
         blanks=
@@ -199,7 +199,7 @@ for file in "$tempdir"/frame_*.$exten ; do
             adend=$seq
         fi
     else
-        let blanks++
+        let ++blanks,1
         if (( adstart > 0 && blanks > ENDBLANKS )) ; then
             adstring
         fi
